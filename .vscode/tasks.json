@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"command": "./tool/setup-git-hooks.sh",
+			"label": "Setup git hooks",
+			"problemMatcher": []
+		},
+	]
+}
