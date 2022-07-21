@@ -7,6 +7,12 @@ publish_to: none
 environment:
   sdk: ">=2.17.0 <3.0.0"
 
+platforms:
+  linux:
+
+executables:
+  pacsync:
+
 dependencies:
   args: ^2.3.1
   freezed_annotation: ^2.1.0

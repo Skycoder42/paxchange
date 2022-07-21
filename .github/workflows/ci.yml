@@ -1,0 +1,36 @@
+name: Continous Integration and Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  ci:
+    name: CI
+    uses: Skycoder42/dart_test_tools/.github/workflows/dart.yml@main
+    with:
+      buildRunner: true
+      unitTestPaths: ""
+      platforms: '["linux"]'
+
+  # cd:
+  #   name: CD
+  #   needs:
+  #     - ci
+  #   uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
+  #   with:
+  #     buildRunner: true
+  #     targets: '["pacsync"]'
+  #     platforms: '["linux"]'
+
+  # aur_deploy:
+  #   name: AUR
+  #   runs-on: ubuntu-latest
+  #   needs: cd
+  #   # TODO: add outputs to CD step
+  #   if: needs.cd.outputs.release_created == 'true'
