@@ -93,7 +93,7 @@ packages:
     source: hosted
     version: "8.4.0"
   checked_yaml:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: checked_yaml
       url: "https://pub.dartlang.org"
@@ -247,12 +247,19 @@ packages:
     source: hosted
     version: "0.6.4"
   json_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.6.0"
+  json_serializable:
+    dependency: "direct dev"
+    description:
+      name: json_serializable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.3.1"
   lints:
     dependency: transitive
     description:
@@ -324,14 +331,14 @@ packages:
     source: hosted
     version: "1.5.1"
   pub_semver:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pub_semver
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
   pubspec_parse:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pubspec_parse
       url: "https://pub.dartlang.org"
@@ -379,6 +386,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.2"
+  source_helper:
+    dependency: transitive
+    description:
+      name: source_helper
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.3.2"
   source_map_stack_trace:
     dependency: transitive
     description:

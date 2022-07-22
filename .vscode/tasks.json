@@ -23,6 +23,12 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"type": "shell",
+			"label": "docker: makepkg",
+			"command": "docker run --rm -it -v '${workspaceFolder}:/src:ro' -v '${workspaceFolder}/deploy:/deploy:rw' authelia/aurpackager bash -c 'cd /src && ./tool/aur-build.sh'",
+			"problemMatcher": []
 		}
 	]
 }

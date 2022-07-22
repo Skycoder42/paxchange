@@ -1,5 +1,12 @@
 {
   "cSpell.words": [
-    "pacsync"
+    "makedepends",
+    "pacsync",
+    "pkgbuild",
+    "pkgdesc",
+    "pkgdir",
+    "pkgname",
+    "pkgrel",
+    "pkgver"
   ]
 }

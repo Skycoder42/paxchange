@@ -19,19 +19,57 @@ jobs:
       unitTestPaths: ""
       platforms: '["linux"]'
 
-  # cd:
-  #   name: CD
-  #   needs:
-  #     - ci
-  #   uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
-  #   with:
-  #     buildRunner: true
-  #     targets: '["pacsync"]'
-  #     platforms: '["linux"]'
+  cd:
+    name: CD
+    needs:
+      - ci
+    uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
+    with:
+      buildRunner: true
+      targets: '["pacsync"]'
+      platforms: '["linux"]'
 
-  # aur_deploy:
-  #   name: AUR
-  #   runs-on: ubuntu-latest
-  #   needs: cd
-  #   # TODO: add outputs to CD step
-  #   if: needs.cd.outputs.release_created == 'true'
+  aur_deploy:
+    name: AUR
+    runs-on: ubuntu-latest
+    needs: cd
+    if: needs.cd.outputs.releaseCreated == 'true'
+    container: authelia/aurpackager
+    steps:
+      - name: Install pacman dependencies
+        run: sudo pacman -Sy --noconfirm dart namcap
+      - name: Checkout source repository
+        uses: actions/checkout@v2
+        with:
+          path: src
+      - name: Checkout AUR repository
+        uses: actions/checkout@v2
+        with:
+          repository: ssh://aur@aur.archlinux.org/pacsync.git
+          ssh-known-hosts: |
+            aur.archlinux.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKF9vAFWdgm9Bi8uc+tYRBmXASBb5cB5iZsB7LOWWFeBrLp3r14w0/9S2vozjgqY5sJLDPONWoTTaVTbhe3vwO8CBKZTEt1AcWxuXNlRnk9FliR1/eNB9uz/7y1R0+c1Md+P98AJJSJWKN12nqIDIhjl2S1vOUvm7FNY43fU2knIhEbHybhwWeg+0wxpKwcAd/JeL5i92Uv03MYftOToUijd1pqyVFdJvQFhqD4v3M157jxS5FTOBrccAEjT+zYmFyD8WvKUa9vUclRddNllmBJdy4NyLB8SvVZULUPrP3QOlmzemeKracTlVOUG1wsDbxknF1BwSCU7CmU6UFP90kpWIyz66bP0bl67QAvlIc52Yix7pKJPbw85+zykvnfl2mdROsaT8p8R9nwCdFsBc9IiD0NhPEHcyHRwB8fokXTajk2QnGhL+zP5KnkmXnyQYOCUYo3EKMXIlVOVbPDgRYYT/XqvBuzq5S9rrU70KoI/S5lDnFfx/+lPLdtcnnEPk=
+            aur.archlinux.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLMiLrP8pVi5BFX2i3vepSUnpedeiewE5XptnUnau+ZoeUOPkpoCgZZuYfpaIQfhhJJI5qgnjJmr4hyJbe/zxow=
+            aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN
+          ssh-strict: true
+          ssh-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          path: aur
+      - run: dart pub get
+        working-directory: src
+      - run: dart run build_runner build
+        working-directory: src
+      - run: dart run tool/makepkg/generate_pkgbuild.dart ../aur
+        working-directory: src
+      - run: updpkgsums
+        working-directory: aur
+      - run: namcap -i PKGBUILD
+        working-directory: aur
+      - run: makepkg -sfC --check --noconfirm
+        working-directory: aur
+      - run: makepkg --printsrcinfo > .SRCINFO
+        working-directory: aur
+      - run: git add PKGBUILD CHANGELOG.md .SRCINFO
+        working-directory: aur
+      - run: git commit -m "Update package to version $(yq ".version" pubspec.yaml)"
+        working-directory: aur
+      - run: git push
+        working-directory: aur
