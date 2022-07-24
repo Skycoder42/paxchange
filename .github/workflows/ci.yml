@@ -41,9 +41,8 @@ jobs:
       - name: Create working directory
         run: |
           set -exo pipefail
-          env
-          sudo mkdir -p "$PWD"
-          sudo chown "$(id -un):$(id -gn)" "$(echo "$PWD" | cut -d "/" -f2)"
+          sudo mkdir -p "$RUNNER_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE"
+          sudo chown "$(id -un):$(id -gn)" "$RUNNER_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE"
       - name: Checkout source repository
         uses: actions/checkout@v2
         with:
