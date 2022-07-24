@@ -38,6 +38,11 @@ jobs:
     steps:
       - name: Install pacman dependencies
         run: sudo pacman -Sy --noconfirm dart namcap
+      - name: Create working directory
+        run: |
+          set -exo pipefail
+          sudo mkdir -p "$PWD"
+          sudo chown "$USER:$USER" "$PWD"
       - name: Checkout source repository
         uses: actions/checkout@v2
         with:
