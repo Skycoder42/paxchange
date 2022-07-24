@@ -49,6 +49,7 @@ jobs:
           path: src
       - name: Prepare SSH for AUR repo checkout
         run: |
+          mkdir -p "~/.ssh"
           echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > "$RUNNER_TEMP/ssh-key"
           echo "Host aur.archlinux.org" >> ~/.ssh/config
           echo "  IdentityFile $RUNNER_TEMP/ssh-key" >> ~/.ssh/config
@@ -63,13 +64,13 @@ jobs:
       - run: dart run tool/makepkg/generate_pkgbuild.dart ../aur
         working-directory: src
       - run: chown -R build:build aur
-      - run: su build -c updpkgsums
+      - run: updpkgsums
         working-directory: aur
-      - run: su build -c "namcap -i PKGBUILD"
+      - run: namcap -i PKGBUILD
         working-directory: aur
-      - run: su build -c "makepkg -sfC --check --noconfirm"
+      - run: makepkg -sfC --check --noconfirm
         working-directory: aur
-      - run: su build -c "makepkg --printsrcinfo > .SRCINFO"
+      - run: makepkg --printsrcinfo > .SRCINFO
         working-directory: aur
       - run: git add PKGBUILD CHANGELOG.md .SRCINFO
         working-directory: aur
