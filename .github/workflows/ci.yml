@@ -42,7 +42,7 @@ jobs:
         run: |
           set -exo pipefail
           sudo mkdir -p "$PWD"
-          sudo chown "$USER:$USER" "$PWD"
+          sudo chown "$(id -un):$(id -gn)" "$PWD"
       - name: Checkout source repository
         uses: actions/checkout@v2
         with:
