@@ -56,7 +56,7 @@ Future<PubspecWithAur> _readPubspecWithAur() async {
 
 String _pkgbuildTemplate(PubspecWithAur options) => '''
 # Maintainer: ${options.aurOptions.maintainer}
-pkgname='${options.pubspec.name}'
+pkgname='${options.aurOptions.package ?? options.pubspec.name}'
 pkgver='${options.pubspec.version!.toString().replaceAll('-', '_')}'
 pkgrel='${options.aurOptions.pkgrel}'
 pkgdesc='${options.pubspec.description ?? ''}'
