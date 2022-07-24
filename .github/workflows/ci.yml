@@ -47,17 +47,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: src
-      - name: Checkout AUR repository
-        uses: actions/checkout@v2
-        with:
-          repository: ssh://aur@aur.archlinux.org/pacsync.git
-          ssh-known-hosts: |
-            aur.archlinux.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKF9vAFWdgm9Bi8uc+tYRBmXASBb5cB5iZsB7LOWWFeBrLp3r14w0/9S2vozjgqY5sJLDPONWoTTaVTbhe3vwO8CBKZTEt1AcWxuXNlRnk9FliR1/eNB9uz/7y1R0+c1Md+P98AJJSJWKN12nqIDIhjl2S1vOUvm7FNY43fU2knIhEbHybhwWeg+0wxpKwcAd/JeL5i92Uv03MYftOToUijd1pqyVFdJvQFhqD4v3M157jxS5FTOBrccAEjT+zYmFyD8WvKUa9vUclRddNllmBJdy4NyLB8SvVZULUPrP3QOlmzemeKracTlVOUG1wsDbxknF1BwSCU7CmU6UFP90kpWIyz66bP0bl67QAvlIc52Yix7pKJPbw85+zykvnfl2mdROsaT8p8R9nwCdFsBc9IiD0NhPEHcyHRwB8fokXTajk2QnGhL+zP5KnkmXnyQYOCUYo3EKMXIlVOVbPDgRYYT/XqvBuzq5S9rrU70KoI/S5lDnFfx/+lPLdtcnnEPk=
-            aur.archlinux.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLMiLrP8pVi5BFX2i3vepSUnpedeiewE5XptnUnau+ZoeUOPkpoCgZZuYfpaIQfhhJJI5qgnjJmr4hyJbe/zxow=
-            aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN
-          ssh-strict: true
-          ssh-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          path: aur
+      - name: Prepare SSH for AUR repo checkout
+        run: |
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > "$RUNNER_TEMP/ssh-key"
+          echo "Host aur.archlinux.org" >> ~/.ssh/config
+          echo "  IdentityFile $RUNNER_TEMP/ssh-key" >> ~/.ssh/config
+          echo "  User aur" >> ~/.ssh/config
+          echo "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN" >> ~/.ssh/known_hosts
+      - name: Clone AUR repository
+        run: git clone "ssh://aur@aur.archlinux.org/$(yq ".name" pubspec.yaml).git" ./aur
       - run: dart pub get
         working-directory: src
       - run: dart run build_runner build
