@@ -37,7 +37,7 @@ jobs:
     container: archlinux:base-devel
     steps:
       - name: Install pacman dependencies
-        run: sudo pacman -Sy --noconfirm git openssh pacman-contrib dart namcap
+        run: sudo pacman -Sy --noconfirm git openssh go-yq pacman-contrib dart namcap
       - name: Create build user
         run: |
           set -exo pipefail
