@@ -34,18 +34,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: cd
     if: needs.cd.outputs.releaseCreated == 'true'
-    container: authelia/aurpackager
+    container: archlinux:base-devel
     steps:
       - name: Install pacman dependencies
-        run: sudo pacman -Sy --noconfirm dart namcap
-      - name: Create working directory
+        run: sudo pacman -Sy --noconfirm git pacman-contrib dart namcap
+      - name: Create build user
         run: |
           set -exo pipefail
-          sudo mkdir -p "$RUNNER_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" "$GITHUB_WORKSPACE"
-          sudo chown -R "$(id -un):$(id -gn)" "$RUNNER_WORKSPACE" "$RUNNER_TEMP" "$RUNNER_TOOL_CACHE" "$GITHUB_WORKSPACE"
-          ls -lsa /
-          ls -lsa /__w
-          ls -lsa /__t
+          useradd -m -G wheel -s /bin/bash -d /build build
+          echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
       - name: Checkout source repository
         uses: actions/checkout@v2
         with:
@@ -67,13 +64,14 @@ jobs:
         working-directory: src
       - run: dart run tool/makepkg/generate_pkgbuild.dart ../aur
         working-directory: src
-      - run: updpkgsums
+      - run: chown -R build:build aur
+      - run: su build -c updpkgsums
         working-directory: aur
-      - run: namcap -i PKGBUILD
+      - run: su build -c "namcap -i PKGBUILD"
         working-directory: aur
-      - run: makepkg -sfC --check --noconfirm
+      - run: su build -c "makepkg -sfC --check --noconfirm"
         working-directory: aur
-      - run: makepkg --printsrcinfo > .SRCINFO
+      - run: su build -c "makepkg --printsrcinfo > .SRCINFO"
         working-directory: aur
       - run: git add PKGBUILD CHANGELOG.md .SRCINFO
         working-directory: aur
