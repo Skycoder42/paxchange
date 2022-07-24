@@ -82,7 +82,10 @@ jobs:
       - run: chown -R root:root aur
       - run: git add PKGBUILD CHANGELOG.md .SRCINFO
         working-directory: aur
-      - run: git commit -m "Update $(yq ".name" ../src/pubspec.yaml) to version $(yq ".version" ../src/pubspec.yaml)"
+      - run: >-
+          git commit
+          --author="$(yq ".aur.maintainer" ../src/pubspec.yaml)"
+          -m "Update $(yq ".name" ../src/pubspec.yaml) to version $(yq ".version" ../src/pubspec.yaml)"
         working-directory: aur
       - run: git push
         working-directory: aur
