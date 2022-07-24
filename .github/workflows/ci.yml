@@ -50,12 +50,12 @@ jobs:
       - name: Prepare SSH for AUR repo checkout
         run: |
           set -exo pipefail
-          mkdir -p "~/.ssh"
+          mkdir -p "$HOME/.ssh"
           echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > "$RUNNER_TEMP/ssh-key"
-          echo "Host aur.archlinux.org" >> ~/.ssh/config
-          echo "  IdentityFile $RUNNER_TEMP/ssh-key" >> ~/.ssh/config
-          echo "  User aur" >> ~/.ssh/config
-          echo "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN" >> ~/.ssh/known_hosts
+          echo "Host aur.archlinux.org" > "$HOME/.ssh/config"
+          echo "  IdentityFile $RUNNER_TEMP/ssh-key" >> "$HOME/.ssh/config"
+          echo "  User aur" >> "$HOME/.ssh/config"
+          echo "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN" >> "$HOME/.ssh/known_hosts"
       - name: Clone AUR repository
         run: git clone "ssh://aur@aur.archlinux.org/$(yq ".name" pubspec.yaml).git" ./aur
       - run: dart pub get
