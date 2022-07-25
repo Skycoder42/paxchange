@@ -42,7 +42,7 @@ class AurOptions with _$AurOptions {
   )
   const factory AurOptions({
     required String maintainer,
-    String? package,
+    int? epoch,
     @Default('1') String pkgrel,
     @Default('custom') String license,
     @Default(<String>[]) List<String> depends,

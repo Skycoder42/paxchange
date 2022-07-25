@@ -1,9 +1,9 @@
 import 'package:test/test.dart';
 
-import '../../bin/pacsync.dart' as pacsync;
+import '../../bin/paxchange.dart' as paxchange;
 
 void main() {
   test('coverage', () {
-    expect(pacsync.main, anything);
+    expect(paxchange.main, anything);
   });
 }

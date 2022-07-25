@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:pacsync/src/config.dart';
-import 'package:pacsync/src/package_sync.dart';
+import 'package:paxchange/src/config.dart';
+import 'package:paxchange/src/package_sync.dart';
 import 'package:riverpod/riverpod.dart';
 
 const _storageDirectoryOption = 'storage-directory';
@@ -56,7 +56,7 @@ Future<ArgResults> _parse(List<String> arguments) async {
     ..addOption(
       _storageDirectoryOption,
       abbr: 'd',
-      defaultsTo: '/etc/pacsync',
+      defaultsTo: '/etc/paxchange',
       valueHelp: 'path',
       help: 'Path to the directory where the package history should be stored.',
     )

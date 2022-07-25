@@ -56,12 +56,13 @@ Future<PubspecWithAur> _readPubspecWithAur() async {
 
 String _pkgbuildTemplate(PubspecWithAur options) => '''
 # Maintainer: ${options.aurOptions.maintainer}
-pkgname='${options.aurOptions.package ?? options.pubspec.name}'
+pkgname='${options.pubspec.name}'
 pkgver='${options.pubspec.version!.toString().replaceAll('-', '_')}'
 pkgrel='${options.aurOptions.pkgrel}'
-pkgdesc='${options.pubspec.description ?? ''}'
+${options.aurOptions.epoch.maybe((v) => 'epoch=$v')}
+${options.pubspec.description.maybe((v) => "pkgdesc='$v'")}
 arch=('x86_64' 'i686' 'armv7h' 'aarch64')
-url='${options.pubspec.homepage ?? options.pubspec.repository ?? ''}'
+${(options.pubspec.homepage ?? options.pubspec.repository).maybe((v) => "url='$v'")}
 license=('${options.aurOptions.license}')
 depends=(${options.aurOptions.depends.map((d) => "'$d'").join(' ')})
 makedepends=(${_getDartDependency(options.pubspec).join(' ')} 'go-yq')
@@ -159,4 +160,9 @@ Iterable<String> _getInstallSteps(PubspecWithAur options) sync* {
         "'bin/${entry.key}' "
         "\"\$pkgdir\"'/usr/bin/${entry.key}'",
   );
+}
+
+extension TNullable<T extends Object> on T? {
+  String maybe(String Function(T v) transform) =>
+      this != null ? transform(this!) : '';
 }

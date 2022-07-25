@@ -1,7 +1,7 @@
-name: pacsync
+name: paxchange
 description: Simple dart script to passively synchronize installed pacman packages between systems.
 version: 0.1.0
-homepage: https://github.com/Skycoder42/pacsync
+homepage: https://github.com/Skycoder42/paxchange
 publish_to: none
 
 environment:
@@ -11,7 +11,7 @@ platforms:
   linux:
 
 executables:
-  pacsync:
+  paxchange:
 
 dependencies:
   args: ^2.3.1
@@ -31,8 +31,8 @@ dev_dependencies:
   test: ^1.21.4
 
 aur:
-  package: pacsync-dart
   maintainer: Skycoder42 <Skycoder42@users.noreply.github.com>
+  epoch: 2
   license: BSD
   depends:
     - pacman
