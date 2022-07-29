@@ -32,11 +32,19 @@ class DiffFileAdapter {
 
   Future<void> savePackageDiff(
     String host,
-    Iterable<DiffEntry> diffEntries,
+    Set<DiffEntry> diffEntries,
   ) async {
     await _storageDirectory.create(recursive: true);
 
     final diffFile = _diffFile(host);
+
+    if (diffEntries.isEmpty) {
+      if (diffFile.existsSync()) {
+        await diffFile.delete();
+      }
+      return;
+    }
+
     final diffFileSink = diffFile.openWrite();
     try {
       for (final entry in diffEntries) {

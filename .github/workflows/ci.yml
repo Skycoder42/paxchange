@@ -16,13 +16,32 @@ jobs:
     with:
       buildRunner: true
       extendedAnalyzerArgs: --linter test-import # Do not run the lib-export linter
-      unitTestPaths: ""
+      unitTestPaths: "test/unit"
       platforms: '["linux"]'
+
+  integration_tests:
+    name: Integration tests
+    needs:
+      - ci
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install Dart-SDK
+        run: pacman -Sy --noconfirm dart
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Restore dart packages
+        run: dart pub get
+      - name: Create build files
+        run: dart run build_runner build
+      - name: Run integration tests
+        run: dart test --reporter github test/integration
 
   cd:
     name: CD
     needs:
       - ci
+      - integration_tests
     uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
     with:
       buildRunner: true
