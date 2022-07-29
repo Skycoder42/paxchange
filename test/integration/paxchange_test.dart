@@ -78,7 +78,7 @@ void main() {
 
       final files = await testDir.list().toList();
       expect(files, hasLength(5));
-      expect(_packageFile('machine-1.pcs'), isNot(exists));
+      expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
     });
 
     test('discards changes if no changes are actually left', () async {
@@ -93,7 +93,7 @@ void main() {
 
       final files = await testDir.list().toList();
       expect(files, hasLength(5));
-      expect(_packageFile('machine-1.pcs'), isNot(exists));
+      expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
     });
 
     test('generates changes if packages are different', () async {
@@ -103,7 +103,7 @@ void main() {
 
       final files = await testDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs'), exists);
+      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
         await _readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
@@ -127,7 +127,7 @@ void main() {
 
       final files = await testDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs'), exists);
+      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
         await _readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
@@ -149,7 +149,7 @@ void main() {
 
       final files = await testDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs'), exists);
+      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
         await _readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
@@ -167,8 +167,3 @@ Future<List<String>> _runPacman(List<String> command) async {
   expect(result.exitCode, 0);
   return const LineSplitter().convert(result.stdout as String);
 }
-
-Matcher get exists => predicate<FileSystemEntity>(
-      (f) => f.existsSync(),
-      'exists',
-    );

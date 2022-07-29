@@ -7,6 +7,7 @@ import 'pacman/pacman.dart';
 import 'storage/diff_file_adapter.dart';
 import 'storage/package_file_adapter.dart';
 
+// coverage:ignore-start
 final packageSyncProvider = Provider(
   (ref) => PackageSync(
     ref.watch(packageFileAdapterProvider),
@@ -14,6 +15,7 @@ final packageSyncProvider = Provider(
     ref.watch(pacmanProvider),
   ),
 );
+// coverage:ignore-end
 
 class PackageSync {
   final PackageFileAdapter _packageFileAdapter;

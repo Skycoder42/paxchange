@@ -5,11 +5,13 @@ import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
 
+// coverage:ignore-start
 final packageFileAdapterProvider = Provider(
   (ref) => PackageFileAdapter(
     ref.watch(configProvider).storageDirectory,
   ),
 );
+// coverage:ignore-end
 
 class LoadPackageFailure implements Exception {
   final String fileName;

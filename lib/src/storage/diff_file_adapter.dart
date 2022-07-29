@@ -6,11 +6,13 @@ import 'package:riverpod/riverpod.dart';
 import '../config.dart';
 import '../diff_entry.dart';
 
+// coverage:ignore-start
 final diffFileAdapterProvider = Provider(
   (ref) => DiffFileAdapter(
     ref.watch(configProvider).storageDirectory,
   ),
 );
+// coverage:ignore-end
 
 class DiffFileAdapter {
   final Directory _storageDirectory;

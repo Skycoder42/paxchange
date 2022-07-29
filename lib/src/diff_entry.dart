@@ -2,6 +2,15 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'diff_entry.freezed.dart';
 
+class DecodingFailure implements Exception {
+  final String line;
+
+  DecodingFailure(this.line);
+
+  @override
+  String toString() => '"$line"is not a diff entry. Must start with + or -';
+}
+
 @freezed
 class DiffEntry with _$DiffEntry implements Comparable<DiffEntry> {
   const DiffEntry._();
@@ -16,11 +25,7 @@ class DiffEntry with _$DiffEntry implements Comparable<DiffEntry> {
       case '-':
         return DiffEntry.removed(line.substring(1));
       default:
-        throw ArgumentError.value(
-          line,
-          'line',
-          'is not a diff entry. Must start with + or -',
-        );
+        throw DecodingFailure(line);
     }
   }
 

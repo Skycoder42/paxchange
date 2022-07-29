@@ -4,13 +4,21 @@ import 'dart:io';
 
 import 'package:riverpod/riverpod.dart';
 
+import '../util/process_wrapper.dart';
+
+// coverage:ignore-start
 final pacmanProvider = Provider(
-  (ref) => Pacman(),
+  (ref) => Pacman(ref.watch(processProvider)),
 );
+// coverage:ignore-end
 
 class Pacman {
+  final ProcessWrapper _process;
+
+  Pacman(this._process);
+
   Stream<String> listExplicitlyInstalledPackages() async* {
-    final pacmanProc = await Process.start('pacman', const ['-Qqe']);
+    final pacmanProc = await _process.start('pacman', const ['-Qqe']);
 
     final stderrAdded = stderr.addStream(pacmanProc.stderr);
     try {
