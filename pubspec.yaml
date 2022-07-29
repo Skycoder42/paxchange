@@ -15,6 +15,7 @@ executables:
 
 dependencies:
   args: ^2.3.1
+  dart_console: ^1.1.2
   freezed_annotation: ^2.1.0
   json_annotation: ^4.6.0
   riverpod: ^1.0.3

@@ -46,6 +46,15 @@ class PackageFileAdapter {
     }
   }
 
+  Stream<String> loadPackageFileHierarchy(String machineName) =>
+      throw UnimplementedError();
+
+  Future<void> addToPackageFile(String machineName, String package) =>
+      throw UnimplementedError();
+
+  Future<void> removeFromPackageFile(String machineName, String package) =>
+      throw UnimplementedError();
+
   File _packageFile(String machineName) => File.fromUri(
         _storageDirectory.uri.resolve(machineName),
       );
