@@ -37,7 +37,7 @@ void main() {
       when(() => processMock.stdout).thenStream(const Stream.empty());
       when(() => processMock.exitCode).thenReturnAsync(0);
 
-      sut = Pacman(processWrapperMock);
+      sut = Pacman(processWrapperMock, null);
     });
 
     group('listExplicitlyInstalledPackages', () {

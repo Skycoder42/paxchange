@@ -17,5 +17,6 @@ final configProvider = Provider<Config>(
 class Config with _$Config {
   const factory Config({
     required Directory storageDirectory,
+    String? queryPackagesTool,
   }) = _Config;
 }
