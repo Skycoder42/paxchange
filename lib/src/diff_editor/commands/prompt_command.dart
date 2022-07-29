@@ -21,6 +21,15 @@ abstract class PromptCommand {
 
   FutureOr<bool> call(Console console, String packageName);
 
+  @protected
+  static void writeError(Console console, String message) {
+    console
+      ..setForegroundColor(ConsoleColor.red)
+      ..writeLine()
+      ..writeErrorLine(message)
+      ..resetColorAttributes();
+  }
+
   static FutureOr<bool> prompt(
     Console console,
     String packageName,
@@ -44,11 +53,7 @@ abstract class PromptCommand {
         }
       }
 
-      console
-        ..setForegroundColor(ConsoleColor.red)
-        ..writeErrorLine('Invalid option: ${key.char}!')
-        ..writeLine()
-        ..resetColorAttributes();
+      writeError(console, 'Invalid option: ${key.char}!');
     }
   }
 }

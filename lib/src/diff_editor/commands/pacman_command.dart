@@ -25,15 +25,11 @@ abstract class PacmanCommand extends PromptCommand {
         ..readKey();
       return true;
     } else {
-      console
-        ..setForegroundColor(ConsoleColor.red)
-        ..writeLine()
-        ..writeErrorLine(
-          'Failed to $operation $packageName! '
-          'Package manager failed with exit code $exitCode.',
-        )
-        ..writeLine()
-        ..resetColorAttributes();
+      PromptCommand.writeError(
+        console,
+        'Failed to $operation $packageName! '
+        'Package manager failed with exit code $exitCode.',
+      );
       return false;
     }
   }

@@ -11,6 +11,14 @@ final processProvider = Provider(
 class ProcessWrapper {
   const ProcessWrapper();
 
-  Future<Process> start(String executable, List<String> arguments) =>
-      Process.start(executable, arguments);
+  Future<Process> start(
+    String executable,
+    List<String> arguments, {
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) =>
+      Process.start(
+        executable,
+        arguments,
+        mode: mode,
+      );
 }

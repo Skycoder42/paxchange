@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:dart_console/dart_console.dart';
 
-import '../diff_entry.dart';
+import '../package_sync.dart';
 import '../pacman/pacman.dart';
+import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
 import 'commands/pacman_command.dart';
 import 'commands/print_command.dart';
@@ -14,35 +15,47 @@ import 'commands/update_history_command.dart';
 
 class DiffEditor {
   final PackageFileAdapter _packageFileAdapter;
+  final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
+  final PackageSync _packageSync;
 
   final _console = Console.scrolling();
 
-  late String _machineName;
-  late List<String> _machineHierarchy;
-
   DiffEditor(
     this._packageFileAdapter,
+    this._diffFileAdapter,
     this._pacman,
+    this._packageSync,
   );
 
-  Future<void> initializeFor(String machineName) async {
+  Future<void> run(String machineName) async {
     if (!_console.hasTerminal || !stdout.supportsAnsiEscapes) {
       throw Exception('Cannot run without an interactive ANSI terminal!');
     }
 
-    _machineName = machineName;
-    _machineHierarchy = await _packageFileAdapter
+    final machineHierarchy = await _packageFileAdapter
         .loadPackageFileHierarchy(machineName)
         .toList();
-  }
+    final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
-  Future<bool> presentDiff(DiffEntry diffEntry) => diffEntry.when(
-        added: _presentAdded,
-        removed: _presentRemoved,
+    await for (final diffEntry in diffEntries) {
+      final entryResult = await diffEntry.when(
+        added: (package) => _presentAdded(package, machineHierarchy),
+        removed: (package) => _presentRemoved(package, machineName),
       );
 
-  Future<bool> _presentAdded(String package) async {
+      if (!entryResult) {
+        break;
+      }
+    }
+
+    await _updatePackageDiff(machineName);
+  }
+
+  Future<bool> _presentAdded(
+    String package,
+    List<String> machineHierarchy,
+  ) async {
     _writeTitle(
       messagePrefix: 'Found installed package ',
       package: package,
@@ -53,13 +66,13 @@ class DiffEditor {
     return PromptCommand.prompt(_console, package, [
       PrintCommand.local(_pacman),
       RemoveCommand(_pacman),
-      ...AddHistoryCommand.generate(_packageFileAdapter, _machineHierarchy),
+      ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
       const SkipCommand(),
       const QuitCommand(),
     ]);
   }
 
-  Future<bool> _presentRemoved(String package) async {
+  Future<bool> _presentRemoved(String package, String machineName) async {
     _writeTitle(
       messagePrefix: 'Found uninstalled package ',
       package: package,
@@ -70,7 +83,7 @@ class DiffEditor {
     return PromptCommand.prompt(_console, package, [
       PrintCommand.remote(_pacman),
       InstallCommand(_pacman),
-      RemoveHistoryCommand(_packageFileAdapter, _machineName),
+      RemoveHistoryCommand(_packageFileAdapter, machineName),
       const SkipCommand(),
       const QuitCommand(),
     ]);
@@ -93,5 +106,17 @@ class DiffEditor {
       ..setForegroundColor(color)
       ..writeLine(messageSuffix)
       ..resetColorAttributes();
+  }
+
+  Future<void> _updatePackageDiff(String machineName) async {
+    _console
+      ..clearScreen()
+      ..writeLine('Updating package changelog, please wait...');
+
+    final result = await _packageSync.updatePackageDiff(machineName);
+
+    _console
+      ..writeLine('Successfully regenerated package changelog!')
+      ..writeLine('It now contains $result entries');
   }
 }

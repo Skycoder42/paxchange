@@ -23,19 +23,21 @@ class Pacman {
   Pacman(this._process, this._pacmanFrontend);
 
   Stream<String> listExplicitlyInstalledPackages() =>
-      _runPacman(const ['-Qqe']);
+      _streamPacmanLines(const ['-Qqe']);
 
   Stream<String> queryInstalledPackage(String packageName) =>
-      _runPacman(['-Qi', packageName]);
+      _streamPacmanLines(['-Qi', packageName]);
 
   Stream<String> queryUninstalledPackage(String packageName) =>
-      _runPacman(['-Si', packageName]);
+      _streamPacmanLines(['-Si', packageName]);
 
-  Future<int> installPackage(String packageName) => throw UnimplementedError();
+  Future<int> installPackage(String packageName) =>
+      _executePacmanInteractive(['-S', packageName]);
 
-  Future<int> removePackage(String packageName) => throw UnimplementedError();
+  Future<int> removePackage(String packageName) =>
+      _executePacmanInteractive(['-R', packageName]);
 
-  Stream<String> _runPacman(List<String> query) async* {
+  Stream<String> _streamPacmanLines(List<String> query) async* {
     final pacmanProc = await _process.start(
       _pacmanFrontend ?? 'pacman',
       query,
@@ -57,5 +59,15 @@ class Pacman {
       // wait for stderr to complete, but do not catch here
       await stderrAdded.catchError(Zone.current.handleUncaughtError);
     }
+  }
+
+  Future<int> _executePacmanInteractive(List<String> command) async {
+    final pacmanProc = await _process.start(
+      _pacmanFrontend ?? 'pacman',
+      command,
+      mode: ProcessStartMode.inheritStdio,
+    );
+
+    return pacmanProc.exitCode;
   }
 }
