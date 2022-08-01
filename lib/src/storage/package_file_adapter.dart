@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
@@ -46,14 +47,65 @@ class PackageFileAdapter {
     }
   }
 
-  Stream<String> loadPackageFileHierarchy(String machineName) =>
-      throw UnimplementedError();
+  Stream<String> loadPackageFileHierarchy(String machineName) {
+    final packageFile = _packageFile(machineName);
 
-  Future<void> addToPackageFile(String machineName, String package) =>
-      throw UnimplementedError();
+    if (packageFile.existsSync()) {
+      return _streamPackageFileHierarchy(packageFile, {machineName});
+    } else {
+      return const Stream.empty();
+    }
+  }
 
-  Future<void> removeFromPackageFile(String machineName, String package) =>
-      throw UnimplementedError();
+  Future<void> addToPackageFile(String machineName, String package) async {
+    final packageFile = _packageFile(machineName);
+
+    final packageFileSink = packageFile.openWrite(
+      mode: FileMode.writeOnlyAppend,
+    );
+    try {
+      packageFileSink.writeln(package);
+    } finally {
+      await packageFileSink.flush();
+      await packageFileSink.close();
+    }
+  }
+
+  Future<bool> removeFromPackageFile(
+    String machineName,
+    String package,
+  ) async {
+    final packageFile = _packageFile(machineName);
+    if (!packageFile.existsSync()) {
+      return false;
+    }
+
+    final fileWithPackage = await _findPackageRecursively(
+      packageFile,
+      package,
+      {machineName},
+    );
+
+    if (fileWithPackage == null) {
+      return false;
+    }
+
+    final lines = await _streamLines(packageFile, autoTrim: false).toList();
+    final sink = packageFile.openWrite();
+    try {
+      for (final line in lines) {
+        if (line.trim() == package) {
+          continue;
+        }
+        sink.writeln(line);
+      }
+    } finally {
+      await sink.flush();
+      await sink.close();
+    }
+
+    return true;
+  }
 
   File _packageFile(String machineName) => File.fromUri(
         _storageDirectory.uri.resolve(machineName),
@@ -65,15 +117,9 @@ class PackageFileAdapter {
   ) async* {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
-    final lines = packageFile
-        .openRead()
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty);
-    await for (final line in lines) {
+    await for (final line in _streamLines(packageFile)) {
       // skip comment lines
-      if (line.startsWith('#')) {
+      if (_isComment(line)) {
         continue;
       }
 
@@ -93,6 +139,68 @@ class PackageFileAdapter {
     }
   }
 
+  Stream<String> _streamPackageFileHierarchy(
+    File packageFile,
+    Set<String> importHistory,
+  ) async* {
+    assert(packageFile.existsSync(), '$packageFile must exist');
+
+    if (isWithin(_storageDirectory.path, packageFile.path)) {
+      yield relative(packageFile.path, from: _storageDirectory.path);
+    } else {
+      yield packageFile.absolute.path;
+    }
+
+    await for (final line in _streamLines(packageFile)) {
+      // recursively stream imported package files
+      final importMatch = _importRegExp.matchAsPrefix(line);
+      if (importMatch != null) {
+        final importFileName = importMatch[1]!;
+        yield* _streamPackageFileHierarchy(
+          _findPackageFile(importFileName, importHistory),
+          _updateHistory(importFileName, importHistory),
+        );
+      }
+    }
+  }
+
+  Future<File?> _findPackageRecursively(
+    File packageFile,
+    String package,
+    Set<String> importHistory,
+  ) async {
+    assert(packageFile.existsSync(), '$packageFile must exist');
+
+    await for (final line in _streamLines(packageFile)) {
+      // skip comment lines
+      if (_isComment(line)) {
+        continue;
+      }
+
+      // recursively stream imported package files
+      final importMatch = _importRegExp.matchAsPrefix(line);
+      if (importMatch != null) {
+        final importFileName = importMatch[1]!;
+        final fileWithPackage = await _findPackageRecursively(
+          _findPackageFile(importFileName, importHistory),
+          package,
+          _updateHistory(importFileName, importHistory),
+        );
+
+        if (fileWithPackage != null) {
+          return fileWithPackage;
+        }
+      }
+
+      // return with current file if found
+      if (line == package) {
+        return packageFile;
+      }
+    }
+
+    return null;
+  }
+
   File _findPackageFile(String fileName, Iterable<String> history) {
     final packageFile = File.fromUri(
       _storageDirectory.uri.resolve(fileName),
@@ -108,6 +216,24 @@ class PackageFileAdapter {
 
     return packageFile;
   }
+
+  Stream<String> _streamLines(
+    File packageFile, {
+    bool autoTrim = true,
+  }) {
+    final rawLines = packageFile
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
+
+    if (!autoTrim) {
+      return rawLines;
+    }
+
+    return rawLines.map((line) => line.trim()).where((line) => line.isNotEmpty);
+  }
+
+  bool _isComment(String line) => line.startsWith('#');
 
   Set<String> _updateHistory(String importFileName, Set<String> importHistory) {
     if (importHistory.contains(importFileName)) {

@@ -24,19 +24,6 @@ void main() {
         File.fromUri(testDir.uri.resolve('$name.pcs'))
             .writeAsStringSync(lines.join('\n'));
 
-    group('hasPackageDiff', () {
-      test('returns false if file does not exist', () {
-        expect(sut.hasPackageDiff('non-existent-file'), isFalse);
-      });
-
-      test('returns true if file does exist', () {
-        const fileName = 'existent-file';
-        _writeFile(fileName, const []);
-
-        expect(sut.hasPackageDiff(fileName), isTrue);
-      });
-    });
-
     group('loadPackageDiff', () {
       test('returns empty stream if file does not exist', () {
         final stream = sut.loadPackageDiff('non-existent-file');

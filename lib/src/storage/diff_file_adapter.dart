@@ -19,9 +19,6 @@ class DiffFileAdapter {
 
   DiffFileAdapter(this._storageDirectory);
 
-  bool hasPackageDiff(String machineName) =>
-      _diffFile(machineName).existsSync();
-
   Stream<DiffEntry> loadPackageDiff(String machineName) {
     final diffFile = _diffFile(machineName);
 
