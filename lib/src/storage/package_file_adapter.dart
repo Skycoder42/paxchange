@@ -90,8 +90,8 @@ class PackageFileAdapter {
       return false;
     }
 
-    final lines = await _streamLines(packageFile, autoTrim: false).toList();
-    final sink = packageFile.openWrite();
+    final lines = await _streamLines(fileWithPackage, autoTrim: false).toList();
+    final sink = fileWithPackage.openWrite();
     try {
       for (final line in lines) {
         if (line.trim() == package) {

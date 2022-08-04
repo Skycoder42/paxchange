@@ -52,11 +52,7 @@ void main() {
 
     test('is correctly configured', () {
       expect(sut.name, 'update');
-      expect(
-        sut.description,
-        'Update the package diff with '
-        'the current system package configuration.',
-      );
+      expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
       expect(sut.argParser.options, hasLength(2));
       expect(

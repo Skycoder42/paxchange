@@ -464,7 +464,7 @@ void main() {
         expect(_packageFile(fileName).readAsLinesSync(), lines);
       });
 
-      test('remove line from file and returns true', () async {
+      test('removes line from file and returns true', () async {
         const fileName = 'test-file';
         const lines = [
           'line-A',
@@ -485,90 +485,54 @@ void main() {
         );
       });
 
-      // TODO WIP HERE
-
-      test('skips comment and empty lines', () {
+      test('skips comment and empty lines', () async {
         const fileName = 'test-file';
         const lines = [
-          '   line-A     ',
+          '# $testPackageName',
           '',
-          '# line-B',
+          '    # $testPackageName',
           '  \t    ',
-          '    # line-C',
+          '   $testPackageName     ',
         ];
         _writeFile(fileName, lines);
 
-        final stream = sut.loadPackageFile(fileName);
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            lines.first.trim(),
-            emitsDone,
-          ]),
+        final result = await sut.removeFromPackageFile(
+          fileName,
+          testPackageName,
         );
+
+        expect(result, isTrue);
+        expect(_packageFile(fileName).readAsLinesSync(), lines.sublist(0, 4));
       });
 
-      test('imports other package files', () {
-        const fileName1 = 'test-file-1';
-        const fileName2 = 'test-file-2';
-        const lines1 = [
-          'line-A',
-          'line-B',
-          'line-C',
-        ];
-        const lines2 = ['::import $fileName1'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-
-        final stream = sut.loadPackageFile(fileName2);
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            ...lines1,
-            emitsDone,
-          ]),
-        );
-      });
-
-      test('imports other package files recursively and keeps ordering', () {
+      test('searches package files recursively', () async {
         const fileName1 = 'test-file-1';
         const fileName2 = 'test-file-2';
         const fileName3 = 'test-file-3';
-        const fileName4 = 'test-file-4';
         const lines1 = [
           'line-A',
           'line-B',
           'line-C',
+          testPackageName,
         ];
         const lines2 = [
-          'line-D',
-          'line-E',
-          'line-F',
+          '::import $fileName1',
+          testPackageName,
         ];
-        const lines3 = [
-          '   ::import $fileName2',
-          'line-G',
-          '::import $fileName1   ',
-        ];
-        const lines4 = [
-          '#::import $fileName1',
-          '::import $fileName3',
-        ];
+        const lines3 = ['::import $fileName2'];
         _writeFile(fileName1, lines1);
         _writeFile(fileName2, lines2);
         _writeFile(fileName3, lines3);
-        _writeFile(fileName4, lines4);
 
-        final stream = sut.loadPackageFile(fileName4);
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            ...lines2,
-            lines3[1],
-            ...lines1,
-            emitsDone,
-          ]),
+        final result = await sut.removeFromPackageFile(
+          fileName3,
+          testPackageName,
         );
+
+        expect(result, isTrue);
+        expect(_packageFile(fileName3).readAsLinesSync(), lines3);
+        expect(_packageFile(fileName2).readAsLinesSync(), lines2);
+        expect(_packageFile(fileName1).readAsLinesSync(), lines1.sublist(0, 3));
       });
 
       test('throws exception if imported file cannot be found', () {
@@ -576,29 +540,25 @@ void main() {
         const lines1 = ['::import non-existent-file'];
         _writeFile(fileName1, lines1);
 
-        final stream = sut.loadPackageFile(fileName1);
         expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            emitsError(
-              isA<LoadPackageFailure>()
-                  .having(
-                (f) => f.fileName,
-                'fileName',
-                'non-existent-file',
-              )
-                  .having(
-                (f) => f.history,
-                'history',
-                const [fileName1],
-              ).having(
-                (f) => f.message,
-                'history',
-                'Package file does not exist',
-              ),
+          () => sut.removeFromPackageFile(fileName1, testPackageName),
+          throwsA(
+            isA<LoadPackageFailure>()
+                .having(
+              (f) => f.fileName,
+              'fileName',
+              'non-existent-file',
+            )
+                .having(
+              (f) => f.history,
+              'history',
+              const [fileName1],
+            ).having(
+              (f) => f.message,
+              'history',
+              'Package file does not exist',
             ),
-            emitsDone,
-          ]),
+          ),
         );
       });
 
@@ -613,29 +573,25 @@ void main() {
         _writeFile(fileName2, lines2);
         _writeFile(fileName3, lines3);
 
-        final stream = sut.loadPackageFile(fileName3);
         expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            emitsError(
-              isA<LoadPackageFailure>()
-                  .having(
-                (f) => f.fileName,
-                'fileName',
-                fileName3,
-              )
-                  .having(
-                (f) => f.history,
-                'history',
-                const [fileName3, fileName2, fileName1, fileName3],
-              ).having(
-                (f) => f.message,
-                'history',
-                'Circular import detected',
-              ),
+          () => sut.removeFromPackageFile(fileName3, testPackageName),
+          throwsA(
+            isA<LoadPackageFailure>()
+                .having(
+              (f) => f.fileName,
+              'fileName',
+              fileName3,
+            )
+                .having(
+              (f) => f.history,
+              'history',
+              const [fileName3, fileName2, fileName1, fileName3],
+            ).having(
+              (f) => f.message,
+              'history',
+              'Circular import detected',
             ),
-            emitsDone,
-          ]),
+          ),
         );
       });
     });

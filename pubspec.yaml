@@ -24,7 +24,7 @@ dependencies:
 dev_dependencies:
   build_runner: ^2.2.0
   dart_pre_commit: ^3.0.2
-  dart_test_tools: ^4.2.3
+  dart_test_tools: ^4.3.0
   freezed: ^2.1.0+1
   json_serializable: ^6.3.1
   mocktail: ^0.3.0
