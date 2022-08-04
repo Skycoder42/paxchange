@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:paxchange/src/config.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('paxchange', () {
+  group('paxchange update', () {
     late Directory testDir;
+    late Directory packageDir;
 
     late List<String> base1;
     late List<String> base2;
@@ -14,7 +16,7 @@ void main() {
     final base5 = List.generate(10, (index) => 'fake-package-$index');
 
     File _packageFile(String fileName) =>
-        File.fromUri(testDir.uri.resolve(fileName));
+        File.fromUri(packageDir.uri.resolve(fileName));
 
     Future<void> _writePackages(String fileName, Iterable<String> lines) =>
         _packageFile(fileName).writeAsString(lines.join('\n'));
@@ -23,15 +25,24 @@ void main() {
         _packageFile(fileName).readAsLines();
 
     Future<int> _runPaxchange(String machineName) async {
+      final configFile = File.fromUri(testDir.uri.resolve('config.json'));
+      await configFile.writeAsString(
+        json.encode(
+          Config(
+            storageDirectory: packageDir,
+            machineName: machineName,
+          ),
+        ),
+      );
+
       final proc = await Process.start(
         'dart',
         [
           'run',
           'bin/paxchange.dart',
-          '--storage-directory',
-          testDir.path,
-          '--machine-name',
-          machineName,
+          '--config',
+          configFile.path,
+          'update',
           '--set-exit-on-changed',
         ],
         mode: ProcessStartMode.inheritStdio,
@@ -41,6 +52,8 @@ void main() {
 
     setUp(() async {
       testDir = await Directory.systemTemp.createTemp();
+      packageDir = Directory.fromUri(testDir.uri.resolve('packages'));
+      await packageDir.create();
 
       final packages = await _runPacman(const ['-Qqe']);
       final oneFourth = packages.length ~/ 4;
@@ -55,7 +68,7 @@ void main() {
         '::import base1',
         ...base3,
         '# other important packages',
-        '::import ${testDir.absolute.uri.resolve('base2').toFilePath()}',
+        '::import ${packageDir.absolute.uri.resolve('base2').toFilePath()}',
       ]);
       await _writePackages('machine-1', [
         '::import base_all',
@@ -76,7 +89,7 @@ void main() {
 
       expect(result, 0);
 
-      final files = await testDir.list().toList();
+      final files = await packageDir.list().toList();
       expect(files, hasLength(5));
       expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
     });
@@ -91,7 +104,7 @@ void main() {
 
       expect(result, 0);
 
-      final files = await testDir.list().toList();
+      final files = await packageDir.list().toList();
       expect(files, hasLength(5));
       expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
     });
@@ -101,7 +114,7 @@ void main() {
 
       expect(result, 2);
 
-      final files = await testDir.list().toList();
+      final files = await packageDir.list().toList();
       expect(files, hasLength(6));
       expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
@@ -125,7 +138,7 @@ void main() {
 
       expect(result, 2);
 
-      final files = await testDir.list().toList();
+      final files = await packageDir.list().toList();
       expect(files, hasLength(6));
       expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
@@ -147,7 +160,7 @@ void main() {
 
       expect(result, 2);
 
-      final files = await testDir.list().toList();
+      final files = await packageDir.list().toList();
       expect(files, hasLength(6));
       expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(

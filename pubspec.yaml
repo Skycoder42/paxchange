@@ -37,3 +37,8 @@ aur:
   license: BSD
   depends:
     - pacman
+  install:
+    - source: deploy/aur/config.json
+      target: /etc/paxchange.json
+  backup:
+    - etc/paxchange.json

@@ -17,6 +17,8 @@ class MockPacman extends Mock implements Pacman {}
 
 void main() {
   group('$PackageSync', () {
+    const testMachineName = 'test-machine';
+
     final mockPackageFileAdapter = MockPackageFileAdapter();
     final mockDiffFileAdapter = MockDiffFileAdapter();
     final mockPacman = MockPacman();
@@ -29,6 +31,7 @@ void main() {
       reset(mockPacman);
 
       sut = PackageSync(
+        testMachineName,
         mockPackageFileAdapter,
         mockDiffFileAdapter,
         mockPacman,
@@ -39,7 +42,6 @@ void main() {
       test(
         'generates diff between installed and cached packages and saves it',
         () async {
-          const testMachineName = 'test-machine';
           const packageHistory = [
             'package-2',
             'package-4',
@@ -60,7 +62,7 @@ void main() {
           when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
               .thenReturnAsync(null);
 
-          final result = await sut.updatePackageDiff(testMachineName);
+          final result = await sut.updatePackageDiff();
 
           final captured = verifyInOrder([
             () => mockPackageFileAdapter.loadPackageFile(testMachineName),
@@ -104,7 +106,7 @@ void main() {
           when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
               .thenReturnAsync(null);
 
-          final result = await sut.updatePackageDiff(testMachineName);
+          final result = await sut.updatePackageDiff();
 
           verifyInOrder([
             () => mockPackageFileAdapter.loadPackageFile(testMachineName),

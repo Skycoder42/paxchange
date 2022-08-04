@@ -1,0 +1,5 @@
+{
+  "storageDirectory": "/var/lib/paxchange/packages",
+  "machineName": null,
+  "pacmanFrontend": null
+}

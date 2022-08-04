@@ -14,6 +14,7 @@ import 'commands/skip_command.dart';
 import 'commands/update_history_command.dart';
 
 class DiffEditor {
+  final String _rootPackageName;
   final PackageFileAdapter _packageFileAdapter;
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
@@ -22,26 +23,27 @@ class DiffEditor {
   final _console = Console.scrolling();
 
   DiffEditor(
+    this._rootPackageName,
     this._packageFileAdapter,
     this._diffFileAdapter,
     this._pacman,
     this._packageSync,
   );
 
-  Future<void> run(String machineName) async {
+  Future<void> run() async {
     if (!_console.hasTerminal || !stdout.supportsAnsiEscapes) {
       throw Exception('Cannot run without an interactive ANSI terminal!');
     }
 
     final machineHierarchy = await _packageFileAdapter
-        .loadPackageFileHierarchy(machineName)
+        .loadPackageFileHierarchy(_rootPackageName)
         .toList();
-    final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
+    final diffEntries = _diffFileAdapter.loadPackageDiff(_rootPackageName);
 
     await for (final diffEntry in diffEntries) {
       final entryResult = await diffEntry.when(
         added: (package) => _presentAdded(package, machineHierarchy),
-        removed: (package) => _presentRemoved(package, machineName),
+        removed: (package) => _presentRemoved(package, _rootPackageName),
       );
 
       if (!entryResult) {
@@ -49,7 +51,7 @@ class DiffEditor {
       }
     }
 
-    await _updatePackageDiff(machineName);
+    await _updatePackageDiff();
   }
 
   Future<bool> _presentAdded(
@@ -108,12 +110,12 @@ class DiffEditor {
       ..resetColorAttributes();
   }
 
-  Future<void> _updatePackageDiff(String machineName) async {
+  Future<void> _updatePackageDiff() async {
     _console
       ..clearScreen()
       ..writeLine('Updating package changelog, please wait...');
 
-    final result = await _packageSync.updatePackageDiff(machineName);
+    final result = await _packageSync.updatePackageDiff();
 
     _console
       ..writeLine('Successfully regenerated package changelog!')
