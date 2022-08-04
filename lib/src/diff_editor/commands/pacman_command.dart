@@ -51,9 +51,11 @@ class InstallCommand extends PacmanCommand {
   String get description => 'Install the package on this machine';
 
   @override
+  @protected
   String get operation => 'install';
 
   @override
+  @protected
   Future<int> runPacman(String packageName) =>
       pacman.installPackage(packageName);
 }
@@ -68,9 +70,11 @@ class RemoveCommand extends PacmanCommand {
   String get description => 'Remove the package from this machine';
 
   @override
+  @protected
   String get operation => 'uninstall';
 
   @override
+  @protected
   Future<int> runPacman(String packageName) =>
       pacman.removePackage(packageName);
 }

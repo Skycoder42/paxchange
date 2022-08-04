@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dart_console/dart_console.dart';
+import 'package:riverpod/riverpod.dart';
 
 import '../package_sync.dart';
 import '../pacman/pacman.dart';
@@ -13,8 +14,18 @@ import 'commands/quit_command.dart';
 import 'commands/skip_command.dart';
 import 'commands/update_history_command.dart';
 
+// coverage:ignore-start
+final diffEditorProvider = Provider(
+  (ref) => DiffEditor(
+    ref.read(packageFileAdapterProvider),
+    ref.read(diffFileAdapterProvider),
+    ref.read(pacmanProvider),
+    ref.read(packageSyncProvider),
+  ),
+);
+// coverage:ignore-end
+
 class DiffEditor {
-  final String _rootPackageName;
   final PackageFileAdapter _packageFileAdapter;
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
@@ -23,27 +34,26 @@ class DiffEditor {
   final _console = Console.scrolling();
 
   DiffEditor(
-    this._rootPackageName,
     this._packageFileAdapter,
     this._diffFileAdapter,
     this._pacman,
     this._packageSync,
   );
 
-  Future<void> run() async {
+  Future<void> run(String machineName) async {
     if (!_console.hasTerminal || !stdout.supportsAnsiEscapes) {
       throw Exception('Cannot run without an interactive ANSI terminal!');
     }
 
     final machineHierarchy = await _packageFileAdapter
-        .loadPackageFileHierarchy(_rootPackageName)
+        .loadPackageFileHierarchy(machineName)
         .toList();
-    final diffEntries = _diffFileAdapter.loadPackageDiff(_rootPackageName);
+    final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
     await for (final diffEntry in diffEntries) {
       final entryResult = await diffEntry.when(
         added: (package) => _presentAdded(package, machineHierarchy),
-        removed: (package) => _presentRemoved(package, _rootPackageName),
+        removed: (package) => _presentRemoved(package, machineName),
       );
 
       if (!entryResult) {

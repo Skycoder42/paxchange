@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:paxchange/src/command/update_package_diff_command.dart';
+import 'package:paxchange/src/command/update_command.dart';
 import 'package:paxchange/src/package_sync.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
@@ -14,7 +14,7 @@ class MockPackageSync extends Mock implements PackageSync {}
 
 class MockStdout extends Mock implements Stdout {}
 
-class TestableUpdatePackageDiffCommand extends UpdatePackageDiffCommand {
+class TestableUpdatePackageDiffCommand extends UpdateCommand {
   @override
   ArgResults? argResults;
 
@@ -22,7 +22,7 @@ class TestableUpdatePackageDiffCommand extends UpdatePackageDiffCommand {
 }
 
 void main() {
-  group('$UpdatePackageDiffCommand', () {
+  group('$UpdateCommand', () {
     final mockPackageSync = MockPackageSync();
     final mockArgResults = MockArgResults();
     final mockStdout = MockStdout();
@@ -57,7 +57,7 @@ void main() {
       expect(sut.argParser.options, hasLength(2));
       expect(
         sut.argParser.options,
-        contains(UpdatePackageDiffCommand.setExitOnChangedFlag),
+        contains(UpdateCommand.setExitOnChangedFlag),
       );
     });
 
@@ -73,8 +73,7 @@ void main() {
             final result = await sut.run();
 
             verifyInOrder<dynamic>([
-              () =>
-                  mockArgResults[UpdatePackageDiffCommand.setExitOnChangedFlag],
+              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
               () => mockPackageSync.updatePackageDiff(),
             ]);
             verifyZeroInteractions(mockStdout);
@@ -94,8 +93,7 @@ void main() {
             final result = await sut.run();
 
             verifyInOrder<dynamic>([
-              () =>
-                  mockArgResults[UpdatePackageDiffCommand.setExitOnChangedFlag],
+              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(
@@ -118,8 +116,7 @@ void main() {
             final result = await sut.run();
 
             verifyInOrder<dynamic>([
-              () =>
-                  mockArgResults[UpdatePackageDiffCommand.setExitOnChangedFlag],
+              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(

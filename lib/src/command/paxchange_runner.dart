@@ -8,7 +8,8 @@ import 'package:args/command_runner.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
-import 'update_package_diff_command.dart';
+import 'review_command.dart';
+import 'update_command.dart';
 
 class PaxchangeRunner extends CommandRunner<int> {
   static const _configOption = 'config';
@@ -36,7 +37,8 @@ class PaxchangeRunner extends CommandRunner<int> {
       help: 'Path to the configuration file to be used.',
     );
 
-    addCommand(UpdatePackageDiffCommand(_providerContainer));
+    addCommand(UpdateCommand(_providerContainer));
+    addCommand(ReviewCommand(_providerContainer));
   }
 
   void dispose() => _providerContainer.dispose();

@@ -1,5 +1,3 @@
-// coverage:ignore-file
-
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -10,11 +8,13 @@ import 'util/directory_json_converter.dart';
 part 'config.freezed.dart';
 part 'config.g.dart';
 
+// coverage:ignore-start
 final configProvider = Provider<Config>(
   (ref) => throw StateError(
     'configProvider must be overridden with a valid config',
   ),
 );
+// coverage:ignore-end
 
 @freezed
 class Config with _$Config {

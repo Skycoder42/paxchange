@@ -14,7 +14,7 @@ abstract class UpdateHistoryCommand extends PromptCommand {
   Future<bool> call(Console console, String packageName) async {
     console
       ..writeLine()
-      ..writeLine('$operation $packageName to $machineName...');
+      ..writeLine('$operation $packageName for $machineName...');
     await updateHistory(packageName);
     console
       ..writeLine('Success! Press any key to continue...')

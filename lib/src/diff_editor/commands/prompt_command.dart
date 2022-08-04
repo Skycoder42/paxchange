@@ -26,7 +26,7 @@ abstract class PromptCommand {
     console
       ..setForegroundColor(ConsoleColor.red)
       ..writeLine()
-      ..writeErrorLine(message)
+      ..writeLine(message)
       ..resetColorAttributes();
   }
 

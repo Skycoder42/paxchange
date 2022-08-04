@@ -7,7 +7,7 @@ import 'package:riverpod/riverpod.dart';
 
 import '../package_sync.dart';
 
-class UpdatePackageDiffCommand extends Command<int> {
+class UpdateCommand extends Command<int> {
   @visibleForTesting
   static const setExitOnChangedFlag = 'set-exit-on-changed';
 
@@ -23,7 +23,7 @@ class UpdatePackageDiffCommand extends Command<int> {
   @override
   bool get takesArguments => false;
 
-  UpdatePackageDiffCommand(this._providerContainer) {
+  UpdateCommand(this._providerContainer) {
     argParser.addFlag(
       setExitOnChangedFlag,
       abbr: 'e',
