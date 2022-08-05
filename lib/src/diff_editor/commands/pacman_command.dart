@@ -2,6 +2,7 @@ import 'package:dart_console/dart_console.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../pacman/pacman.dart';
+import '../prompter.dart';
 import 'prompt_command.dart';
 
 abstract class PacmanCommand extends PromptCommand {
@@ -25,7 +26,7 @@ abstract class PacmanCommand extends PromptCommand {
         ..readKey();
       return true;
     } else {
-      PromptCommand.writeError(
+      Prompter.writeError(
         console,
         'Failed to $operation $packageName! '
         'Package manager failed with exit code $exitCode.',

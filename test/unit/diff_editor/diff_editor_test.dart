@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dart_console/dart_console.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/diff_editor.dart';
+import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:paxchange/src/package_sync.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/storage/diff_file_adapter.dart';
@@ -17,6 +18,8 @@ class MockPacman extends Mock implements Pacman {}
 
 class MockPackageSync extends Mock implements PackageSync {}
 
+class MockPrompter extends Mock implements Prompter {}
+
 class MockStdout extends Mock implements Stdout {}
 
 class MockConsole extends Mock implements Console {}
@@ -30,6 +33,7 @@ void main() {
     final mockPacman = MockPacman();
     final mockPackageSync = MockPackageSync();
     final mockStdout = MockStdout();
+    final mockPrompter = MockPrompter();
 
     late DiffEditor sut;
 
@@ -39,12 +43,14 @@ void main() {
       reset(mockPacman);
       reset(mockPackageSync);
       reset(mockStdout);
+      reset(mockPrompter);
 
       sut = DiffEditor(
         mockPackageFileAdapter,
         mockDiffFileAdapter,
         mockPacman,
         mockPackageSync,
+        mockPrompter,
       );
     });
 

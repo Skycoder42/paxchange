@@ -9,10 +9,10 @@ import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
 import 'commands/pacman_command.dart';
 import 'commands/print_command.dart';
-import 'commands/prompt_command.dart';
 import 'commands/quit_command.dart';
 import 'commands/skip_command.dart';
 import 'commands/update_history_command.dart';
+import 'prompter.dart';
 
 // coverage:ignore-start
 final diffEditorProvider = Provider(
@@ -21,6 +21,7 @@ final diffEditorProvider = Provider(
     ref.read(diffFileAdapterProvider),
     ref.read(pacmanProvider),
     ref.read(packageSyncProvider),
+    ref.read(prompterProvider),
   ),
 );
 // coverage:ignore-end
@@ -30,6 +31,7 @@ class DiffEditor {
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
   final PackageSync _packageSync;
+  final Prompter _prompter;
 
   final _console = Console.scrolling();
 
@@ -38,6 +40,7 @@ class DiffEditor {
     this._diffFileAdapter,
     this._pacman,
     this._packageSync,
+    this._prompter,
   );
 
   Future<void> run(String machineName) async {
@@ -75,7 +78,7 @@ class DiffEditor {
       color: ConsoleColor.green,
     );
 
-    return PromptCommand.prompt(_console, package, [
+    return _prompter.prompt(_console, package, [
       PrintCommand.local(_pacman),
       RemoveCommand(_pacman),
       ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
@@ -92,7 +95,7 @@ class DiffEditor {
       color: ConsoleColor.red,
     );
 
-    return PromptCommand.prompt(_console, package, [
+    return _prompter.prompt(_console, package, [
       PrintCommand.remote(_pacman),
       InstallCommand(_pacman),
       RemoveHistoryCommand(_packageFileAdapter, machineName),
