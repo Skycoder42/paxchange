@@ -1,9 +1,18 @@
 import 'dart:io';
 
 import 'package:dart_console/dart_console.dart';
+import 'package:dart_test_tools/test.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paxchange/src/diff_editor/commands/pacman_command.dart';
+import 'package:paxchange/src/diff_editor/commands/print_command.dart';
+import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
+import 'package:paxchange/src/diff_editor/commands/quit_command.dart';
+import 'package:paxchange/src/diff_editor/commands/skip_command.dart';
+import 'package:paxchange/src/diff_editor/commands/update_history_command.dart';
 import 'package:paxchange/src/diff_editor/diff_editor.dart';
 import 'package:paxchange/src/diff_editor/prompter.dart';
+import 'package:paxchange/src/diff_entry.dart';
 import 'package:paxchange/src/package_sync.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/storage/diff_file_adapter.dart';
@@ -22,9 +31,14 @@ class MockPrompter extends Mock implements Prompter {}
 
 class MockStdout extends Mock implements Stdout {}
 
-class MockConsole extends Mock implements Console {}
+final mockStdout = MockStdout();
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(Console());
+    registerFallbackValue(ConsoleColor.black);
+  });
+
   group('$DiffEditor', () {
     const testMachineName = 'test-machine';
 
@@ -32,7 +46,6 @@ void main() {
     final mockDiffFileAdapter = MockDiffFileAdapter();
     final mockPacman = MockPacman();
     final mockPackageSync = MockPackageSync();
-    final mockStdout = MockStdout();
     final mockPrompter = MockPrompter();
 
     late DiffEditor sut;
@@ -54,29 +67,281 @@ void main() {
       );
     });
 
-    group(
-      'run',
-      () => IOOverrides.runZoned(stdout: () => mockStdout, () {
-        test('throws exception if console does not have a terminal', () {
-          when(() => mockStdout.hasTerminal).thenReturn(false);
-
-          expect(() => sut.run(testMachineName), throwsA(isException));
-        });
-
-        test(
-          'throws exception if stdout does not support ansi',
-          () {
-            when(() => mockStdout.hasTerminal).thenReturn(true);
-            when(() => mockStdout.supportsAnsiEscapes).thenReturn(false);
-
-            expect(() => sut.run(testMachineName), throwsA(isException));
-          },
+    @isTest
+    void _testZoned(String description, dynamic Function() body) => test(
+          description,
+          () => IOOverrides.runZoned<dynamic>(
+            stdout: () => mockStdout,
+            body,
+          ),
         );
 
-        test('presents added diff entry', () {
-          fail('TODO');
-        });
-      }),
-    );
+    group('run', () {
+      setUp(() {
+        when(() => mockStdout.hasTerminal).thenReturn(true);
+        when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
+        when(() => mockStdout.terminalColumns).thenReturn(80);
+
+        when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
+      });
+
+      _testZoned('throws exception if console does not have a terminal', () {
+        when(() => mockStdout.hasTerminal).thenReturn(false);
+
+        expect(() => sut.run(testMachineName), throwsA(isException));
+
+        verify(() => mockStdout.hasTerminal);
+      });
+
+      _testZoned(
+        'throws exception if stdout does not support ansi',
+        () {
+          when(() => mockStdout.hasTerminal).thenReturn(true);
+          when(() => mockStdout.supportsAnsiEscapes).thenReturn(false);
+
+          expect(() => sut.run(testMachineName), throwsA(isException));
+
+          verifyInOrder([
+            () => mockStdout.hasTerminal,
+            () => mockStdout.supportsAnsiEscapes,
+          ]);
+        },
+      );
+
+      _testZoned('presents added diff entry', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntry = DiffEntry.added('package-1');
+
+        when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+            .thenStream(Stream.fromIterable(testHierarchy));
+        when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+            .thenStream(Stream.value(diffEntry));
+        when(
+          () => mockPrompter.prompt(
+            console: any(named: 'console'),
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(true);
+
+        await sut.run(testMachineName);
+
+        final captured = verifyInOrder([
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPrompter.writeTitle(
+                console: any(named: 'console'),
+                messagePrefix: 'Found installed package ',
+                package: diffEntry.package,
+                messageSuffix: ' that is not in the history yet!',
+                color: ConsoleColor.green,
+              ),
+          () => mockPrompter.prompt(
+                console: any(named: 'console'),
+                packageName: diffEntry.package,
+                commands: captureAny(named: 'commands'),
+              ),
+          () => mockPackageSync.updatePackageDiff(),
+        ]).captured[3].single as List<PromptCommand>;
+
+        expect(captured, hasLength(7));
+        expect(
+          captured,
+          contains(
+            isA<PrintCommand>().having((c) => c.targetIndex, 'index', 0),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<RemoveCommand>()),
+        );
+        expect(
+          captured,
+          contains(
+            isA<AddHistoryCommand>()
+                .having(
+                  (c) => c.index,
+                  'index',
+                  0,
+                )
+                .having(
+                  (c) => c.machineName,
+                  'index',
+                  testHierarchy[0],
+                ),
+          ),
+        );
+        expect(
+          captured,
+          contains(
+            isA<AddHistoryCommand>()
+                .having(
+                  (c) => c.index,
+                  'index',
+                  1,
+                )
+                .having(
+                  (c) => c.machineName,
+                  'index',
+                  testHierarchy[1],
+                ),
+          ),
+        );
+        expect(
+          captured,
+          contains(
+            isA<AddHistoryCommand>()
+                .having(
+                  (c) => c.index,
+                  'index',
+                  2,
+                )
+                .having(
+                  (c) => c.machineName,
+                  'index',
+                  testHierarchy[2],
+                ),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<SkipCommand>()),
+        );
+        expect(
+          captured,
+          contains(isA<QuitCommand>()),
+        );
+      });
+
+      _testZoned('presents removed diff entry', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntry = DiffEntry.removed('package-1');
+
+        when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+            .thenStream(Stream.fromIterable(testHierarchy));
+        when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+            .thenStream(Stream.value(diffEntry));
+        when(
+          () => mockPrompter.prompt(
+            console: any(named: 'console'),
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(true);
+
+        await sut.run(testMachineName);
+
+        final captured = verifyInOrder([
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPrompter.writeTitle(
+                console: any(named: 'console'),
+                messagePrefix: 'Found uninstalled package ',
+                package: diffEntry.package,
+                messageSuffix: ' that is in the history!',
+                color: ConsoleColor.red,
+              ),
+          () => mockPrompter.prompt(
+                console: any(named: 'console'),
+                packageName: diffEntry.package,
+                commands: captureAny(named: 'commands'),
+              ),
+          () => mockPackageSync.updatePackageDiff(),
+        ]).captured[3].single as List<PromptCommand>;
+
+        expect(captured, hasLength(5));
+        expect(
+          captured,
+          contains(
+            isA<PrintCommand>().having((c) => c.targetIndex, 'index', 1),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<InstallCommand>()),
+        );
+        expect(
+          captured,
+          contains(
+            isA<RemoveHistoryCommand>().having(
+              (c) => c.machineName,
+              'index',
+              testMachineName,
+            ),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<SkipCommand>()),
+        );
+        expect(
+          captured,
+          contains(isA<QuitCommand>()),
+        );
+      });
+
+      _testZoned('aborts early if a command returns false', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntries = [
+          DiffEntry.removed('package-1'),
+          DiffEntry.added('package-2'),
+          DiffEntry.added('package-3'),
+        ];
+
+        when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+            .thenStream(Stream.fromIterable(testHierarchy));
+        when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+            .thenStream(Stream.fromIterable(diffEntries));
+        when(
+          () => mockPrompter.prompt(
+            console: any(named: 'console'),
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(true);
+        when(
+          () => mockPrompter.prompt(
+            console: any(named: 'console'),
+            packageName: 'package-2',
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(false);
+
+        await sut.run(testMachineName);
+        verifyInOrder([
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPrompter.writeTitle(
+                console: any(named: 'console'),
+                messagePrefix: any(named: 'messagePrefix'),
+                package: diffEntries[0].package,
+                messageSuffix: any(named: 'messageSuffix'),
+                color: any(named: 'color'),
+              ),
+          () => mockPrompter.prompt(
+                console: any(named: 'console'),
+                packageName: diffEntries[0].package,
+                commands: any(named: 'commands'),
+              ),
+          () => mockPrompter.writeTitle(
+                console: any(named: 'console'),
+                messagePrefix: any(named: 'messagePrefix'),
+                package: diffEntries[1].package,
+                messageSuffix: any(named: 'messageSuffix'),
+                color: any(named: 'color'),
+              ),
+          () => mockPrompter.prompt(
+                console: any(named: 'console'),
+                packageName: diffEntries[1].package,
+                commands: any(named: 'commands'),
+              ),
+          () => mockPackageSync.updatePackageDiff(),
+        ]);
+        verifyNoMoreInteractions(mockPrompter);
+      });
+    });
   });
 }

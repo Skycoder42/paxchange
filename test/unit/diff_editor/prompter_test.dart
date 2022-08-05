@@ -33,6 +33,35 @@ void main() {
       ]);
     });
 
+    test('writeTitle writes a title', () {
+      const prefix = 'prefix';
+      const suffix = 'suffix';
+      const package = 'test-package';
+      const color = ConsoleColor.magenta;
+
+      const Prompter().writeTitle(
+        console: mockConsole,
+        messagePrefix: prefix,
+        package: package,
+        messageSuffix: suffix,
+        color: color,
+      );
+
+      verifyInOrder([
+        () => mockConsole.resetColorAttributes(),
+        () => mockConsole.clearScreen(),
+        () => mockConsole.setForegroundColor(color),
+        () => mockConsole.write(prefix),
+        () => mockConsole.setTextStyle(bold: true),
+        () => mockConsole.write(package),
+        () => mockConsole.setTextStyle(),
+        () => mockConsole.setForegroundColor(color),
+        () => mockConsole.writeLine(suffix),
+        () => mockConsole.resetColorAttributes(),
+      ]);
+      verifyNoMoreInteractions(mockConsole);
+    });
+
     group('prompt', () {
       const testPackageName = 'test-package';
       final cmd1 = MockPromptCommand();
@@ -53,9 +82,9 @@ void main() {
         when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
 
         final result = await const Prompter().prompt(
-          mockConsole,
-          testPackageName,
-          [cmd1, cmd2],
+          console: mockConsole,
+          packageName: testPackageName,
+          commands: [cmd1, cmd2],
         );
 
         verifyInOrder([
@@ -68,6 +97,7 @@ void main() {
           () => mockConsole.setTextStyle(),
           () => cmd1.call(mockConsole, testPackageName),
         ]);
+        verifyNoMoreInteractions(mockConsole);
         expect(result, isTrue);
       });
 
@@ -77,9 +107,9 @@ void main() {
             .thenAnswer((i) => Key.printable('${keyCtr--}'));
 
         final result = await const Prompter().prompt(
-          mockConsole,
-          testPackageName,
-          [cmd1, cmd2],
+          console: mockConsole,
+          packageName: testPackageName,
+          commands: [cmd1, cmd2],
         );
 
         verifyInOrder([
@@ -103,6 +133,7 @@ void main() {
           () => mockConsole.setTextStyle(),
           () => cmd2.call(mockConsole, testPackageName),
         ]);
+        verifyNoMoreInteractions(mockConsole);
         expect(result, isFalse);
       });
     });

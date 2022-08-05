@@ -21,11 +21,31 @@ class Prompter {
 
   const Prompter();
 
-  FutureOr<bool> prompt(
-    Console console,
-    String packageName,
-    List<PromptCommand> commands,
-  ) async {
+  void writeTitle({
+    required Console console,
+    required String messagePrefix,
+    required String package,
+    required String messageSuffix,
+    required ConsoleColor color,
+  }) {
+    console
+      ..resetColorAttributes()
+      ..clearScreen()
+      ..setForegroundColor(color)
+      ..write(messagePrefix)
+      ..setTextStyle(bold: true)
+      ..write(package)
+      ..setTextStyle()
+      ..setForegroundColor(color)
+      ..writeLine(messageSuffix)
+      ..resetColorAttributes();
+  }
+
+  FutureOr<bool> prompt({
+    required Console console,
+    required String packageName,
+    required List<PromptCommand> commands,
+  }) async {
     while (true) {
       console.writeLine('What do you want to do?');
       for (final command in commands) {

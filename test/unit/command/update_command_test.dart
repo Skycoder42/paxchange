@@ -14,11 +14,11 @@ class MockPackageSync extends Mock implements PackageSync {}
 
 class MockStdout extends Mock implements Stdout {}
 
-class TestableUpdatePackageDiffCommand extends UpdateCommand {
+class TestableUpdateCommand extends UpdateCommand {
   @override
   ArgResults? argResults;
 
-  TestableUpdatePackageDiffCommand(super.providerContainer);
+  TestableUpdateCommand(super.providerContainer);
 }
 
 void main() {
@@ -29,7 +29,7 @@ void main() {
 
     late ProviderContainer providerContainer;
 
-    late TestableUpdatePackageDiffCommand sut;
+    late TestableUpdateCommand sut;
 
     setUp(() {
       reset(mockPackageSync);
@@ -42,7 +42,7 @@ void main() {
         ],
       );
 
-      sut = TestableUpdatePackageDiffCommand(providerContainer)
+      sut = TestableUpdateCommand(providerContainer)
         ..argResults = mockArgResults;
     });
 

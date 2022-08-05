@@ -71,56 +71,47 @@ class DiffEditor {
     String package,
     List<String> machineHierarchy,
   ) async {
-    _writeTitle(
+    _prompter.writeTitle(
+      console: _console,
       messagePrefix: 'Found installed package ',
       package: package,
-      messageSuffix: ' that is not in history yet!',
+      messageSuffix: ' that is not in the history yet!',
       color: ConsoleColor.green,
     );
 
-    return _prompter.prompt(_console, package, [
-      PrintCommand.local(_pacman),
-      RemoveCommand(_pacman),
-      ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
-      const SkipCommand(),
-      const QuitCommand(),
-    ]);
+    return _prompter.prompt(
+      console: _console,
+      packageName: package,
+      commands: [
+        PrintCommand.local(_pacman),
+        RemoveCommand(_pacman),
+        ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
+        const SkipCommand(),
+        const QuitCommand(),
+      ],
+    );
   }
 
   Future<bool> _presentRemoved(String package, String machineName) async {
-    _writeTitle(
+    _prompter.writeTitle(
+      console: _console,
       messagePrefix: 'Found uninstalled package ',
       package: package,
       messageSuffix: ' that is in the history!',
       color: ConsoleColor.red,
     );
 
-    return _prompter.prompt(_console, package, [
-      PrintCommand.remote(_pacman),
-      InstallCommand(_pacman),
-      RemoveHistoryCommand(_packageFileAdapter, machineName),
-      const SkipCommand(),
-      const QuitCommand(),
-    ]);
-  }
-
-  void _writeTitle({
-    required String messagePrefix,
-    required String package,
-    required String messageSuffix,
-    required ConsoleColor color,
-  }) {
-    _console
-      ..resetColorAttributes()
-      ..clearScreen()
-      ..setForegroundColor(color)
-      ..write(messagePrefix)
-      ..setTextStyle(bold: true)
-      ..write(package)
-      ..setTextStyle()
-      ..setForegroundColor(color)
-      ..writeLine(messageSuffix)
-      ..resetColorAttributes();
+    return _prompter.prompt(
+      console: _console,
+      packageName: package,
+      commands: [
+        PrintCommand.remote(_pacman),
+        InstallCommand(_pacman),
+        RemoveHistoryCommand(_packageFileAdapter, machineName),
+        const SkipCommand(),
+        const QuitCommand(),
+      ],
+    );
   }
 
   Future<void> _updatePackageDiff() async {
