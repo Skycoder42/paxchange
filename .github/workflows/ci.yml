@@ -17,6 +17,9 @@ jobs:
       buildRunner: true
       extendedAnalyzerArgs: --linter test-import # Do not run the lib-export linter
       unitTestPaths: "test/unit"
+      coverageExclude: >-
+        "**.freezed.dart"
+        "**.g.dart"
       platforms: '["linux"]'
 
   integration_tests:
