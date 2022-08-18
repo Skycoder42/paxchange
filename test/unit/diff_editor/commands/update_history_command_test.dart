@@ -1,6 +1,7 @@
 import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/commands/update_history_command.dart';
 import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:test/test.dart';
@@ -55,7 +56,7 @@ void main() {
         () => mockConsole.writeLine(any()),
         () => mockConsole.readKey(),
       ]);
-      expect(result, isTrue);
+      expect(result, PromptResult.succeeded);
     });
 
     test('generate creates list of commands', () {
@@ -118,7 +119,7 @@ void main() {
         () => mockConsole.writeLine(any()),
         () => mockConsole.readKey(),
       ]);
-      expect(result, isTrue);
+      expect(result, PromptResult.succeeded);
     });
   });
 }

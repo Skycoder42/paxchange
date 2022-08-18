@@ -41,7 +41,7 @@ class Prompter {
       ..resetColorAttributes();
   }
 
-  FutureOr<bool> prompt({
+  FutureOr<PromptResult> prompt({
     required Console console,
     required String packageName,
     required List<PromptCommand> commands,
@@ -58,13 +58,21 @@ class Prompter {
       final key = console.readKey();
       console.setTextStyle();
 
+      var repeat = false;
       for (final command in commands) {
         if (command.key == key.char) {
-          return command(console, packageName);
+          final result = await command(console, packageName);
+          if (result == PromptResult.repeat) {
+            repeat = true;
+            break;
+          }
+          return result;
         }
       }
 
-      writeError(console, 'Invalid option: ${key.char}!');
+      if (!repeat) {
+        writeError(console, 'Invalid option: ${key.char}!');
+      }
     }
   }
 }

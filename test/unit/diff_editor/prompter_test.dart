@@ -70,11 +70,11 @@ void main() {
       setUp(() {
         when(() => cmd1.key).thenReturn('1');
         when(() => cmd1.description).thenReturn('command 1');
-        when(() => cmd1.call(any(), any())).thenReturn(true);
+        when(() => cmd1.call(any(), any())).thenReturn(PromptResult.succeeded);
 
         when(() => cmd2.key).thenReturn('2');
         when(() => cmd2.description).thenReturn('command 2');
-        when(() => cmd2.call(any(), any())).thenReturn(false);
+        when(() => cmd2.call(any(), any())).thenReturn(PromptResult.failed);
       });
 
       test('writes a prompt with all options and returns result of selected',
@@ -98,7 +98,7 @@ void main() {
           () => cmd1.call(mockConsole, testPackageName),
         ]);
         verifyNoMoreInteractions(mockConsole);
-        expect(result, isTrue);
+        expect(result, PromptResult.succeeded);
       });
 
       test('writes a looping prompt for invalid inputs', () async {
@@ -134,7 +134,7 @@ void main() {
           () => cmd2.call(mockConsole, testPackageName),
         ]);
         verifyNoMoreInteractions(mockConsole);
-        expect(result, isFalse);
+        expect(result, PromptResult.failed);
       });
     });
   });

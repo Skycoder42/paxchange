@@ -2,6 +2,7 @@ import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/commands/print_command.dart';
+import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
@@ -44,7 +45,7 @@ void main() {
         ...packageInfo.map((line) => () => mockConsole.writeLine(line)),
         () => mockConsole.writeLine(),
       ]);
-      expect(result, isTrue);
+      expect(result, PromptResult.repeat);
     });
 
     test('remote prints remote package status', () async {
@@ -70,7 +71,7 @@ void main() {
         ...packageInfo.map((line) => () => mockConsole.writeLine(line)),
         () => mockConsole.writeLine(),
       ]);
-      expect(result, isTrue);
+      expect(result, PromptResult.repeat);
     });
   });
 }

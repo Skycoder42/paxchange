@@ -398,6 +398,36 @@ void main() {
       });
     });
 
+    group('ensurePackageFileExists', () {
+      const testMachineName = 'ensurePackageFileExists-machine';
+      test('creates file if it does not exist', () async {
+        final now = DateTime.now();
+        await Future<void>.delayed(const Duration(seconds: 1));
+
+        await sut.ensurePackageFileExists(testMachineName);
+
+        expect(_packageFile(testMachineName).existsSync(), isTrue);
+        expect(
+          _packageFile(testMachineName).lastModifiedSync().isAfter(now),
+          isTrue,
+        );
+      });
+
+      test('does nothing if file already exist', () async {
+        final createdFile = await _packageFile(testMachineName).create();
+        final createdTimeStamp = createdFile.lastModifiedSync();
+        await Future<void>.delayed(const Duration(seconds: 1));
+
+        await sut.ensurePackageFileExists(testMachineName);
+
+        expect(_packageFile(testMachineName).existsSync(), isTrue);
+        expect(
+          _packageFile(testMachineName).lastModifiedSync(),
+          createdTimeStamp,
+        );
+      });
+    });
+
     group('addToPackageFile', () {
       test('creates new file with single entry if it does not exist', () async {
         const testMachineName = 'test-machine';

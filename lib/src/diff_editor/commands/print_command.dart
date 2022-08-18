@@ -30,7 +30,7 @@ class PrintCommand extends PromptCommand {
   String get description => 'Print information about the package';
 
   @override
-  Future<bool> call(Console console, String packageName) async {
+  Future<PromptResult> call(Console console, String packageName) async {
     Stream<String> packageStream;
     switch (_printTarget) {
       case _PrintTarget.local:
@@ -45,6 +45,6 @@ class PrintCommand extends PromptCommand {
     await packageStream.forEach(console.writeLine);
     console.writeLine();
 
-    return true;
+    return PromptResult.repeat;
   }
 }

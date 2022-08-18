@@ -12,5 +12,5 @@ class QuitCommand extends PromptCommand {
   String get description => 'Quit the application';
 
   @override
-  bool call(Console console, String packageName) => false;
+  PromptResult call(Console console, String packageName) => PromptResult.quit;
 }

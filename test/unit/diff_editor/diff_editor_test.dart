@@ -58,6 +58,10 @@ void main() {
       reset(mockStdout);
       reset(mockPrompter);
 
+      when(
+        () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+      ).thenReturnAsync(null);
+
       sut = DiffEditor(
         mockPackageFileAdapter,
         mockDiffFileAdapter,
@@ -93,20 +97,24 @@ void main() {
         verify(() => mockStdout.hasTerminal);
       });
 
-      _testZoned(
-        'throws exception if stdout does not support ansi',
-        () {
-          when(() => mockStdout.hasTerminal).thenReturn(true);
-          when(() => mockStdout.supportsAnsiEscapes).thenReturn(false);
+      _testZoned('does nothing if no entries are present', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
 
-          expect(() => sut.run(testMachineName), throwsA(isException));
+        when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+            .thenStream(Stream.fromIterable(testHierarchy));
+        when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+            .thenStream(const Stream.empty());
 
-          verifyInOrder([
-            () => mockStdout.hasTerminal,
-            () => mockStdout.supportsAnsiEscapes,
-          ]);
-        },
-      );
+        await sut.run(testMachineName);
+
+        verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+        ]);
+        verifyNoMoreInteractions(mockPackageSync);
+      });
 
       _testZoned('presents added diff entry', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
@@ -122,11 +130,12 @@ void main() {
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
-        ).thenReturn(true);
+        ).thenReturn(PromptResult.succeeded);
 
         await sut.run(testMachineName);
 
         final captured = verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
           () =>
               mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
           () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
@@ -143,7 +152,7 @@ void main() {
                 commands: captureAny(named: 'commands'),
               ),
           () => mockPackageSync.updatePackageDiff(),
-        ]).captured[3].single as List<PromptCommand>;
+        ]).captured[4].single as List<PromptCommand>;
 
         expect(captured, hasLength(7));
         expect(
@@ -228,11 +237,12 @@ void main() {
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
-        ).thenReturn(true);
+        ).thenReturn(PromptResult.succeeded);
 
         await sut.run(testMachineName);
 
         final captured = verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
           () =>
               mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
           () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
@@ -249,7 +259,7 @@ void main() {
                 commands: captureAny(named: 'commands'),
               ),
           () => mockPackageSync.updatePackageDiff(),
-        ]).captured[3].single as List<PromptCommand>;
+        ]).captured[4].single as List<PromptCommand>;
 
         expect(captured, hasLength(5));
         expect(
@@ -300,17 +310,18 @@ void main() {
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
-        ).thenReturn(true);
+        ).thenReturn(PromptResult.succeeded);
         when(
           () => mockPrompter.prompt(
             console: any(named: 'console'),
             packageName: 'package-2',
             commands: any(named: 'commands'),
           ),
-        ).thenReturn(false);
+        ).thenReturn(PromptResult.failed);
 
         await sut.run(testMachineName);
         verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
           () =>
               mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
           () => mockDiffFileAdapter.loadPackageDiff(testMachineName),

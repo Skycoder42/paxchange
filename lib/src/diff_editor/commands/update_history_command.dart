@@ -11,7 +11,7 @@ abstract class UpdateHistoryCommand extends PromptCommand {
   const UpdateHistoryCommand(this.packageFileAdapter);
 
   @override
-  Future<bool> call(Console console, String packageName) async {
+  Future<PromptResult> call(Console console, String packageName) async {
     console
       ..writeLine()
       ..writeLine('$operation $packageName for $machineName...');
@@ -20,7 +20,7 @@ abstract class UpdateHistoryCommand extends PromptCommand {
       ..writeLine('Success! Press any key to continue...')
       ..readKey();
 
-    return true;
+    return PromptResult.succeeded;
   }
 
   @protected

@@ -1,3 +1,4 @@
+import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/commands/quit_command.dart';
 import 'package:test/test.dart';
 
@@ -10,7 +11,7 @@ void main() {
 
       expect(sut.key, 'q');
       expect(sut.description, isNotEmpty);
-      expect(sut(MockConsole(), ''), isFalse);
+      expect(sut(MockConsole(), ''), PromptResult.quit);
     });
   });
 }

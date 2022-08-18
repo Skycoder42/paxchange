@@ -57,6 +57,13 @@ class PackageFileAdapter {
     }
   }
 
+  Future<void> ensurePackageFileExists(String machineName) async {
+    final packageFile = _packageFile(machineName);
+    if (!packageFile.existsSync()) {
+      await packageFile.create();
+    }
+  }
+
   Future<void> addToPackageFile(String machineName, String package) async {
     final packageFile = _packageFile(machineName);
 

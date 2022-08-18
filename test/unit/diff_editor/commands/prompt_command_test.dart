@@ -19,7 +19,7 @@ class TestablePromptCommand extends PromptCommand {
   String get description => mock.description;
 
   @override
-  FutureOr<bool> call(Console console, String packageName) =>
+  FutureOr<PromptResult> call(Console console, String packageName) =>
       mock.call(console, packageName);
 }
 

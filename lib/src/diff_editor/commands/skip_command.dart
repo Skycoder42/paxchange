@@ -12,5 +12,6 @@ class SkipCommand extends PromptCommand {
   String get description => 'Skip this package for now';
 
   @override
-  bool call(Console console, String packageName) => true;
+  PromptResult call(Console console, String packageName) =>
+      PromptResult.skipped;
 }

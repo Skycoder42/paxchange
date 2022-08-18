@@ -2,6 +2,7 @@ import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/commands/pacman_command.dart';
+import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
@@ -53,7 +54,7 @@ void main() {
           () => mockConsole.readKey(),
         ]);
 
-        expect(result, isTrue);
+        expect(result, PromptResult.succeeded);
       });
 
       test('runs pacman and prints error message if pacman fails', () async {
@@ -80,7 +81,7 @@ void main() {
           () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, isFalse);
+        expect(result, PromptResult.failed);
       });
     });
   });
@@ -128,7 +129,7 @@ void main() {
           () => mockConsole.readKey(),
         ]);
 
-        expect(result, isTrue);
+        expect(result, PromptResult.succeeded);
       });
 
       test('runs pacman and prints error message if pacman fails', () async {
@@ -155,7 +156,7 @@ void main() {
           () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, isFalse);
+        expect(result, PromptResult.failed);
       });
     });
   });

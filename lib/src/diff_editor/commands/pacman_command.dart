@@ -13,7 +13,7 @@ abstract class PacmanCommand extends PromptCommand {
 
   @override
   @nonVirtual
-  Future<bool> call(Console console, String packageName) async {
+  Future<PromptResult> call(Console console, String packageName) async {
     console.clearScreen();
     final exitCode = await runPacman(packageName);
     if (exitCode == 0) {
@@ -24,14 +24,14 @@ abstract class PacmanCommand extends PromptCommand {
           'Press any key to continue...',
         )
         ..readKey();
-      return true;
+      return PromptResult.succeeded;
     } else {
       Prompter.writeError(
         console,
         'Failed to $operation $packageName! '
         'Package manager failed with exit code $exitCode.',
       );
-      return false;
+      return PromptResult.failed;
     }
   }
 

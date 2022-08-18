@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dart_console/dart_console.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -9,6 +7,7 @@ import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
 import 'commands/pacman_command.dart';
 import 'commands/print_command.dart';
+import 'commands/prompt_command.dart';
 import 'commands/quit_command.dart';
 import 'commands/skip_command.dart';
 import 'commands/update_history_command.dart';
@@ -44,30 +43,38 @@ class DiffEditor {
   );
 
   Future<void> run(String machineName) async {
-    if (!_console.hasTerminal || !stdout.supportsAnsiEscapes) {
+    if (!_console.hasTerminal) {
       throw Exception('Cannot run without an interactive ANSI terminal!');
     }
+
+    await _packageFileAdapter.ensurePackageFileExists(machineName);
 
     final machineHierarchy = await _packageFileAdapter
         .loadPackageFileHierarchy(machineName)
         .toList();
     final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
+    var didModify = false;
     await for (final diffEntry in diffEntries) {
       final entryResult = await diffEntry.when(
         added: (package) => _presentAdded(package, machineHierarchy),
         removed: (package) => _presentRemoved(package, machineName),
       );
 
-      if (!entryResult) {
+      didModify = didModify || entryResult.didModify;
+      if (entryResult.stopProcessing) {
         break;
       }
     }
 
-    await _updatePackageDiff();
+    if (didModify) {
+      await _updatePackageDiff();
+    } else {
+      _console.writeLine('No packages modified, nothing to do!');
+    }
   }
 
-  Future<bool> _presentAdded(
+  Future<PromptResult> _presentAdded(
     String package,
     List<String> machineHierarchy,
   ) async {
@@ -92,7 +99,10 @@ class DiffEditor {
     );
   }
 
-  Future<bool> _presentRemoved(String package, String machineName) async {
+  Future<PromptResult> _presentRemoved(
+    String package,
+    String machineName,
+  ) async {
     _prompter.writeTitle(
       console: _console,
       messagePrefix: 'Found uninstalled package ',
