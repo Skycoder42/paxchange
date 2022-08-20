@@ -158,7 +158,11 @@ void main() {
         expect(
           captured,
           contains(
-            isA<PrintCommand>().having((c) => c.targetIndex, 'index', 0),
+            isA<PrintCommand>().having(
+              (c) => c.printTarget,
+              'printTarget',
+              PrintTarget.local,
+            ),
           ),
         );
         expect(
@@ -227,7 +231,7 @@ void main() {
         );
       });
 
-      _testZoned('presents removed diff entry', () async {
+      _testZoned('presents removed diff entry for removed package', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.removed('package-1');
 
@@ -235,6 +239,8 @@ void main() {
             .thenStream(Stream.fromIterable(testHierarchy));
         when(() => mockDiffFileAdapter.loadPackageDiff(any()))
             .thenStream(Stream.value(diffEntry));
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(false);
         when(
           () => mockPrompter.prompt(
             console: any(named: 'console'),
@@ -250,6 +256,7 @@ void main() {
           () =>
               mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
           () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPacman.checkIfPackageIsInstalled(diffEntry.package),
           () => mockPrompter.writeTitle(
                 console: any(named: 'console'),
                 messagePrefix: 'Found uninstalled package ',
@@ -263,18 +270,99 @@ void main() {
                 commands: captureAny(named: 'commands'),
               ),
           () => mockPackageSync.updatePackageDiff(),
-        ]).captured[4].single as List<PromptCommand>;
+        ]).captured[5].single as List<PromptCommand>;
 
         expect(captured, hasLength(5));
         expect(
           captured,
           contains(
-            isA<PrintCommand>().having((c) => c.targetIndex, 'index', 1),
+            isA<PrintCommand>().having(
+              (c) => c.printTarget,
+              'printTarget',
+              PrintTarget.remote,
+            ),
           ),
         );
         expect(
           captured,
           contains(isA<InstallCommand>()),
+        );
+        expect(
+          captured,
+          contains(
+            isA<RemoveHistoryCommand>().having(
+              (c) => c.machineName,
+              'index',
+              testMachineName,
+            ),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<SkipCommand>()),
+        );
+        expect(
+          captured,
+          contains(isA<QuitCommand>()),
+        );
+      });
+
+      _testZoned('presents removed diff entry for implicitly installed package',
+          () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntry = DiffEntry.removed('package-1');
+
+        when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+            .thenStream(Stream.fromIterable(testHierarchy));
+        when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+            .thenStream(Stream.value(diffEntry));
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(true);
+        when(
+          () => mockPrompter.prompt(
+            console: any(named: 'console'),
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(PromptResult.succeeded);
+
+        await sut.run(testMachineName);
+
+        final captured = verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPacman.checkIfPackageIsInstalled(diffEntry.package),
+          () => mockPrompter.writeTitle(
+                console: any(named: 'console'),
+                messagePrefix: 'Found implicitly installed package ',
+                package: diffEntry.package,
+                messageSuffix: ' that is in the history!',
+                color: ConsoleColor.yellow,
+              ),
+          () => mockPrompter.prompt(
+                console: any(named: 'console'),
+                packageName: diffEntry.package,
+                commands: captureAny(named: 'commands'),
+              ),
+          () => mockPackageSync.updatePackageDiff(),
+        ]).captured[5].single as List<PromptCommand>;
+
+        expect(captured, hasLength(5));
+        expect(
+          captured,
+          contains(
+            isA<PrintCommand>().having(
+              (c) => c.printTarget,
+              'printTarget',
+              PrintTarget.local,
+            ),
+          ),
+        );
+        expect(
+          captured,
+          contains(isA<MarkExplicitlyInstalledCommand>()),
         );
         expect(
           captured,
@@ -308,6 +396,8 @@ void main() {
             .thenStream(Stream.fromIterable(testHierarchy));
         when(() => mockDiffFileAdapter.loadPackageDiff(any()))
             .thenStream(Stream.fromIterable(diffEntries));
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(false);
         when(
           () => mockPrompter.prompt(
             console: any(named: 'console'),

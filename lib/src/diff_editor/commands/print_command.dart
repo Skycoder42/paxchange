@@ -6,7 +6,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../pacman/pacman.dart';
 import 'prompt_command.dart';
 
-enum _PrintTarget {
+@visibleForTesting
+enum PrintTarget {
   local,
   remote,
 }
@@ -14,14 +15,12 @@ enum _PrintTarget {
 class PrintCommand extends PromptCommand {
   final Pacman _pacman;
 
-  final _PrintTarget _printTarget;
-
-  const PrintCommand.local(this._pacman) : _printTarget = _PrintTarget.local;
-
-  const PrintCommand.remote(this._pacman) : _printTarget = _PrintTarget.remote;
-
   @visibleForTesting
-  int get targetIndex => _printTarget.index;
+  final PrintTarget printTarget;
+
+  const PrintCommand.local(this._pacman) : printTarget = PrintTarget.local;
+
+  const PrintCommand.remote(this._pacman) : printTarget = PrintTarget.remote;
 
   @override
   String get key => 'p';
@@ -32,11 +31,11 @@ class PrintCommand extends PromptCommand {
   @override
   Future<PromptResult> call(Console console, String packageName) async {
     Stream<String> packageStream;
-    switch (_printTarget) {
-      case _PrintTarget.local:
+    switch (printTarget) {
+      case PrintTarget.local:
         packageStream = _pacman.queryInstalledPackage(packageName);
         break;
-      case _PrintTarget.remote:
+      case PrintTarget.remote:
         packageStream = _pacman.queryUninstalledPackage(packageName);
         break;
     }

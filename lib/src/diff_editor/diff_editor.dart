@@ -104,6 +104,43 @@ class DiffEditor {
     String package,
     String machineName,
   ) async {
+    final isInstalled = await _pacman.checkIfPackageIsInstalled(package);
+    if (isInstalled) {
+      return _presentImplicitlyInstalled(package, machineName);
+    } else {
+      return _presentUninstalled(package, machineName);
+    }
+  }
+
+  Future<PromptResult> _presentImplicitlyInstalled(
+    String package,
+    String machineName,
+  ) async {
+    _prompter.writeTitle(
+      console: _console,
+      messagePrefix: 'Found implicitly installed package ',
+      package: package,
+      messageSuffix: ' that is in the history!',
+      color: ConsoleColor.yellow,
+    );
+
+    return _prompter.prompt(
+      console: _console,
+      packageName: package,
+      commands: [
+        PrintCommand.local(_pacman),
+        MarkExplicitlyInstalledCommand(_pacman),
+        RemoveHistoryCommand(_packageFileAdapter, machineName),
+        const SkipCommand(),
+        const QuitCommand(),
+      ],
+    );
+  }
+
+  Future<PromptResult> _presentUninstalled(
+    String package,
+    String machineName,
+  ) async {
     _prompter.writeTitle(
       console: _console,
       messagePrefix: 'Found uninstalled package ',

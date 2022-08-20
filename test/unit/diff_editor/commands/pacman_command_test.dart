@@ -247,4 +247,87 @@ void main() {
       });
     });
   });
+
+  group('$MarkExplicitlyInstalledCommand', () {
+    final mockPacman = MockPacman();
+    final mockConsole = MockConsole();
+
+    late MarkExplicitlyInstalledCommand sut;
+
+    setUp(() {
+      reset(mockPacman);
+      reset(mockConsole);
+
+      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
+
+      sut = MarkExplicitlyInstalledCommand(mockPacman);
+    });
+
+    test('uses correct key', () {
+      expect(sut.key, 'm');
+      expect(sut.description, isNotEmpty);
+    });
+
+    group('call', () {
+      test('runs pacman and prints success message', () async {
+        const testPackageName = 'test-package';
+
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(0);
+
+        final result = await sut(mockConsole, testPackageName);
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.changePackageInstallReason(
+                testPackageName,
+                InstallReason.asExplicit,
+              ),
+          () => mockConsole.writeLine(),
+          () => mockConsole.writeLine(
+                any(
+                  that: allOf(
+                    contains('mark'),
+                    contains(testPackageName),
+                  ),
+                ),
+              ),
+          () => mockConsole.readKey(),
+        ]);
+
+        expect(result, PromptResult.succeeded);
+      });
+
+      test('runs pacman and prints error message if pacman fails', () async {
+        const testPackageName = 'test-package';
+
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(10);
+
+        final result = await sut(mockConsole, testPackageName);
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.changePackageInstallReason(
+                testPackageName,
+                InstallReason.asExplicit,
+              ),
+          () => mockConsole.setForegroundColor(ConsoleColor.red),
+          () => mockConsole.writeLine(),
+          () => mockConsole.writeLine(
+                any(
+                  that: allOf(
+                    contains('mark'),
+                    contains(testPackageName),
+                    contains('exit code 10'),
+                  ),
+                ),
+              ),
+          () => mockConsole.resetColorAttributes(),
+        ]);
+
+        expect(result, PromptResult.failed);
+      });
+    });
+  });
 }

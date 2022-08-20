@@ -36,6 +36,7 @@ void main() {
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
+      expect(sut.printTarget, PrintTarget.local);
 
       final result = await sut(mockConsole, testPackageName);
 
@@ -62,6 +63,7 @@ void main() {
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
+      expect(sut.printTarget, PrintTarget.remote);
 
       final result = await sut(mockConsole, testPackageName);
 

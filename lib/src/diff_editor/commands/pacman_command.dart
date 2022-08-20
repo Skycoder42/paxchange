@@ -102,3 +102,22 @@ class MarkImplicitlyInstalledCommand extends PacmanCommand {
   Future<int> runPacman(String packageName) =>
       pacman.changePackageInstallReason(packageName, InstallReason.asDeps);
 }
+
+class MarkExplicitlyInstalledCommand extends PacmanCommand {
+  const MarkExplicitlyInstalledCommand(super.pacman);
+
+  @override
+  String get key => 'm';
+
+  @override
+  String get description => 'Mark the package as explicitly by a dependency';
+
+  @override
+  @protected
+  String get operation => 'mark';
+
+  @override
+  @protected
+  Future<int> runPacman(String packageName) =>
+      pacman.changePackageInstallReason(packageName, InstallReason.asExplicit);
+}
