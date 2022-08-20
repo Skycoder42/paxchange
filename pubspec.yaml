@@ -1,6 +1,6 @@
 name: paxchange
 description: Simple dart script to passively synchronize installed pacman packages between systems.
-version: 1.0.2
+version: 1.1.0
 homepage: https://github.com/Skycoder42/paxchange
 publish_to: none
 
@@ -37,6 +37,7 @@ aur:
   license: BSD
   depends:
     - pacman
+  testArgs: test/unit
   install: deploy/aur/paxchange.install
   files:
     - source: deploy/aur/config.json
