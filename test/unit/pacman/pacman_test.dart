@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/util/process_wrapper.dart';
 import 'package:test/test.dart';
+import 'package:tuple/tuple.dart';
 
 class ProcessWrapperMock extends Mock implements ProcessWrapper {}
 
@@ -19,6 +20,19 @@ void main() {
   setUpAll(() {
     registerFallbackValue(const Stream<List<int>>.empty());
     registerFallbackValue(ProcessStartMode.normal);
+  });
+
+  group('$InstallReason', () {
+    testData<Tuple2<InstallReason, String>>(
+      'correctly maps flag',
+      const [
+        Tuple2(InstallReason.asExplicit, '--asexplicit'),
+        Tuple2(InstallReason.asDeps, '--asdeps'),
+      ],
+      (fixture) {
+        expect(fixture.item1.flag, fixture.item2);
+      },
+    );
   });
 
   group('$Pacman', () {
@@ -42,6 +56,43 @@ void main() {
       when(() => processMock.stdout).thenStream(const Stream.empty());
       when(() => processMock.exitCode).thenReturnAsync(0);
     });
+
+    @isTestGroup
+    void _testStderrForwarding({
+      required Future<void> Function() runPacman,
+    }) {
+      test(
+        'forwards errors to stderr',
+        () => IOOverrides.runZoned(
+          stderr: () => mockStderr,
+          () async {
+            final errorStream = Stream.value([1, 2, 3]);
+            when(() => processMock.stderr).thenStream(errorStream);
+            when(() => mockStderr.addStream(any())).thenReturnAsync(null);
+
+            await expectLater(runPacman(), completes);
+
+            verify(() => mockStderr.addStream(errorStream));
+          },
+        ),
+      );
+
+      test(
+        'waits for stderr and forwards uncaught errors to zone handler',
+        () => runZonedGuarded(
+          () {
+            final error = Exception('error');
+            when(() => processMock.stderr).thenStream(const Stream.empty());
+            when(() => mockStderr.addStream(any())).thenThrow(error);
+
+            expect(runPacman(), completes);
+
+            verify(() => mockStderr.addError(error, any(that: isNotNull)));
+          },
+          mockStderr.addError,
+        ),
+      );
+    }
 
     @isTestGroup
     void _testLineStreaming({
@@ -77,37 +128,7 @@ void main() {
         );
       });
 
-      test(
-        'forwards errors to stderr',
-        () => IOOverrides.runZoned(
-          stderr: () => mockStderr,
-          () async {
-            final errorStream = Stream.value([1, 2, 3]);
-            when(() => processMock.stderr).thenStream(errorStream);
-            when(() => mockStderr.addStream(any())).thenReturnAsync(null);
-
-            await expectLater(runPacman(), emitsDone);
-
-            verify(() => mockStderr.addStream(errorStream));
-          },
-        ),
-      );
-
-      test(
-        'waits for stderr and forwards uncaught errors to zone handler',
-        () => runZonedGuarded(
-          () {
-            final error = Exception('error');
-            when(() => processMock.stderr).thenStream(const Stream.empty());
-            when(() => mockStderr.addStream(any())).thenThrow(error);
-
-            expect(runPacman(), emitsDone);
-
-            verify(() => mockStderr.addError(error, any(that: isNotNull)));
-          },
-          mockStderr.addError,
-        ),
-      );
+      _testStderrForwarding(runPacman: () => runPacman().drain());
     }
 
     @isTestGroup
@@ -131,6 +152,36 @@ void main() {
             _testLineStreaming(
               runPacman: () => sut.listExplicitlyInstalledPackages(),
             );
+          });
+
+          group('checkIfPackageIsInstalled', () {
+            const packageName = 'test-package';
+
+            test('invokes pacman to find the package', () async {
+              await sut.checkIfPackageIsInstalled(packageName);
+
+              verify(
+                () => processWrapperMock.start(
+                  process,
+                  const ['-Qqi', packageName],
+                ),
+              );
+              verifyNoMoreInteractions(processWrapperMock);
+            });
+
+            test('returns true if the package was found', () async {
+              when(() => processMock.exitCode).thenReturnAsync(0);
+
+              final result = await sut.checkIfPackageIsInstalled(packageName);
+              expect(result, isTrue);
+            });
+
+            test('returns false if the package was not found', () async {
+              when(() => processMock.exitCode).thenReturnAsync(1);
+
+              final result = await sut.checkIfPackageIsInstalled(packageName);
+              expect(result, isFalse);
+            });
           });
 
           group('queryInstalledPackage', () {
@@ -216,6 +267,33 @@ void main() {
             verifyNever(() => processMock.stderr);
             expect(result, exitCode);
           });
+
+          testData<InstallReason>(
+            'changePackageInstallReason starts pacman',
+            InstallReason.values,
+            (fixture) async {
+              const testPackageName = 'test-package';
+              const exitCode = 42;
+
+              when(() => processMock.exitCode).thenReturnAsync(exitCode);
+
+              final result = await sut.changePackageInstallReason(
+                testPackageName,
+                fixture,
+              );
+
+              verify(
+                () => processWrapperMock.start(
+                  process,
+                  ['-D', fixture.flag, testPackageName],
+                  mode: ProcessStartMode.inheritStdio,
+                ),
+              );
+              verifyNever(() => processMock.stdout);
+              verifyNever(() => processMock.stderr);
+              expect(result, exitCode);
+            },
+          );
         });
 
     _testWithFrontend(null, 'pacman');

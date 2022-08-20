@@ -11,6 +11,10 @@ class MockPacman extends Mock implements Pacman {}
 class MockConsole extends Mock implements Console {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(InstallReason.asExplicit);
+  });
+
   group('$InstallCommand', () {
     final mockPacman = MockPacman();
     final mockConsole = MockConsole();
@@ -148,6 +152,89 @@ void main() {
                 any(
                   that: allOf(
                     contains('uninstall'),
+                    contains(testPackageName),
+                    contains('exit code 10'),
+                  ),
+                ),
+              ),
+          () => mockConsole.resetColorAttributes(),
+        ]);
+
+        expect(result, PromptResult.failed);
+      });
+    });
+  });
+
+  group('$MarkImplicitlyInstalledCommand', () {
+    final mockPacman = MockPacman();
+    final mockConsole = MockConsole();
+
+    late MarkImplicitlyInstalledCommand sut;
+
+    setUp(() {
+      reset(mockPacman);
+      reset(mockConsole);
+
+      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
+
+      sut = MarkImplicitlyInstalledCommand(mockPacman);
+    });
+
+    test('uses correct key', () {
+      expect(sut.key, 'm');
+      expect(sut.description, isNotEmpty);
+    });
+
+    group('call', () {
+      test('runs pacman and prints success message', () async {
+        const testPackageName = 'test-package';
+
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(0);
+
+        final result = await sut(mockConsole, testPackageName);
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.changePackageInstallReason(
+                testPackageName,
+                InstallReason.asDeps,
+              ),
+          () => mockConsole.writeLine(),
+          () => mockConsole.writeLine(
+                any(
+                  that: allOf(
+                    contains('mark'),
+                    contains(testPackageName),
+                  ),
+                ),
+              ),
+          () => mockConsole.readKey(),
+        ]);
+
+        expect(result, PromptResult.succeeded);
+      });
+
+      test('runs pacman and prints error message if pacman fails', () async {
+        const testPackageName = 'test-package';
+
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(10);
+
+        final result = await sut(mockConsole, testPackageName);
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.changePackageInstallReason(
+                testPackageName,
+                InstallReason.asDeps,
+              ),
+          () => mockConsole.setForegroundColor(ConsoleColor.red),
+          () => mockConsole.writeLine(),
+          () => mockConsole.writeLine(
+                any(
+                  that: allOf(
+                    contains('mark'),
                     contains(testPackageName),
                     contains('exit code 10'),
                   ),

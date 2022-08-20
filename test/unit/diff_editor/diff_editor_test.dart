@@ -154,7 +154,7 @@ void main() {
           () => mockPackageSync.updatePackageDiff(),
         ]).captured[4].single as List<PromptCommand>;
 
-        expect(captured, hasLength(7));
+        expect(captured, hasLength(8));
         expect(
           captured,
           contains(
@@ -164,6 +164,10 @@ void main() {
         expect(
           captured,
           contains(isA<RemoveCommand>()),
+        );
+        expect(
+          captured,
+          contains(isA<MarkImplicitlyInstalledCommand>()),
         );
         expect(
           captured,

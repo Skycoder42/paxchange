@@ -14,7 +14,11 @@ abstract class PacmanCommand extends PromptCommand {
   @override
   @nonVirtual
   Future<PromptResult> call(Console console, String packageName) async {
-    console.clearScreen();
+    console
+      ..clearScreen()
+      ..setForegroundColor(ConsoleColor.blue)
+      ..writeLine('> Running pacman command to $operation $packageName')
+      ..resetColorAttributes();
     final exitCode = await runPacman(packageName);
     if (exitCode == 0) {
       console
@@ -78,4 +82,23 @@ class RemoveCommand extends PacmanCommand {
   @protected
   Future<int> runPacman(String packageName) =>
       pacman.removePackage(packageName);
+}
+
+class MarkImplicitlyInstalledCommand extends PacmanCommand {
+  const MarkImplicitlyInstalledCommand(super.pacman);
+
+  @override
+  String get key => 'm';
+
+  @override
+  String get description => 'Mark the package as installed by a dependency';
+
+  @override
+  @protected
+  String get operation => 'mark';
+
+  @override
+  @protected
+  Future<int> runPacman(String packageName) =>
+      pacman.changePackageInstallReason(packageName, InstallReason.asDeps);
 }

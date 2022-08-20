@@ -92,6 +92,7 @@ class DiffEditor {
       commands: [
         PrintCommand.local(_pacman),
         RemoveCommand(_pacman),
+        MarkImplicitlyInstalledCommand(_pacman),
         ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
         const SkipCommand(),
         const QuitCommand(),
