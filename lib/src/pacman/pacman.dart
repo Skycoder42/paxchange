@@ -50,8 +50,15 @@ class Pacman {
   Stream<String> queryUninstalledPackage(String packageName) =>
       _streamPacmanLines(['-Si', packageName]);
 
-  Future<int> installPackage(String packageName) =>
-      _executePacmanInteractive(['-S', packageName]);
+  Future<int> installPackages(
+    List<String> packageNames, {
+    bool onlyNeeded = false,
+  }) =>
+      _executePacmanInteractive([
+        '-S',
+        if (onlyNeeded) '--needed',
+        ...packageNames,
+      ]);
 
   Future<int> removePackage(String packageName) =>
       _executePacmanInteractive(['-R', packageName]);

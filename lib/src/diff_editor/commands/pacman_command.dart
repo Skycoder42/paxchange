@@ -62,7 +62,7 @@ class InstallCommand extends PacmanCommand {
   @override
   @protected
   Future<int> runPacman(String packageName) =>
-      pacman.installPackage(packageName);
+      pacman.installPackages([packageName]);
 }
 
 class RemoveCommand extends PacmanCommand {

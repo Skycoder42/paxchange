@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
+import 'install_command.dart';
 import 'review_command.dart';
 import 'update_command.dart';
 
@@ -39,6 +40,7 @@ class PaxchangeRunner extends CommandRunner<int> {
 
     addCommand(UpdateCommand(_providerContainer));
     addCommand(ReviewCommand(_providerContainer));
+    addCommand(InstallCommand(_providerContainer));
   }
 
   void dispose() => _providerContainer.dispose();

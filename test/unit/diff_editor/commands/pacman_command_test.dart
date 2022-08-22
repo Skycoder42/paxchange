@@ -39,13 +39,13 @@ void main() {
       test('runs pacman and prints success message', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.installPackage(any())).thenReturnAsync(0);
+        when(() => mockPacman.installPackages(any())).thenReturnAsync(0);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
-          () => mockPacman.installPackage(testPackageName),
+          () => mockPacman.installPackages(const [testPackageName]),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
                 any(
@@ -64,13 +64,13 @@ void main() {
       test('runs pacman and prints error message if pacman fails', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.installPackage(any())).thenReturnAsync(10);
+        when(() => mockPacman.installPackages(any())).thenReturnAsync(10);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
-          () => mockPacman.installPackage(testPackageName),
+          () => mockPacman.installPackages(const [testPackageName]),
           () => mockConsole.setForegroundColor(ConsoleColor.red),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(

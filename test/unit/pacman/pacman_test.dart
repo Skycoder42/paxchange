@@ -226,25 +226,55 @@ void main() {
             );
           });
 
-          test('installPackage starts pacman in interactive install mode',
-              () async {
-            const testPackageName = 'test-package';
-            const exitCode = 42;
+          group('installPackages', () {
+            test('starts pacman in interactive install mode', () async {
+              const testPackageName1 = 'test-package-1';
+              const testPackageName2 = 'test-package-2';
+              const exitCode = 42;
 
-            when(() => processMock.exitCode).thenReturnAsync(exitCode);
+              when(() => processMock.exitCode).thenReturnAsync(exitCode);
 
-            final result = await sut.installPackage(testPackageName);
+              final result = await sut.installPackages(const [
+                testPackageName1,
+                testPackageName2,
+              ]);
 
-            verify(
-              () => processWrapperMock.start(
-                process,
-                const ['-S', testPackageName],
-                mode: ProcessStartMode.inheritStdio,
-              ),
-            );
-            verifyNever(() => processMock.stdout);
-            verifyNever(() => processMock.stderr);
-            expect(result, exitCode);
+              verify(
+                () => processWrapperMock.start(
+                  process,
+                  const ['-S', testPackageName1, testPackageName2],
+                  mode: ProcessStartMode.inheritStdio,
+                ),
+              );
+              verifyNever(() => processMock.stdout);
+              verifyNever(() => processMock.stderr);
+              expect(result, exitCode);
+            });
+
+            test(
+                'starts pacman in interactive install mode for needed packages',
+                () async {
+              const testPackageName = 'test-package';
+              const exitCode = 42;
+
+              when(() => processMock.exitCode).thenReturnAsync(exitCode);
+
+              final result = await sut.installPackages(
+                const [testPackageName],
+                onlyNeeded: true,
+              );
+
+              verify(
+                () => processWrapperMock.start(
+                  process,
+                  const ['-S', '--needed', testPackageName],
+                  mode: ProcessStartMode.inheritStdio,
+                ),
+              );
+              verifyNever(() => processMock.stdout);
+              verifyNever(() => processMock.stderr);
+              expect(result, exitCode);
+            });
           });
 
           test('removePackage starts pacman in interactive remove mode',
