@@ -26,9 +26,10 @@ void main() {
       );
     });
 
-    test(
+    testData<bool>(
       'installPackages streams packages for machine name and installs them',
-      () async {
+      const [false, true],
+      (noConfirm) async {
         const testMachineName = 'test-machine';
         const packages = ['p1', 'p2', 'p3'];
 
@@ -38,14 +39,22 @@ void main() {
           () => mockPacman.installPackages(
             any(),
             onlyNeeded: any(named: 'onlyNeeded'),
+            noConfirm: any(named: 'noConfirm'),
           ),
         ).thenReturnAsync(42);
 
-        final result = await sut.installPackages(testMachineName);
+        final result = await sut.installPackages(
+          testMachineName,
+          noConfirm: noConfirm,
+        );
 
         verifyInOrder([
           () => mockPackageFileAdapter.loadPackageFile(testMachineName),
-          () => mockPacman.installPackages(packages, onlyNeeded: true),
+          () => mockPacman.installPackages(
+                packages,
+                onlyNeeded: true,
+                noConfirm: noConfirm,
+              ),
         ]);
         expect(result, 42);
       },

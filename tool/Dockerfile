@@ -1,7 +1,7 @@
 FROM archlinux:base-devel
 
 WORKDIR /app
-ENTRYPOINT [ "dart", "test", "test/integration" ]
+ENTRYPOINT [ "dart", "test", "-P", "integration" ]
 
 RUN pacman -Sy --noconfirm dart rsync
 RUN dart --disable-analytics

@@ -275,6 +275,29 @@ void main() {
               verifyNever(() => processMock.stderr);
               expect(result, exitCode);
             });
+
+            test('starts pacman in automatic install mode', () async {
+              const testPackageName = 'test-package';
+              const exitCode = 42;
+
+              when(() => processMock.exitCode).thenReturnAsync(exitCode);
+
+              final result = await sut.installPackages(
+                const [testPackageName],
+                noConfirm: true,
+              );
+
+              verify(
+                () => processWrapperMock.start(
+                  process,
+                  const ['-S', '--noconfirm', testPackageName],
+                  mode: ProcessStartMode.inheritStdio,
+                ),
+              );
+              verifyNever(() => processMock.stdout);
+              verifyNever(() => processMock.stderr);
+              expect(result, exitCode);
+            });
           });
 
           test('removePackage starts pacman in interactive remove mode',

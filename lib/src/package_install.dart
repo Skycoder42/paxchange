@@ -21,9 +21,17 @@ class PackageInstall {
     this._pacman,
   );
 
-  Future<int> installPackages(String machineName) async {
+  Future<int> installPackages(
+    String machineName, {
+    bool noConfirm = false,
+  }) async {
     final packages =
         await _packageFileAdapter.loadPackageFile(machineName).toList();
-    return _pacman.installPackages(packages, onlyNeeded: true);
+
+    return _pacman.installPackages(
+      packages,
+      onlyNeeded: true,
+      noConfirm: noConfirm,
+    );
   }
 }

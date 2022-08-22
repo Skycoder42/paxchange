@@ -16,7 +16,7 @@ jobs:
     with:
       buildRunner: true
       extendedAnalyzerArgs: --linter test-import # Do not run the lib-export linter
-      unitTestPaths: "test/unit"
+      unitTestPaths: --preset unit
       coverageExclude: >-
         "**.freezed.dart"
         "**.g.dart"
@@ -38,7 +38,7 @@ jobs:
       - name: Create build files
         run: dart run build_runner build
       - name: Run integration tests
-        run: dart test --reporter github test/integration
+        run: dart test --reporter github --preset integration
 
   cd:
     name: CD

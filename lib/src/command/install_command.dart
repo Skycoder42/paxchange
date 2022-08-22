@@ -8,6 +8,8 @@ import '../package_install.dart';
 class InstallCommand extends Command<int> {
   @visibleForTesting
   static const machineNameOption = 'machine-name';
+  @visibleForTesting
+  static const confirmFlag = 'confirm';
 
   final ProviderContainer _providerContainer;
 
@@ -27,25 +29,34 @@ review command instead.''';
   bool get takesArguments => false;
 
   InstallCommand(this._providerContainer) {
-    argParser.addOption(
-      machineNameOption,
-      abbr: 'n',
-      aliases: const ['name', 'machine'],
-      valueHelp: 'name',
-      help: 'Specify a custom machine name to install packages for. '
-          'By default, this machine is used.',
-    );
+    argParser
+      ..addOption(
+        machineNameOption,
+        abbr: 'n',
+        aliases: const ['name', 'machine'],
+        valueHelp: 'name',
+        help: 'Specify a custom machine name to install packages for. '
+            'By default, this machine is used.',
+      )
+      ..addFlag(
+        confirmFlag,
+        defaultsTo: true,
+        help: 'When disabled, the pacman installation will run '
+            'without confirmation. Use carefully!',
+      );
   }
 
   @override
   Future<int> run() {
     final machineName = argResults![machineNameOption] as String?;
+    final confirm = argResults![confirmFlag] as bool;
     final config = _providerContainer.read(configProvider);
 
     final packageInstall = _providerContainer.read(packageInstallProvider);
 
     return packageInstall.installPackages(
       machineName ?? config.rootPackageFile,
+      noConfirm: !confirm,
     );
   }
 }

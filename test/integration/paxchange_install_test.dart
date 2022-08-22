@@ -39,12 +39,10 @@ void main() {
           '--config',
           configFile.path,
           'install',
+          '--no-confirm',
         ],
+        mode: ProcessStartMode.inheritStdio,
       );
-      proc.stdout.listen(stdout.add);
-      proc.stderr.listen(stderr.add);
-      proc.stdin.writeln('y');
-      await proc.stdin.flush();
       return proc.exitCode;
     }
 

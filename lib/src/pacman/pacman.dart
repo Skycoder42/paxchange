@@ -53,10 +53,12 @@ class Pacman {
   Future<int> installPackages(
     List<String> packageNames, {
     bool onlyNeeded = false,
+    bool noConfirm = false,
   }) =>
       _executePacmanInteractive([
         '-S',
         if (onlyNeeded) '--needed',
+        if (noConfirm) '--noconfirm',
         ...packageNames,
       ]);
 
