@@ -182,7 +182,7 @@ packages:
       name: dart_test_tools
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.5.0"
+    version: "4.5.3"
   dotenv:
     dependency: transitive
     description:
@@ -295,13 +295,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.5.1"
-  lints:
+  lint:
     dependency: transitive
     description:
-      name: lints
+      name: lint
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "1.10.0"
   logging:
     dependency: transitive
     description:
