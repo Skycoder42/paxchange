@@ -67,7 +67,7 @@ void main() {
       final cmd1 = MockPromptCommand();
       final cmd2 = MockPromptCommand();
 
-      setUp(() {
+      setUp(() async {
         when(() => cmd1.key).thenReturn('1');
         when(() => cmd1.description).thenReturn('command 1');
         when(() => cmd1.call(any(), any())).thenReturn(PromptResult.succeeded);

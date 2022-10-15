@@ -40,7 +40,7 @@ void main() {
     final processMock = ProcessMock();
     final mockStderr = MockStderr();
 
-    setUp(() {
+    setUp(() async {
       reset(processWrapperMock);
       reset(processMock);
       reset(mockStderr);
@@ -58,12 +58,12 @@ void main() {
     });
 
     @isTestGroup
-    void _testStderrForwarding({
+    void testStderrForwarding({
       required Future<void> Function() runPacman,
     }) {
       test(
         'forwards errors to stderr',
-        () => IOOverrides.runZoned(
+        () async => IOOverrides.runZoned(
           stderr: () => mockStderr,
           () async {
             final errorStream = Stream.value([1, 2, 3]);
@@ -79,7 +79,7 @@ void main() {
 
       test(
         'waits for stderr and forwards uncaught errors to zone handler',
-        () => runZonedGuarded(
+        () async => runZonedGuarded(
           () {
             final error = Exception('error');
             when(() => processMock.stderr).thenStream(const Stream.empty());
@@ -95,7 +95,7 @@ void main() {
     }
 
     @isTestGroup
-    void _testLineStreaming({
+    void testLineStreaming({
       required Stream<String> Function() runPacman,
     }) {
       test('returns lines of pacman command', () {
@@ -128,11 +128,11 @@ void main() {
         );
       });
 
-      _testStderrForwarding(runPacman: () => runPacman().drain());
+      testStderrForwarding(runPacman: () async => runPacman().drain());
     }
 
     @isTestGroup
-    void _testWithFrontend(String? frontend, String process) =>
+    void testWithFrontend(String? frontend, String process) =>
         group('(frontend: $frontend)', () {
           late Pacman sut;
 
@@ -149,7 +149,7 @@ void main() {
               verifyNoMoreInteractions(processWrapperMock);
             });
 
-            _testLineStreaming(
+            testLineStreaming(
               runPacman: () => sut.listExplicitlyInstalledPackages(),
             );
           });
@@ -200,7 +200,7 @@ void main() {
               verifyNoMoreInteractions(processWrapperMock);
             });
 
-            _testLineStreaming(
+            testLineStreaming(
               runPacman: () => sut.queryInstalledPackage(testPackageName),
             );
           });
@@ -221,7 +221,7 @@ void main() {
               verifyNoMoreInteractions(processWrapperMock);
             });
 
-            _testLineStreaming(
+            testLineStreaming(
               runPacman: () => sut.queryUninstalledPackage(testPackageName),
             );
           });
@@ -349,8 +349,8 @@ void main() {
           );
         });
 
-    _testWithFrontend(null, 'pacman');
+    testWithFrontend(null, 'pacman');
 
-    _testWithFrontend('yay', 'yay');
+    testWithFrontend('yay', 'yay');
   });
 }

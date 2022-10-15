@@ -9,18 +9,18 @@ void main() {
     late Directory testDir;
     late Directory packageDir;
 
-    File _packageFile(String fileName) =>
+    File packageFile(String fileName) =>
         File.fromUri(packageDir.uri.resolve(fileName));
 
-    Future<void> _writePackages(String fileName, Iterable<String> lines) =>
-        _packageFile(fileName).writeAsString(lines.join('\n'));
+    Future<void> writePackages(String fileName, Iterable<String> lines) async =>
+        packageFile(fileName).writeAsString(lines.join('\n'));
 
-    Future<bool> _checkInstalled(String package) async {
+    Future<bool> checkInstalled(String package) async {
       final result = await Process.run('pacman', ['-Qi', package]);
       return result.exitCode == 0;
     }
 
-    Future<int> _runPaxchange(String machineName) async {
+    Future<int> runPaxchange(String machineName) async {
       final configFile = File.fromUri(testDir.uri.resolve('config.json'));
       await configFile.writeAsString(
         json.encode(
@@ -57,16 +57,16 @@ void main() {
     });
 
     test('installs needed packages', () async {
-      expect(await _checkInstalled('bash'), isTrue);
-      expect(await _checkInstalled('p7zip'), isFalse);
+      expect(await checkInstalled('bash'), isTrue);
+      expect(await checkInstalled('p7zip'), isFalse);
 
       const machineName = 'testMachine';
-      await _writePackages(machineName, const ['bash', 'p7zip']);
+      await writePackages(machineName, const ['bash', 'p7zip']);
 
-      await _runPaxchange(machineName);
+      await runPaxchange(machineName);
 
-      expect(await _checkInstalled('bash'), isTrue);
-      expect(await _checkInstalled('p7zip'), isTrue);
+      expect(await checkInstalled('bash'), isTrue);
+      expect(await checkInstalled('p7zip'), isTrue);
     });
   });
 }

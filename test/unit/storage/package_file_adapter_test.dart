@@ -35,10 +35,10 @@ void main() {
       await testDir.delete(recursive: true);
     });
 
-    File _packageFile(String name) => File.fromUri(testDir.uri.resolve(name));
+    File packageFile(String name) => File.fromUri(testDir.uri.resolve(name));
 
-    void _writeFile(String name, List<String> lines) =>
-        _packageFile(name).writeAsStringSync(lines.join('\n'));
+    void writeFile(String name, List<String> lines) =>
+        packageFile(name).writeAsStringSync(lines.join('\n'));
 
     group('loadPackageFile', () {
       test('returns empty stream if file does not exist', () {
@@ -53,7 +53,7 @@ void main() {
           'line-B',
           'line-C',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final stream = sut.loadPackageFile(fileName);
         expect(
@@ -74,7 +74,7 @@ void main() {
           '  \t    ',
           '    # line-C',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final stream = sut.loadPackageFile(fileName);
         expect(
@@ -95,8 +95,8 @@ void main() {
           'line-C',
         ];
         const lines2 = ['::import $fileName1'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
 
         final stream = sut.loadPackageFile(fileName2);
         expect(
@@ -132,10 +132,10 @@ void main() {
           '#::import $fileName1',
           '::import $fileName3',
         ];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
-        _writeFile(fileName4, lines4);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
+        writeFile(fileName4, lines4);
 
         final stream = sut.loadPackageFile(fileName4);
         expect(
@@ -152,7 +152,7 @@ void main() {
       test('throws exception if imported file cannot be found', () {
         const fileName1 = 'test-file';
         const lines1 = ['::import non-existent-file'];
-        _writeFile(fileName1, lines1);
+        writeFile(fileName1, lines1);
 
         final stream = sut.loadPackageFile(fileName1);
         expect(
@@ -187,9 +187,9 @@ void main() {
         const lines1 = ['::import $fileName3'];
         const lines2 = ['::import $fileName1'];
         const lines3 = ['::import $fileName2'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
 
         final stream = sut.loadPackageFile(fileName3);
         expect(
@@ -231,7 +231,7 @@ void main() {
           'line-B',
           'line-C',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final stream = sut.loadPackageFileHierarchy(fileName);
         expect(
@@ -245,7 +245,7 @@ void main() {
 
       test('imports other package files with simplified paths', () {
         final otherDir = Directory.systemTemp.createTempSync();
-        addTearDown(() => otherDir.delete(recursive: true));
+        addTearDown(() async => otherDir.delete(recursive: true));
 
         const fileName1 = 'test-file-1';
         const fileName2 = 'test-file-2';
@@ -263,11 +263,11 @@ void main() {
           '::import $fileName3',
           '::import ${relative(fileName4, from: testDir.path)}',
         ];
-        _writeFile(fileName1, lines1_2_3_4);
-        _writeFile(fileName2, lines1_2_3_4);
-        _writeFile(fileName3, lines1_2_3_4);
-        _writeFile(fileName4, lines1_2_3_4);
-        _writeFile(fileName5, lines5);
+        writeFile(fileName1, lines1_2_3_4);
+        writeFile(fileName2, lines1_2_3_4);
+        writeFile(fileName3, lines1_2_3_4);
+        writeFile(fileName4, lines1_2_3_4);
+        writeFile(fileName5, lines5);
 
         final stream = sut.loadPackageFileHierarchy(fileName5);
         expect(
@@ -307,10 +307,10 @@ void main() {
           '#::import $fileName1',
           '::import $fileName3',
         ];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
-        _writeFile(fileName4, lines4);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
+        writeFile(fileName4, lines4);
 
         final stream = sut.loadPackageFileHierarchy(fileName4);
         expect(
@@ -328,7 +328,7 @@ void main() {
       test('throws exception if imported file cannot be found', () {
         const fileName1 = 'test-file';
         const lines1 = ['::import non-existent-file'];
-        _writeFile(fileName1, lines1);
+        writeFile(fileName1, lines1);
 
         final stream = sut.loadPackageFileHierarchy(fileName1);
         expect(
@@ -364,9 +364,9 @@ void main() {
         const lines1 = ['::import $fileName3'];
         const lines2 = ['::import $fileName1'];
         const lines3 = ['::import $fileName2'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
 
         final stream = sut.loadPackageFileHierarchy(fileName3);
         expect(
@@ -406,23 +406,23 @@ void main() {
 
         await sut.ensurePackageFileExists(testMachineName);
 
-        expect(_packageFile(testMachineName).existsSync(), isTrue);
+        expect(packageFile(testMachineName).existsSync(), isTrue);
         expect(
-          _packageFile(testMachineName).lastModifiedSync().isAfter(now),
+          packageFile(testMachineName).lastModifiedSync().isAfter(now),
           isTrue,
         );
       });
 
       test('does nothing if file already exist', () async {
-        final createdFile = await _packageFile(testMachineName).create();
+        final createdFile = await packageFile(testMachineName).create();
         final createdTimeStamp = createdFile.lastModifiedSync();
         await Future<void>.delayed(const Duration(seconds: 1));
 
         await sut.ensurePackageFileExists(testMachineName);
 
-        expect(_packageFile(testMachineName).existsSync(), isTrue);
+        expect(packageFile(testMachineName).existsSync(), isTrue);
         expect(
-          _packageFile(testMachineName).lastModifiedSync(),
+          packageFile(testMachineName).lastModifiedSync(),
           createdTimeStamp,
         );
       });
@@ -436,7 +436,7 @@ void main() {
         await sut.addToPackageFile(testMachineName, testPackageName);
 
         expect(testDir.listSync(), hasLength(1));
-        final testFile = _packageFile(testMachineName);
+        final testFile = packageFile(testMachineName);
         expect(testFile.existsSync(), isTrue);
         expect(testFile.readAsLinesSync(), const [testPackageName]);
       });
@@ -450,7 +450,7 @@ void main() {
           'line3',
         ];
 
-        final testFile = _packageFile(testMachineName);
+        final testFile = packageFile(testMachineName);
         await testFile.writeAsString('${existingPackages.join('\n')}\n');
 
         await sut.addToPackageFile(testMachineName, testPackageName);
@@ -483,7 +483,7 @@ void main() {
           'line-B',
           'line-C',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final result = await sut.removeFromPackageFile(
           fileName,
@@ -491,7 +491,7 @@ void main() {
         );
 
         expect(result, isFalse);
-        expect(_packageFile(fileName).readAsLinesSync(), lines);
+        expect(packageFile(fileName).readAsLinesSync(), lines);
       });
 
       test('removes line from file and returns true', () async {
@@ -501,7 +501,7 @@ void main() {
           testPackageName,
           'line-C',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final result = await sut.removeFromPackageFile(
           fileName,
@@ -510,7 +510,7 @@ void main() {
 
         expect(result, isTrue);
         expect(
-          _packageFile(fileName).readAsLinesSync(),
+          packageFile(fileName).readAsLinesSync(),
           [lines[0], lines[2]],
         );
       });
@@ -524,7 +524,7 @@ void main() {
           '  \t    ',
           '   $testPackageName     ',
         ];
-        _writeFile(fileName, lines);
+        writeFile(fileName, lines);
 
         final result = await sut.removeFromPackageFile(
           fileName,
@@ -532,7 +532,7 @@ void main() {
         );
 
         expect(result, isTrue);
-        expect(_packageFile(fileName).readAsLinesSync(), lines.sublist(0, 4));
+        expect(packageFile(fileName).readAsLinesSync(), lines.sublist(0, 4));
       });
 
       test('searches package files recursively', () async {
@@ -550,9 +550,9 @@ void main() {
           testPackageName,
         ];
         const lines3 = ['::import $fileName2'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
 
         final result = await sut.removeFromPackageFile(
           fileName3,
@@ -560,15 +560,15 @@ void main() {
         );
 
         expect(result, isTrue);
-        expect(_packageFile(fileName3).readAsLinesSync(), lines3);
-        expect(_packageFile(fileName2).readAsLinesSync(), lines2);
-        expect(_packageFile(fileName1).readAsLinesSync(), lines1.sublist(0, 3));
+        expect(packageFile(fileName3).readAsLinesSync(), lines3);
+        expect(packageFile(fileName2).readAsLinesSync(), lines2);
+        expect(packageFile(fileName1).readAsLinesSync(), lines1.sublist(0, 3));
       });
 
-      test('throws exception if imported file cannot be found', () {
+      test('throws exception if imported file cannot be found', () async {
         const fileName1 = 'test-file';
         const lines1 = ['::import non-existent-file'];
-        _writeFile(fileName1, lines1);
+        writeFile(fileName1, lines1);
 
         expect(
           () => sut.removeFromPackageFile(fileName1, testPackageName),
@@ -592,16 +592,16 @@ void main() {
         );
       });
 
-      test('throws exception if circular import is detected', () {
+      test('throws exception if circular import is detected', () async {
         const fileName1 = 'test-file-1';
         const fileName2 = 'test-file-2';
         const fileName3 = 'test-file-3';
         const lines1 = ['::import $fileName3'];
         const lines2 = ['::import $fileName1'];
         const lines3 = ['::import $fileName2'];
-        _writeFile(fileName1, lines1);
-        _writeFile(fileName2, lines2);
-        _writeFile(fileName3, lines3);
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+        writeFile(fileName3, lines3);
 
         expect(
           () => sut.removeFromPackageFile(fileName3, testPackageName),

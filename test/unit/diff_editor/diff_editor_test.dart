@@ -50,7 +50,7 @@ void main() {
 
     late DiffEditor sut;
 
-    setUp(() {
+    setUp(() async {
       reset(mockPackageFileAdapter);
       reset(mockDiffFileAdapter);
       reset(mockPacman);
@@ -72,7 +72,7 @@ void main() {
     });
 
     @isTest
-    void _testZoned(String description, dynamic Function() body) => test(
+    void testZoned(String description, dynamic Function() body) => test(
           description,
           () => IOOverrides.runZoned<dynamic>(
             stdout: () => mockStdout,
@@ -81,7 +81,7 @@ void main() {
         );
 
     group('run', () {
-      setUp(() {
+      setUp(() async {
         when(() => mockStdout.hasTerminal).thenReturn(true);
         when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
         when(() => mockStdout.terminalColumns).thenReturn(80);
@@ -89,7 +89,8 @@ void main() {
         when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
       });
 
-      _testZoned('throws exception if console does not have a terminal', () {
+      testZoned('throws exception if console does not have a terminal',
+          () async {
         when(() => mockStdout.hasTerminal).thenReturn(false);
 
         expect(() => sut.run(testMachineName), throwsA(isException));
@@ -97,7 +98,7 @@ void main() {
         verify(() => mockStdout.hasTerminal);
       });
 
-      _testZoned('does nothing if no entries are present', () async {
+      testZoned('does nothing if no entries are present', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
 
         when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
@@ -116,7 +117,7 @@ void main() {
         verifyNoMoreInteractions(mockPackageSync);
       });
 
-      _testZoned('presents added diff entry', () async {
+      testZoned('presents added diff entry', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.added('package-1');
 
@@ -231,7 +232,7 @@ void main() {
         );
       });
 
-      _testZoned('presents removed diff entry for removed package', () async {
+      testZoned('presents removed diff entry for removed package', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.removed('package-1');
 
@@ -307,7 +308,7 @@ void main() {
         );
       });
 
-      _testZoned('presents removed diff entry for implicitly installed package',
+      testZoned('presents removed diff entry for implicitly installed package',
           () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.removed('package-1');
@@ -384,7 +385,7 @@ void main() {
         );
       });
 
-      _testZoned('aborts early if a command returns false', () async {
+      testZoned('aborts early if a command returns false', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntries = [
           DiffEntry.removed('package-1'),

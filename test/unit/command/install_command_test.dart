@@ -30,7 +30,7 @@ void main() {
 
     late TestableInstallCommand sut;
 
-    setUp(() {
+    setUp(() async {
       reset(mockArgResults);
       reset(mockConfig);
       reset(mockPackageInstall);

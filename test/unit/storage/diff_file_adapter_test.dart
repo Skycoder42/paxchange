@@ -20,7 +20,7 @@ void main() {
       await testDir.delete(recursive: true);
     });
 
-    void _writeFile(String name, Iterable<String> lines) =>
+    void writeFile(String name, Iterable<String> lines) =>
         File.fromUri(testDir.uri.resolve('$name.pcs'))
             .writeAsStringSync(lines.join('\n'));
 
@@ -39,7 +39,7 @@ void main() {
           DiffEntry.added('line4'),
           DiffEntry.removed('line5'),
         ];
-        _writeFile(fileName, diffEntries.map((e) => e.encode()));
+        writeFile(fileName, diffEntries.map((e) => e.encode()));
 
         final stream = sut.loadPackageDiff(fileName);
         expect(
@@ -53,7 +53,7 @@ void main() {
 
       test('throws exception if diff contains invalid data', () {
         const fileName = 'test-file';
-        _writeFile(fileName, const ['invalid-entry']);
+        writeFile(fileName, const ['invalid-entry']);
 
         final stream = sut.loadPackageDiff(fileName);
         expect(
@@ -77,7 +77,7 @@ void main() {
 
       test('deletes file if diff is empty and files exist', () async {
         const fileName = 'test-file';
-        _writeFile(fileName, const []);
+        writeFile(fileName, const []);
 
         await sut.savePackageDiff(fileName, const {});
 
@@ -94,7 +94,7 @@ void main() {
           const DiffEntry.added('line4'),
           const DiffEntry.removed('line5'),
         };
-        _writeFile(fileName, const []);
+        writeFile(fileName, const []);
 
         await sut.savePackageDiff(fileName, diffEntries);
 

@@ -30,7 +30,7 @@ void main() {
 
     late TestableReviewCommand sut;
 
-    setUp(() {
+    setUp(() async {
       reset(mockArgResults);
       reset(mockConfig);
       reset(mockDiffEditor);

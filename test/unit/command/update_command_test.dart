@@ -64,7 +64,7 @@ void main() {
     group('run', () {
       test(
         'calls packageSync.updatePackageDiff',
-        () => IOOverrides.runZoned(
+        () async => IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
@@ -84,7 +84,7 @@ void main() {
 
       test(
         'returns 0 even if packages did change and write to stdout',
-        () => IOOverrides.runZoned(
+        () async => IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
@@ -107,7 +107,7 @@ void main() {
 
       test(
         'returns 2 if packages did change with option specified',
-        () => IOOverrides.runZoned(
+        () async => IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(true);

@@ -15,16 +15,16 @@ void main() {
     late List<String> base4;
     final base5 = List.generate(10, (index) => 'fake-package-$index');
 
-    File _packageFile(String fileName) =>
+    File packageFile(String fileName) =>
         File.fromUri(packageDir.uri.resolve(fileName));
 
-    Future<void> _writePackages(String fileName, Iterable<String> lines) =>
-        _packageFile(fileName).writeAsString(lines.join('\n'));
+    Future<void> writePackages(String fileName, Iterable<String> lines) async =>
+        packageFile(fileName).writeAsString(lines.join('\n'));
 
-    Future<List<String>> _readPackages(String fileName) =>
-        _packageFile(fileName).readAsLines();
+    Future<List<String>> readPackages(String fileName) async =>
+        packageFile(fileName).readAsLines();
 
-    Future<int> _runPaxchange(String machineName) async {
+    Future<int> runPaxchange(String machineName) async {
       final configFile = File.fromUri(testDir.uri.resolve('config.json'));
       await configFile.writeAsString(
         json.encode(
@@ -62,19 +62,19 @@ void main() {
       base3 = packages.sublist(oneFourth * 2, oneFourth * 3);
       base4 = packages.sublist(oneFourth * 3);
 
-      await _writePackages('base1', base1);
-      await _writePackages('base2', base2);
-      await _writePackages('base_all', [
+      await writePackages('base1', base1);
+      await writePackages('base2', base2);
+      await writePackages('base_all', [
         '::import base1',
         ...base3,
         '# other important packages',
         '::import ${packageDir.absolute.uri.resolve('base2').toFilePath()}',
       ]);
-      await _writePackages('machine-1', [
+      await writePackages('machine-1', [
         '::import base_all',
         ...base4,
       ]);
-      await _writePackages('machine-2', [
+      await writePackages('machine-2', [
         '::import base_all',
         ...base5,
       ]);
@@ -85,40 +85,40 @@ void main() {
     });
 
     test('generates no changes by default', () async {
-      final result = await _runPaxchange('machine-1');
+      final result = await runPaxchange('machine-1');
 
       expect(result, 0);
 
       final files = await packageDir.list().toList();
       expect(files, hasLength(5));
-      expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
+      expect(packageFile('machine-1.pcs').existsSync(), isFalse);
     });
 
     test('discards changes if no changes are actually left', () async {
-      await _writePackages('machine-1.pcs', <String>[
+      await writePackages('machine-1.pcs', <String>[
         ...base3.map((package) => '-$package'),
         ...base5.map((package) => '+$package'),
       ]);
 
-      final result = await _runPaxchange('machine-1');
+      final result = await runPaxchange('machine-1');
 
       expect(result, 0);
 
       final files = await packageDir.list().toList();
       expect(files, hasLength(5));
-      expect(_packageFile('machine-1.pcs').existsSync(), isFalse);
+      expect(packageFile('machine-1.pcs').existsSync(), isFalse);
     });
 
     test('generates changes if packages are different', () async {
-      final result = await _runPaxchange('machine-2');
+      final result = await runPaxchange('machine-2');
 
       expect(result, 2);
 
       final files = await packageDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
+      expect(packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
-        await _readPackages('machine-2.pcs'),
+        await readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
           ...base4.map((package) => '+$package'),
           ...base5.map((package) => '-$package'),
@@ -129,20 +129,20 @@ void main() {
     test(
         'detects changes but does not modify them '
         'if changes are already stored in pcs file', () async {
-      await _writePackages('machine-2.pcs', <String>[
+      await writePackages('machine-2.pcs', <String>[
         ...base4.map((package) => '+$package'),
         ...base5.map((package) => '-$package'),
       ]);
 
-      final result = await _runPaxchange('machine-2');
+      final result = await runPaxchange('machine-2');
 
       expect(result, 2);
 
       final files = await packageDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
+      expect(packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
-        await _readPackages('machine-2.pcs'),
+        await readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
           ...base4.map((package) => '+$package'),
           ...base5.map((package) => '-$package'),
@@ -151,20 +151,20 @@ void main() {
     });
 
     test('updates changes if changes in pcs file are not accurate', () async {
-      await _writePackages('machine-2.pcs', <String>[
+      await writePackages('machine-2.pcs', <String>[
         ...base1.map((package) => '-$package'),
         ...base5.map((package) => '+$package-dev'),
       ]);
 
-      final result = await _runPaxchange('machine-2');
+      final result = await runPaxchange('machine-2');
 
       expect(result, 2);
 
       final files = await packageDir.list().toList();
       expect(files, hasLength(6));
-      expect(_packageFile('machine-2.pcs').existsSync(), isTrue);
+      expect(packageFile('machine-2.pcs').existsSync(), isTrue);
       expect(
-        await _readPackages('machine-2.pcs'),
+        await readPackages('machine-2.pcs'),
         unorderedEquals(<String>[
           ...base4.map((package) => '+$package'),
           ...base5.map((package) => '-$package'),
