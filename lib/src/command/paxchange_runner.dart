@@ -25,7 +25,7 @@ class PaxchangeRunner extends CommandRunner<int> {
         ) {
     _providerContainer = ProviderContainer(
       overrides: [
-        configProvider.overrideWithProvider(configProvider),
+        configProvider.overrideWith((ref) => ref.watch(configProvider)),
       ],
     );
 
