@@ -48,3 +48,6 @@ aur:
       target: /usr/lib/sysusers.d/paxchange.conf
   backup:
     - etc/paxchange.json
+
+dart_pre_commit:
+  flutter-compat: false
