@@ -119,7 +119,7 @@ packages:
       name: cider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.4"
+    version: "0.1.5"
   clock:
     dependency: transitive
     description:
