@@ -1,13 +1,10 @@
-name: Continous Integration and Deployment
+name: Continuous Integration and Deployment
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - "*"
-  pull_request:
-    branches:
-      - "*"
+      - "**"
 
 jobs:
   ci:
@@ -20,7 +17,6 @@ jobs:
       coverageExclude: >-
         "**.freezed.dart"
         "**.g.dart"
-      platforms: '["linux"]'
 
   integration_tests:
     name: Integration tests
@@ -48,8 +44,6 @@ jobs:
     uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
     with:
       buildRunner: true
-      targets: '["paxchange"]'
-      platforms: '["linux"]'
 
   aur:
     name: AUR
