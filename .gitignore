@@ -26,3 +26,5 @@ lib/gen/
 
 # AUR stuff
 aur/
+
+*.log

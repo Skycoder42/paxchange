@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_lambdas
+
 import 'dart:collection';
 
 import 'package:dart_test_tools/test.dart';
