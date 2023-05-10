@@ -48,8 +48,7 @@ jobs:
     name: AUR
     needs:
       - cd
+    if: needs.cd.outputs.releaseCreated == 'true'
     uses: Skycoder42/dart_test_tools/.github/workflows/aur.yml@main
-    with:
-      createAurUpdate: ${{ needs.cd.outputs.releaseCreated == 'true' }}
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
