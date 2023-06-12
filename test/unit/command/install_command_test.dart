@@ -17,7 +17,7 @@ class TestableInstallCommand extends InstallCommand {
   @override
   ArgResults? argResults;
 
-  TestableInstallCommand(super.providerContainer);
+  TestableInstallCommand(super._providerContainer);
 }
 
 void main() {

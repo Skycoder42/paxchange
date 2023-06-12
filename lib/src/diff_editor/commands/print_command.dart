@@ -34,10 +34,8 @@ class PrintCommand extends PromptCommand {
     switch (printTarget) {
       case PrintTarget.local:
         packageStream = _pacman.queryInstalledPackage(packageName);
-        break;
       case PrintTarget.remote:
         packageStream = _pacman.queryUninstalledPackage(packageName);
-        break;
     }
 
     console.clearScreen();

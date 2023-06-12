@@ -20,7 +20,7 @@ class TestableUpdateCommand extends UpdateCommand {
   @override
   ArgResults? argResults;
 
-  TestableUpdateCommand(super.providerContainer);
+  TestableUpdateCommand(super._providerContainer);
 }
 
 void main() {

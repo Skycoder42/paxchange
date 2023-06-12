@@ -17,7 +17,7 @@ class TestableReviewCommand extends ReviewCommand {
   @override
   ArgResults? argResults;
 
-  TestableReviewCommand(super.providerContainer);
+  TestableReviewCommand(super._providerContainer);
 }
 
 void main() {
