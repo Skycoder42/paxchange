@@ -269,10 +269,10 @@ packages:
     dependency: "direct dev"
     description:
       name: dart_test_tools
-      sha256: be108ed7ab193e2ba68b2b4e0a0afa1b42535d0e49627be8f17e54929b9dedc7
+      sha256: "50169b918aac2b08ca249522aaca7a29b46153e4d84ca19018987cfdbdf3fc0e"
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.0"
+    version: "5.3.0"
   dotenv:
     dependency: transitive
     description:
@@ -469,10 +469,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mocktail
-      sha256: "80a996cd9a69284b3dc521ce185ffe9150cde69767c2d3a0720147d93c0cef53"
+      sha256: "9503969a7c2c78c7292022c70c0289ed6241df7a9ba720010c0b215af29a5a58"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "1.0.0"
   node_preamble:
     dependency: transitive
     description:
