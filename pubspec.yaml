@@ -1,6 +1,6 @@
 name: paxchange
 description: Simple dart script to passively synchronize installed pacman packages between systems.
-version: 1.2.3
+version: 1.2.4
 homepage: https://github.com/Skycoder42/paxchange
 publish_to: none
 
