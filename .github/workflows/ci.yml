@@ -27,7 +27,7 @@ jobs:
       - name: Install Dart-SDK
         run: pacman -Sy --noconfirm dart
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Restore dart packages
         run: dart pub get
       - name: Create build files
