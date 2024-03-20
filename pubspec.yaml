@@ -38,7 +38,6 @@ aur:
   license: BSD
   depends:
     - pacman
-  testArgs: --preset unit
   install: deploy/aur/paxchange.install
   files:
     - source: deploy/aur/config.json
