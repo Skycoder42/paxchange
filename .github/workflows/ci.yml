@@ -27,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     container: archlinux:base-devel
     steps:
+      - name: Install unzip
+        run: pacman -Sy --noconfirm unzip
       - name: Install Dart-SDK
         uses: dart-lang/setup-dart@v1
       - name: Checkout repository
