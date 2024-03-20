@@ -28,7 +28,7 @@ jobs:
     container: archlinux:base-devel
     steps:
       - name: Install Dart-SDK
-        run: pacman -Sy --noconfirm dart
+        uses: dart-lang/setup-dart@v1
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Restore dart packages

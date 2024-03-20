@@ -1,4 +1,4 @@
-import 'package:dart_console/dart_console.dart';
+import 'package:dart_console2/dart_console2.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../pacman/pacman.dart';
