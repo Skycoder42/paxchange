@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'config.dart';
 import 'diff_entry.dart';
@@ -8,14 +9,15 @@ import 'pacman/pacman.dart';
 import 'storage/diff_file_adapter.dart';
 import 'storage/package_file_adapter.dart';
 
+part 'package_sync.g.dart';
+
 // coverage:ignore-start
-final packageSyncProvider = Provider(
-  (ref) => PackageSync(
-    ref.watch(configProvider).rootPackageFile,
-    ref.watch(packageFileAdapterProvider),
-    ref.watch(diffFileAdapterProvider),
-    ref.watch(pacmanProvider),
-  ),
+@riverpod
+PackageSync packageSync(Ref ref) => PackageSync(
+  ref.watch(configProvider).rootPackageFile,
+  ref.watch(packageFileAdapterProvider),
+  ref.watch(diffFileAdapterProvider),
+  ref.watch(pacmanProvider),
 );
 // coverage:ignore-end
 

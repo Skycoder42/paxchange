@@ -3,16 +3,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config.dart';
 import '../util/process_wrapper.dart';
 
+part 'pacman.g.dart';
+
 // coverage:ignore-start
-final pacmanProvider = Provider(
-  (ref) => Pacman(
-    ref.watch(processProvider),
-    ref.watch(configProvider).pacmanFrontend,
-  ),
+@riverpod
+Pacman pacman(Ref ref) => Pacman(
+  ref.watch(processProvider),
+  ref.watch(configProvider).pacmanFrontend,
 );
 // coverage:ignore-end
 
@@ -35,10 +37,10 @@ class Pacman {
       _streamPacmanLines(const ['-Qqe']);
 
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
-    final pacmanProc = await _process.start(
-      _pacmanFrontend ?? 'pacman',
-      ['-Qqi', packageName],
-    );
+    final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', [
+      '-Qqi',
+      packageName,
+    ]);
     await pacmanProc.stdout.drain<void>();
     await pacmanProc.stderr.drain<void>();
     return (await pacmanProc.exitCode) == 0;
@@ -54,13 +56,12 @@ class Pacman {
     List<String> packageNames, {
     bool onlyNeeded = false,
     bool noConfirm = false,
-  }) =>
-      _executePacmanInteractive([
-        '-S',
-        if (onlyNeeded) '--needed',
-        if (noConfirm) '--noconfirm',
-        ...packageNames,
-      ]);
+  }) => _executePacmanInteractive([
+    '-S',
+    if (onlyNeeded) '--needed',
+    if (noConfirm) '--noconfirm',
+    ...packageNames,
+  ]);
 
   Future<int> removePackage(String packageName) =>
       _executePacmanInteractive(['-R', packageName]);
@@ -68,14 +69,10 @@ class Pacman {
   Future<int> changePackageInstallReason(
     String packageName,
     InstallReason installReason,
-  ) =>
-      _executePacmanInteractive(['-D', installReason.flag, packageName]);
+  ) => _executePacmanInteractive(['-D', installReason.flag, packageName]);
 
   Stream<String> _streamPacmanLines(List<String> query) async* {
-    final pacmanProc = await _process.start(
-      _pacmanFrontend ?? 'pacman',
-      query,
-    );
+    final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', query);
 
     final stderrAdded = stderr.addStream(pacmanProc.stderr);
     try {

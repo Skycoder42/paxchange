@@ -1,13 +1,13 @@
-import 'dart:async';
-
 import 'package:dart_console/dart_console.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'commands/prompt_command.dart';
 
+part 'prompter.g.dart';
+
 // coverage:ignore-start
-final prompterProvider = Provider(
-  (ref) => const Prompter(),
-);
+@riverpod
+Prompter prompter(Ref ref) => const Prompter();
 // coverage:ignore-end
 
 class Prompter {

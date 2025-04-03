@@ -47,15 +47,11 @@ class AddHistoryCommand extends UpdateHistoryCommand {
   static List<AddHistoryCommand> generate(
     PackageFileAdapter packageFileAdapter,
     List<String> machineHierarchy,
-  ) =>
-      List.generate(
-        machineHierarchy.length,
-        (index) => AddHistoryCommand(
-          packageFileAdapter,
-          index,
-          machineHierarchy[index],
-        ),
-      );
+  ) => List.generate(
+    machineHierarchy.length,
+    (index) =>
+        AddHistoryCommand(packageFileAdapter, index, machineHierarchy[index]),
+  );
 
   @override
   String get key => index.toString();
@@ -68,17 +64,14 @@ class AddHistoryCommand extends UpdateHistoryCommand {
 
   @override
   Future<void> updateHistory(String packageName) =>
-      packageFileAdapter.addToPackageFile(machineName, packageName);
+      super.packageFileAdapter.addToPackageFile(machineName, packageName);
 }
 
 class RemoveHistoryCommand extends UpdateHistoryCommand {
   @override
   final String machineName;
 
-  const RemoveHistoryCommand(
-    super.packageFileAdapter,
-    this.machineName,
-  );
+  const RemoveHistoryCommand(super.packageFileAdapter, this.machineName);
 
   @override
   String get key => 'd';
@@ -91,5 +84,5 @@ class RemoveHistoryCommand extends UpdateHistoryCommand {
 
   @override
   Future<void> updateHistory(String packageName) =>
-      packageFileAdapter.removeFromPackageFile(machineName, packageName);
+      super.packageFileAdapter.removeFromPackageFile(machineName, packageName);
 }

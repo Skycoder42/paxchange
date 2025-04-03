@@ -62,7 +62,7 @@ class InstallCommand extends PacmanCommand {
   @override
   @protected
   Future<int> runPacman(String packageName) =>
-      pacman.installPackages([packageName]);
+      super.pacman.installPackages([packageName]);
 }
 
 class RemoveCommand extends PacmanCommand {
@@ -81,7 +81,7 @@ class RemoveCommand extends PacmanCommand {
   @override
   @protected
   Future<int> runPacman(String packageName) =>
-      pacman.removePackage(packageName);
+      super.pacman.removePackage(packageName);
 }
 
 class MarkImplicitlyInstalledCommand extends PacmanCommand {
@@ -99,8 +99,8 @@ class MarkImplicitlyInstalledCommand extends PacmanCommand {
 
   @override
   @protected
-  Future<int> runPacman(String packageName) =>
-      pacman.changePackageInstallReason(packageName, InstallReason.asDeps);
+  Future<int> runPacman(String packageName) => super.pacman
+      .changePackageInstallReason(packageName, InstallReason.asDeps);
 }
 
 class MarkExplicitlyInstalledCommand extends PacmanCommand {
@@ -118,6 +118,6 @@ class MarkExplicitlyInstalledCommand extends PacmanCommand {
 
   @override
   @protected
-  Future<int> runPacman(String packageName) =>
-      pacman.changePackageInstallReason(packageName, InstallReason.asExplicit);
+  Future<int> runPacman(String packageName) => super.pacman
+      .changePackageInstallReason(packageName, InstallReason.asExplicit);
 }

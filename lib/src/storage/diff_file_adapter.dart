@@ -2,16 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config.dart';
 import '../diff_entry.dart';
 
+part 'diff_file_adapter.g.dart';
+
 // coverage:ignore-start
-final diffFileAdapterProvider = Provider(
-  (ref) => DiffFileAdapter(
-    ref.watch(configProvider).storageDirectory,
-  ),
-);
+@riverpod
+DiffFileAdapter diffFileAdapter(Ref ref) =>
+    DiffFileAdapter(ref.watch(configProvider).storageDirectory);
 // coverage:ignore-end
 
 class DiffFileAdapter {
@@ -29,10 +30,7 @@ class DiffFileAdapter {
     }
   }
 
-  Future<void> savePackageDiff(
-    String host,
-    Set<DiffEntry> diffEntries,
-  ) async {
+  Future<void> savePackageDiff(String host, Set<DiffEntry> diffEntries) async {
     await _storageDirectory.create(recursive: true);
 
     final diffFile = _diffFile(host);
@@ -56,9 +54,8 @@ class DiffFileAdapter {
     }
   }
 
-  File _diffFile(String host) => File.fromUri(
-        _storageDirectory.uri.resolve('$host.pcs'),
-      );
+  File _diffFile(String host) =>
+      File.fromUri(_storageDirectory.uri.resolve('$host.pcs'));
 
   Stream<DiffEntry> _readDiffFile(File diffFile) {
     assert(diffFile.existsSync(), '$diffFile must exist');

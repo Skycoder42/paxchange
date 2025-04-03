@@ -1,6 +1,8 @@
 import 'package:dart_console/dart_console.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../diff_entry.dart';
 import '../package_sync.dart';
 import '../pacman/pacman.dart';
 import '../storage/diff_file_adapter.dart';
@@ -13,15 +15,16 @@ import 'commands/skip_command.dart';
 import 'commands/update_history_command.dart';
 import 'prompter.dart';
 
+part 'diff_editor.g.dart';
+
 // coverage:ignore-start
-final diffEditorProvider = Provider(
-  (ref) => DiffEditor(
-    ref.read(packageFileAdapterProvider),
-    ref.read(diffFileAdapterProvider),
-    ref.read(pacmanProvider),
-    ref.read(packageSyncProvider),
-    ref.read(prompterProvider),
-  ),
+@riverpod
+DiffEditor diffEditor(Ref ref) => DiffEditor(
+  ref.read(packageFileAdapterProvider),
+  ref.read(diffFileAdapterProvider),
+  ref.read(pacmanProvider),
+  ref.read(packageSyncProvider),
+  ref.read(prompterProvider),
 );
 // coverage:ignore-end
 
@@ -49,17 +52,24 @@ class DiffEditor {
 
     await _packageFileAdapter.ensurePackageFileExists(machineName);
 
-    final machineHierarchy = await _packageFileAdapter
-        .loadPackageFileHierarchy(machineName)
-        .toList();
+    final machineHierarchy =
+        await _packageFileAdapter
+            .loadPackageFileHierarchy(machineName)
+            .toList();
     final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
     var didModify = false;
     await for (final diffEntry in diffEntries) {
-      final entryResult = await diffEntry.when(
-        added: (package) => _presentAdded(package, machineHierarchy),
-        removed: (package) => _presentRemoved(package, machineName),
-      );
+      final entryResult = await switch (diffEntry) {
+        DiffAddedEntry(:final package) => _presentAdded(
+          package,
+          machineHierarchy,
+        ),
+        DiffRemovedEntry(:final package) => _presentRemoved(
+          package,
+          machineName,
+        ),
+      };
 
       didModify = didModify || entryResult.didModify;
       if (entryResult.stopProcessing) {

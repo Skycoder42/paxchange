@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'util/directory_json_converter.dart';
 
@@ -9,11 +10,9 @@ part 'config.freezed.dart';
 part 'config.g.dart';
 
 // coverage:ignore-start
-final configProvider = Provider<Config>(
-  (ref) => throw StateError(
-    'configProvider must be overridden with a valid config',
-  ),
-);
+@riverpod
+Config config(Ref ref) =>
+    throw StateError('configProvider must be overridden with a valid config');
 // coverage:ignore-end
 
 @freezed

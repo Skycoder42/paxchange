@@ -3,10 +3,14 @@
 import 'dart:io';
 
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final processProvider = Provider(
-  (ref) => const ProcessWrapper(),
-);
+part 'process_wrapper.g.dart';
+
+// coverage:ignore-start
+@riverpod
+ProcessWrapper process(Ref ref) => const ProcessWrapper();
+// coverage:ignore-end
 
 class ProcessWrapper {
   const ProcessWrapper();
@@ -15,10 +19,5 @@ class ProcessWrapper {
     String executable,
     List<String> arguments, {
     ProcessStartMode mode = ProcessStartMode.normal,
-  }) =>
-      Process.start(
-        executable,
-        arguments,
-        mode: mode,
-      );
+  }) => Process.start(executable, arguments, mode: mode);
 }

@@ -3,15 +3,16 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config.dart';
 
+part 'package_file_adapter.g.dart';
+
 // coverage:ignore-start
-final packageFileAdapterProvider = Provider(
-  (ref) => PackageFileAdapter(
-    ref.watch(configProvider).storageDirectory,
-  ),
-);
+@riverpod
+PackageFileAdapter packageFileAdapter(Ref ref) =>
+    PackageFileAdapter(ref.watch(configProvider).storageDirectory);
 // coverage:ignore-end
 
 class LoadPackageFailure implements Exception {
@@ -78,10 +79,7 @@ class PackageFileAdapter {
     }
   }
 
-  Future<bool> removeFromPackageFile(
-    String machineName,
-    String package,
-  ) async {
+  Future<bool> removeFromPackageFile(String machineName, String package) async {
     final packageFile = _packageFile(machineName);
     if (!packageFile.existsSync()) {
       return false;
@@ -114,9 +112,8 @@ class PackageFileAdapter {
     return true;
   }
 
-  File _packageFile(String machineName) => File.fromUri(
-        _storageDirectory.uri.resolve(machineName),
-      );
+  File _packageFile(String machineName) =>
+      File.fromUri(_storageDirectory.uri.resolve(machineName));
 
   Stream<String> _streamPackageFile(
     File packageFile,
@@ -209,9 +206,7 @@ class PackageFileAdapter {
   }
 
   File _findPackageFile(String fileName, Iterable<String> history) {
-    final packageFile = File.fromUri(
-      _storageDirectory.uri.resolve(fileName),
-    );
+    final packageFile = File.fromUri(_storageDirectory.uri.resolve(fileName));
 
     if (!packageFile.existsSync()) {
       throw LoadPackageFailure(
@@ -224,10 +219,7 @@ class PackageFileAdapter {
     return packageFile;
   }
 
-  Stream<String> _streamLines(
-    File packageFile, {
-    bool autoTrim = true,
-  }) {
+  Stream<String> _streamLines(File packageFile, {bool autoTrim = true}) {
     final rawLines = packageFile
         .openRead()
         .transform(utf8.decoder)

@@ -15,8 +15,8 @@ class DecodingFailure implements Exception {
 sealed class DiffEntry with _$DiffEntry implements Comparable<DiffEntry> {
   const DiffEntry._();
 
-  const factory DiffEntry.added(String package) = _Added;
-  const factory DiffEntry.removed(String package) = _Removed;
+  const factory DiffEntry.added(String package) = DiffAddedEntry;
+  const factory DiffEntry.removed(String package) = DiffRemovedEntry;
 
   factory DiffEntry.decode(String line) {
     switch (line.substring(0, 1)) {
@@ -29,10 +29,10 @@ sealed class DiffEntry with _$DiffEntry implements Comparable<DiffEntry> {
     }
   }
 
-  String encode() => when(
-        added: (package) => '+$package',
-        removed: (package) => '-$package',
-      );
+  String encode() => switch (this) {
+    DiffAddedEntry(:final package) => '+$package',
+    DiffRemovedEntry(:final package) => '-$package',
+  };
 
   @override
   int compareTo(DiffEntry other) => package.compareTo(other.package);
