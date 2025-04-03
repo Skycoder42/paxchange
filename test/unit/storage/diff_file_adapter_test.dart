@@ -20,9 +20,9 @@ void main() {
       await testDir.delete(recursive: true);
     });
 
-    void writeFile(String name, Iterable<String> lines) =>
-        File.fromUri(testDir.uri.resolve('$name.pcs'))
-            .writeAsStringSync(lines.join('\n'));
+    void writeFile(String name, Iterable<String> lines) => File.fromUri(
+      testDir.uri.resolve('$name.pcs'),
+    ).writeAsStringSync(lines.join('\n'));
 
     group('loadPackageDiff', () {
       test('returns empty stream if file does not exist', () {
@@ -42,13 +42,7 @@ void main() {
         writeFile(fileName, diffEntries.map((e) => e.encode()));
 
         final stream = sut.loadPackageDiff(fileName);
-        expect(
-          stream,
-          emitsInOrder(<dynamic>[
-            ...diffEntries,
-            emitsDone,
-          ]),
-        );
+        expect(stream, emitsInOrder(<dynamic>[...diffEntries, emitsDone]));
       });
 
       test('throws exception if diff contains invalid data', () {
@@ -84,30 +78,32 @@ void main() {
         expect(testDir.listSync(), isEmpty);
       });
 
-      test('writes diff file with changes and replaces existing file',
-          () async {
-        const fileName = 'test-file';
-        final diffEntries = {
-          const DiffEntry.added('line1'),
-          const DiffEntry.added('line2'),
-          const DiffEntry.removed('line3'),
-          const DiffEntry.added('line4'),
-          const DiffEntry.removed('line5'),
-        };
-        writeFile(fileName, const []);
+      test(
+        'writes diff file with changes and replaces existing file',
+        () async {
+          const fileName = 'test-file';
+          final diffEntries = {
+            const DiffEntry.added('line1'),
+            const DiffEntry.added('line2'),
+            const DiffEntry.removed('line3'),
+            const DiffEntry.added('line4'),
+            const DiffEntry.removed('line5'),
+          };
+          writeFile(fileName, const []);
 
-        await sut.savePackageDiff(fileName, diffEntries);
+          await sut.savePackageDiff(fileName, diffEntries);
 
-        expect(testDir.listSync(), hasLength(1));
+          expect(testDir.listSync(), hasLength(1));
 
-        final testFile = File.fromUri(testDir.uri.resolve('$fileName.pcs'));
-        expect(testFile.existsSync(), isTrue);
+          final testFile = File.fromUri(testDir.uri.resolve('$fileName.pcs'));
+          expect(testFile.existsSync(), isTrue);
 
-        expect(
-          testFile.readAsLinesSync(),
-          unorderedEquals(diffEntries.map<String>((e) => e.encode())),
-        );
-      });
+          expect(
+            testFile.readAsLinesSync(),
+            unorderedEquals(diffEntries.map<String>((e) => e.encode())),
+          );
+        },
+      );
     });
   });
 }

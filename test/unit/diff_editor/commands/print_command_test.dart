@@ -26,13 +26,10 @@ void main() {
 
     test('local prints local package status', () async {
       const testPackageName = 'test-package';
-      const packageInfo = [
-        'line-1',
-        'line-2',
-        'line-3',
-      ];
-      when(() => mockPacman.queryInstalledPackage(any()))
-          .thenStream(Stream.fromIterable(packageInfo));
+      const packageInfo = ['line-1', 'line-2', 'line-3'];
+      when(
+        () => mockPacman.queryInstalledPackage(any()),
+      ).thenStream(Stream.fromIterable(packageInfo));
 
       final sut = PrintCommand.local(mockPacman);
 
@@ -53,13 +50,10 @@ void main() {
 
     test('remote prints remote package status', () async {
       const testPackageName = 'test-package';
-      const packageInfo = [
-        'line-1',
-        'line-2',
-        'line-3',
-      ];
-      when(() => mockPacman.queryUninstalledPackage(any()))
-          .thenStream(Stream.fromIterable(packageInfo));
+      const packageInfo = ['line-1', 'line-2', 'line-3'];
+      when(
+        () => mockPacman.queryUninstalledPackage(any()),
+      ).thenStream(Stream.fromIterable(packageInfo));
 
       final sut = PrintCommand.remote(mockPacman);
 

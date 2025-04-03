@@ -50,13 +50,8 @@ void main() {
           () => mockPacman.installPackages(const [testPackageName]),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('install'),
-                    contains(testPackageName),
-                  ),
-                ),
-              ),
+            any(that: allOf(contains('install'), contains(testPackageName))),
+          ),
           () => mockConsole.readKey(),
         ]);
 
@@ -76,14 +71,14 @@ void main() {
           () => mockConsole.setForegroundColor(ConsoleColor.red),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('install'),
-                    contains(testPackageName),
-                    contains('exit code 10'),
-                  ),
-                ),
+            any(
+              that: allOf(
+                contains('install'),
+                contains(testPackageName),
+                contains('exit code 10'),
               ),
+            ),
+          ),
           () => mockConsole.resetColorAttributes(),
         ]);
 
@@ -125,13 +120,8 @@ void main() {
           () => mockPacman.removePackage(testPackageName),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('uninstall'),
-                    contains(testPackageName),
-                  ),
-                ),
-              ),
+            any(that: allOf(contains('uninstall'), contains(testPackageName))),
+          ),
           () => mockConsole.readKey(),
         ]);
 
@@ -151,14 +141,14 @@ void main() {
           () => mockConsole.setForegroundColor(ConsoleColor.red),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('uninstall'),
-                    contains(testPackageName),
-                    contains('exit code 10'),
-                  ),
-                ),
+            any(
+              that: allOf(
+                contains('uninstall'),
+                contains(testPackageName),
+                contains('exit code 10'),
               ),
+            ),
+          ),
           () => mockConsole.resetColorAttributes(),
         ]);
 
@@ -191,26 +181,22 @@ void main() {
       test('runs pacman and prints success message', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.changePackageInstallReason(any(), any()))
-            .thenReturnAsync(0);
+        when(
+          () => mockPacman.changePackageInstallReason(any(), any()),
+        ).thenReturnAsync(0);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.changePackageInstallReason(
-                testPackageName,
-                InstallReason.asDeps,
-              ),
+            testPackageName,
+            InstallReason.asDeps,
+          ),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('mark'),
-                    contains(testPackageName),
-                  ),
-                ),
-              ),
+            any(that: allOf(contains('mark'), contains(testPackageName))),
+          ),
           () => mockConsole.readKey(),
         ]);
 
@@ -220,28 +206,29 @@ void main() {
       test('runs pacman and prints error message if pacman fails', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.changePackageInstallReason(any(), any()))
-            .thenReturnAsync(10);
+        when(
+          () => mockPacman.changePackageInstallReason(any(), any()),
+        ).thenReturnAsync(10);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.changePackageInstallReason(
-                testPackageName,
-                InstallReason.asDeps,
-              ),
+            testPackageName,
+            InstallReason.asDeps,
+          ),
           () => mockConsole.setForegroundColor(ConsoleColor.red),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('mark'),
-                    contains(testPackageName),
-                    contains('exit code 10'),
-                  ),
-                ),
+            any(
+              that: allOf(
+                contains('mark'),
+                contains(testPackageName),
+                contains('exit code 10'),
               ),
+            ),
+          ),
           () => mockConsole.resetColorAttributes(),
         ]);
 
@@ -274,26 +261,22 @@ void main() {
       test('runs pacman and prints success message', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.changePackageInstallReason(any(), any()))
-            .thenReturnAsync(0);
+        when(
+          () => mockPacman.changePackageInstallReason(any(), any()),
+        ).thenReturnAsync(0);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.changePackageInstallReason(
-                testPackageName,
-                InstallReason.asExplicit,
-              ),
+            testPackageName,
+            InstallReason.asExplicit,
+          ),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('mark'),
-                    contains(testPackageName),
-                  ),
-                ),
-              ),
+            any(that: allOf(contains('mark'), contains(testPackageName))),
+          ),
           () => mockConsole.readKey(),
         ]);
 
@@ -303,28 +286,29 @@ void main() {
       test('runs pacman and prints error message if pacman fails', () async {
         const testPackageName = 'test-package';
 
-        when(() => mockPacman.changePackageInstallReason(any(), any()))
-            .thenReturnAsync(10);
+        when(
+          () => mockPacman.changePackageInstallReason(any(), any()),
+        ).thenReturnAsync(10);
 
         final result = await sut(mockConsole, testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.changePackageInstallReason(
-                testPackageName,
-                InstallReason.asExplicit,
-              ),
+            testPackageName,
+            InstallReason.asExplicit,
+          ),
           () => mockConsole.setForegroundColor(ConsoleColor.red),
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine(
-                any(
-                  that: allOf(
-                    contains('mark'),
-                    contains(testPackageName),
-                    contains('exit code 10'),
-                  ),
-                ),
+            any(
+              that: allOf(
+                contains('mark'),
+                contains(testPackageName),
+                contains('exit code 10'),
               ),
+            ),
+          ),
           () => mockConsole.resetColorAttributes(),
         ]);
 

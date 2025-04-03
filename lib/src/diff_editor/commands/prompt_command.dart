@@ -13,10 +13,7 @@ enum PromptResult {
   final bool stopProcessing;
   final bool didModify;
 
-  const PromptResult({
-    required this.stopProcessing,
-    required this.didModify,
-  });
+  const PromptResult({required this.stopProcessing, required this.didModify});
 }
 
 abstract class PromptCommand {

@@ -40,8 +40,9 @@ void main() {
     });
 
     test('call adds package to history', () async {
-      when(() => mockPackageFileAdapter.addToPackageFile(any(), any()))
-          .thenReturnAsync(null);
+      when(
+        () => mockPackageFileAdapter.addToPackageFile(any(), any()),
+      ).thenReturnAsync(null);
 
       const testPackageName = 'test-package';
       final result = await sut(mockConsole, testPackageName);
@@ -49,12 +50,12 @@ void main() {
       verifyInOrder([
         () => mockConsole.writeLine(),
         () => mockConsole.writeLine(
-              'Adding $testPackageName for $testMachineName...',
-            ),
+          'Adding $testPackageName for $testMachineName...',
+        ),
         () => mockPackageFileAdapter.addToPackageFile(
-              testMachineName,
-              testPackageName,
-            ),
+          testMachineName,
+          testPackageName,
+        ),
         () => mockConsole.writeLine(any()),
         () => mockConsole.readKey(),
       ]);
@@ -91,10 +92,7 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = RemoveHistoryCommand(
-        mockPackageFileAdapter,
-        testMachineName,
-      );
+      sut = RemoveHistoryCommand(mockPackageFileAdapter, testMachineName);
     });
 
     test('uses correct key', () {
@@ -103,8 +101,9 @@ void main() {
     });
 
     test('call removes package from history', () async {
-      when(() => mockPackageFileAdapter.removeFromPackageFile(any(), any()))
-          .thenReturnAsync(true);
+      when(
+        () => mockPackageFileAdapter.removeFromPackageFile(any(), any()),
+      ).thenReturnAsync(true);
 
       const testPackageName = 'test-package';
       final result = await sut(mockConsole, testPackageName);
@@ -112,12 +111,12 @@ void main() {
       verifyInOrder([
         () => mockConsole.writeLine(),
         () => mockConsole.writeLine(
-              'Removing $testPackageName for $testMachineName...',
-            ),
+          'Removing $testPackageName for $testMachineName...',
+        ),
         () => mockPackageFileAdapter.removeFromPackageFile(
-              testMachineName,
-              testPackageName,
-            ),
+          testMachineName,
+          testPackageName,
+        ),
         () => mockConsole.writeLine(any()),
         () => mockConsole.readKey(),
       ]);

@@ -20,10 +20,7 @@ void main() {
       reset(mockPackageFileAdapter);
       reset(mockPacman);
 
-      sut = PackageInstall(
-        mockPackageFileAdapter,
-        mockPacman,
-      );
+      sut = PackageInstall(mockPackageFileAdapter, mockPacman);
     });
 
     testData<bool>(
@@ -33,8 +30,9 @@ void main() {
         const testMachineName = 'test-machine';
         const packages = ['p1', 'p2', 'p3'];
 
-        when(() => mockPackageFileAdapter.loadPackageFile(any()))
-            .thenStream(Stream.fromIterable(packages));
+        when(
+          () => mockPackageFileAdapter.loadPackageFile(any()),
+        ).thenStream(Stream.fromIterable(packages));
         when(
           () => mockPacman.installPackages(
             any(),
@@ -51,10 +49,10 @@ void main() {
         verifyInOrder([
           () => mockPackageFileAdapter.loadPackageFile(testMachineName),
           () => mockPacman.installPackages(
-                packages,
-                onlyNeeded: true,
-                noConfirm: noConfirm,
-              ),
+            packages,
+            onlyNeeded: true,
+            noConfirm: noConfirm,
+          ),
         ]);
         expect(result, 42);
       },
