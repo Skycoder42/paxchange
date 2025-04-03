@@ -1,14 +1,29 @@
 import 'package:args/command_runner.dart';
+import 'package:build_cli_annotations/build_cli_annotations.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
 import '../diff_editor/diff_editor.dart';
 
-class ReviewCommand extends Command<int> {
-  @visibleForTesting
-  static const machineNameOption = 'machine-name';
+part 'review_command.g.dart';
 
+@immutable
+@CliOptions(createCommand: true)
+final class ReviewOptions {
+  @CliOption(
+    abbr: 'n',
+    valueHelp: 'name',
+    help:
+        'Specify a custom machine name to review the diff for. '
+        'By default, this machine is used.',
+  )
+  final String? machineName;
+
+  const ReviewOptions({required this.machineName});
+}
+
+class ReviewCommand extends _$ReviewOptionsCommand<int> {
   final ProviderContainer _providerContainer;
 
   @override
@@ -20,20 +35,11 @@ class ReviewCommand extends Command<int> {
   @override
   bool get takesArguments => false;
 
-  ReviewCommand(this._providerContainer) {
-    argParser.addOption(
-      machineNameOption,
-      abbr: 'n',
-      aliases: const ['name', 'machine'],
-      valueHelp: 'name',
-      help: 'Specify a custom machine name to review the diff for. '
-          'By default, this machine is used.',
-    );
-  }
+  ReviewCommand(this._providerContainer);
 
   @override
   Future<int> run() async {
-    final machineName = argResults![machineNameOption] as String?;
+    final machineName = _options.machineName;
     final config = _providerContainer.read(configProvider);
     final diffEditor = _providerContainer.read(diffEditorProvider);
 

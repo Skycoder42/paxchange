@@ -25,6 +25,8 @@ class TestableUpdateCommand extends UpdateCommand {
 
 void main() {
   group('$UpdateCommand', () {
+    const testSetExitOnChangedFlag = 'set-exit-on-changed';
+
     final mockPackageSync = MockPackageSync();
     final mockArgResults = MockArgResults();
     final mockStdout = MockStdout();
@@ -55,10 +57,7 @@ void main() {
       expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
       expect(sut.argParser.options, hasLength(2));
-      expect(
-        sut.argParser.options,
-        contains(UpdateCommand.setExitOnChangedFlag),
-      );
+      expect(sut.argParser.options, contains(testSetExitOnChangedFlag));
     });
 
     group('run', () {
@@ -67,15 +66,11 @@ void main() {
         () async => await IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
-            when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
             when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
 
             final result = await sut.run();
 
-            verifyInOrder<dynamic>([
-              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
-              () => mockPackageSync.updatePackageDiff(),
-            ]);
+            verify(() => mockPackageSync.updatePackageDiff());
             verifyZeroInteractions(mockStdout);
             expect(result, 0);
           },
@@ -93,12 +88,12 @@ void main() {
             final result = await sut.run();
 
             verifyInOrder<dynamic>([
-              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(
                 '>>> Please review the package changelog.',
               ),
+              () => mockArgResults[testSetExitOnChangedFlag],
             ]);
             expect(result, 0);
           },
@@ -116,12 +111,12 @@ void main() {
             final result = await sut.run();
 
             verifyInOrder<dynamic>([
-              () => mockArgResults[UpdateCommand.setExitOnChangedFlag],
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(
                 '>>> Please review the package changelog.',
               ),
+              () => mockArgResults[testSetExitOnChangedFlag],
             ]);
             expect(result, 2);
           },

@@ -24,6 +24,8 @@ class TestableReviewCommand extends ReviewCommand {
 
 void main() {
   group('$ReviewCommand', () {
+    const testMachineNameOption = 'machine-name';
+
     const rootPackageFile = 'root-package';
     final testConfig = Config(
       storageDirectory: Directory.systemTemp,
@@ -62,7 +64,7 @@ void main() {
       expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
       expect(sut.argParser.options, hasLength(2));
-      expect(sut.argParser.options, contains(ReviewCommand.machineNameOption));
+      expect(sut.argParser.options, contains(testMachineNameOption));
     });
 
     group('run', () {
@@ -72,7 +74,7 @@ void main() {
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
-          () => mockArgResults[ReviewCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
           () => mockDiffEditor.run(rootPackageFile),
         ]);
         expect(result, 0);
@@ -85,7 +87,7 @@ void main() {
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
-          () => mockArgResults[ReviewCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
           () => mockDiffEditor.run(givenPackageFile),
         ]);
         expect(result, 0);

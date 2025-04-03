@@ -17,10 +17,7 @@ Config config(Ref ref) =>
 
 @freezed
 sealed class Config with _$Config {
-  const Config._();
-
   @DirectoryJsonConverter()
-  // ignore: sort_unnamed_constructors_first
   const factory Config({
     required Directory storageDirectory,
     String? machineName,
@@ -28,6 +25,8 @@ sealed class Config with _$Config {
   }) = _Config;
 
   factory Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
+
+  const Config._();
 
   String get rootPackageFile => machineName ?? Platform.localHostname;
 }

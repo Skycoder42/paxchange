@@ -24,6 +24,9 @@ class TestableInstallCommand extends InstallCommand {
 
 void main() {
   group('$InstallCommand', () {
+    const testMachineNameOption = 'machine-name';
+    const testConfirmFlag = 'confirm';
+
     const rootPackageFile = 'root-package';
     final testConfig = Config(
       storageDirectory: Directory.systemTemp,
@@ -67,23 +70,21 @@ void main() {
       expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
       expect(sut.argParser.options, hasLength(3));
-      expect(sut.argParser.options, contains(InstallCommand.machineNameOption));
-      expect(sut.argParser.options, contains(InstallCommand.confirmFlag));
+      expect(sut.argParser.options, contains(testMachineNameOption));
+      expect(sut.argParser.options, contains(testConfirmFlag));
     });
 
     group('run', () {
       test('runs install with default machine name', () async {
         when<dynamic>(
-          () => mockArgResults[InstallCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
         ).thenReturn(null);
-        when<dynamic>(
-          () => mockArgResults[InstallCommand.confirmFlag],
-        ).thenReturn(true);
+        when<dynamic>(() => mockArgResults[testConfirmFlag]).thenReturn(true);
 
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
-          () => mockArgResults[InstallCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
           () => mockPackageInstall.installPackages(rootPackageFile),
         ]);
         expect(result, 10);
@@ -92,16 +93,14 @@ void main() {
       test('runs install with custom machine name and no-confirm', () async {
         const givenPackageFile = 'other-package';
         when<dynamic>(
-          () => mockArgResults[InstallCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
         ).thenReturn(givenPackageFile);
-        when<dynamic>(
-          () => mockArgResults[InstallCommand.confirmFlag],
-        ).thenReturn(false);
+        when<dynamic>(() => mockArgResults[testConfirmFlag]).thenReturn(false);
 
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
-          () => mockArgResults[InstallCommand.machineNameOption],
+          () => mockArgResults[testMachineNameOption],
           () => mockPackageInstall.installPackages(
             givenPackageFile,
             noConfirm: true,

@@ -1,16 +1,37 @@
 import 'package:args/command_runner.dart';
+import 'package:build_cli_annotations/build_cli_annotations.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
 import '../package_install.dart';
 
-class InstallCommand extends Command<int> {
-  @visibleForTesting
-  static const machineNameOption = 'machine-name';
-  @visibleForTesting
-  static const confirmFlag = 'confirm';
+part 'install_command.g.dart';
 
+@immutable
+@CliOptions(createCommand: true)
+final class InstallOptions {
+  @CliOption(
+    abbr: 'n',
+    valueHelp: 'name',
+    help:
+        'Specify a custom machine name to install packages for. '
+        'By default, this machine is used.',
+  )
+  final String? machineName;
+
+  @CliOption(
+    defaultsTo: true,
+    help:
+        'When disabled, the pacman installation will run '
+        'without confirmation. Use carefully!',
+  )
+  final bool confirm;
+
+  const InstallOptions({required this.machineName, required this.confirm});
+}
+
+class InstallCommand extends _$InstallOptionsCommand<int> {
   final ProviderContainer _providerContainer;
 
   @override
@@ -28,28 +49,12 @@ review command instead.''';
   @override
   bool get takesArguments => false;
 
-  InstallCommand(this._providerContainer) {
-    argParser
-      ..addOption(
-        machineNameOption,
-        abbr: 'n',
-        aliases: const ['name', 'machine'],
-        valueHelp: 'name',
-        help: 'Specify a custom machine name to install packages for. '
-            'By default, this machine is used.',
-      )
-      ..addFlag(
-        confirmFlag,
-        defaultsTo: true,
-        help: 'When disabled, the pacman installation will run '
-            'without confirmation. Use carefully!',
-      );
-  }
+  InstallCommand(this._providerContainer);
 
   @override
   Future<int> run() {
-    final machineName = argResults![machineNameOption] as String?;
-    final confirm = argResults![confirmFlag] as bool;
+    final machineName = _options.machineName;
+    final confirm = _options.confirm;
     final config = _providerContainer.read(configProvider);
 
     final packageInstall = _providerContainer.read(packageInstallProvider);

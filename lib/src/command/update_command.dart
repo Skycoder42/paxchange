@@ -2,15 +2,27 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:build_cli_annotations/build_cli_annotations.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../package_sync.dart';
 
-class UpdateCommand extends Command<int> {
-  @visibleForTesting
-  static const setExitOnChangedFlag = 'set-exit-on-changed';
+part 'update_command.g.dart';
 
+@immutable
+@CliOptions(createCommand: true)
+final class UpdateOptions {
+  @CliOption(
+    abbr: 'e',
+    help: 'Causes the tool to exit with code 2 if packages have changed.',
+  )
+  final bool setExitOnChanged;
+
+  const UpdateOptions({required this.setExitOnChanged});
+}
+
+class UpdateCommand extends _$UpdateOptionsCommand<int> {
   final ProviderContainer _providerContainer;
 
   @override
@@ -23,17 +35,10 @@ class UpdateCommand extends Command<int> {
   @override
   bool get takesArguments => false;
 
-  UpdateCommand(this._providerContainer) {
-    argParser.addFlag(
-      setExitOnChangedFlag,
-      abbr: 'e',
-      help: 'Causes the tool to exit with code 2 if packages have changed.',
-    );
-  }
+  UpdateCommand(this._providerContainer);
 
   @override
   Future<int> run() async {
-    final setExitOnChanges = argResults![setExitOnChangedFlag] as bool;
     final packageSync = _providerContainer.read(packageSyncProvider);
 
     final changeCount = await packageSync.updatePackageDiff();
@@ -43,7 +48,7 @@ class UpdateCommand extends Command<int> {
         ..writeln('>>> $changeCount package(s) have changed!')
         ..writeln('>>> Please review the package changelog.');
 
-      if (setExitOnChanges) {
+      if (_options.setExitOnChanged) {
         return 2;
       }
     }
