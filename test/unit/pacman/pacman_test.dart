@@ -140,6 +140,40 @@ void main() {
         );
       });
 
+      group('listPackagesForGroup', () {
+        const testGroupName = 'test-group';
+
+        test('invokes pacman to list packages in group', () async {
+          final result = sut.listPackagesForGroup(testGroupName);
+          await expectLater(result, emitsDone);
+
+          verify(
+            () => processWrapperMock.start(process, const [
+              '-Sgq',
+              testGroupName,
+            ]),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
+
+        testLineStreaming(
+          runPacman: () => sut.listPackagesForGroup(testGroupName),
+        );
+
+        test('ignores if pacman command fails when ignoreErrors is true', () {
+          const firstLine = 'line';
+          when(
+            () => processMock.stdout,
+          ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
+          when(() => processMock.exitCode).thenReturnAsync(1);
+
+          expect(
+            sut.listPackagesForGroup(testGroupName, ignoreErrors: true),
+            emitsInOrder(<dynamic>[firstLine, emitsDone]),
+          );
+        });
+      });
+
       group('checkIfPackageIsInstalled', () {
         const packageName = 'test-package';
 

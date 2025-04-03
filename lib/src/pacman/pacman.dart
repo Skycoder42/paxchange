@@ -36,6 +36,14 @@ class Pacman {
   Stream<String> listExplicitlyInstalledPackages() =>
       _streamPacmanLines(const ['-Qqe']);
 
+  Stream<String> listPackagesForGroup(
+    String groupName, {
+    bool ignoreErrors = false,
+  }) => _streamPacmanLines([
+    '-Sgq',
+    groupName,
+  ], expectedExitCode: ignoreErrors ? null : 0);
+
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
     final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', [
       '-Qqi',
@@ -71,7 +79,10 @@ class Pacman {
     InstallReason installReason,
   ) => _executePacmanInteractive(['-D', installReason.flag, packageName]);
 
-  Stream<String> _streamPacmanLines(List<String> query) async* {
+  Stream<String> _streamPacmanLines(
+    List<String> query, {
+    int? expectedExitCode = 0,
+  }) async* {
     final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', query);
 
     final stderrAdded = stderr.addStream(pacmanProc.stderr);
@@ -81,7 +92,7 @@ class Pacman {
           .transform(const LineSplitter());
 
       final exitCode = await pacmanProc.exitCode;
-      if (exitCode != 0) {
+      if (expectedExitCode != null && exitCode != expectedExitCode) {
         throw Exception(
           'pacman ${query.join(' ')} failed with exit code: $exitCode',
         );
