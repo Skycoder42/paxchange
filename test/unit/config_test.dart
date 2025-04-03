@@ -3,30 +3,26 @@ import 'dart:io';
 import 'package:dart_test_tools/test.dart';
 import 'package:paxchange/src/config.dart';
 import 'package:test/test.dart';
-import 'package:tuple/tuple.dart';
 
 void main() {
   group('$Config', () {
-    testData<Tuple2<String?, String>>(
+    testData<(String?, String)>(
       'rootPackageFile reports correct value',
-      [
-        Tuple2(null, Platform.localHostname),
-        const Tuple2('test-host', 'test-host'),
-      ],
+      [(null, Platform.localHostname), const ('test-host', 'test-host')],
       (fixture) {
         final config = Config(
           storageDirectory: Directory.current,
-          machineName: fixture.item1,
+          machineName: fixture.$1,
         );
 
-        expect(config.rootPackageFile, fixture.item2);
+        expect(config.rootPackageFile, fixture.$2);
       },
     );
 
-    testData<Tuple2<Config, Map<String, dynamic>>>(
+    testData<(Config, Map<String, dynamic>)>(
       'serialization',
       [
-        Tuple2(
+        (
           Config(storageDirectory: Directory.current),
           <String, dynamic>{
             'storageDirectory': Directory.current.path,
@@ -34,7 +30,7 @@ void main() {
             'pacmanFrontend': null,
           },
         ),
-        Tuple2(
+        (
           Config(
             storageDirectory: Directory.systemTemp,
             machineName: 'test-machine',
@@ -48,8 +44,8 @@ void main() {
         ),
       ],
       (fixture) {
-        expect(fixture.item1.toJson(), fixture.item2);
-        expect(Config.fromJson(fixture.item2), _configEquals(fixture.item1));
+        expect(fixture.$1.toJson(), fixture.$2);
+        expect(Config.fromJson(fixture.$2), _configEquals(fixture.$1));
       },
     );
   });

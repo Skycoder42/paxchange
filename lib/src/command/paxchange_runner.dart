@@ -18,11 +18,11 @@ class PaxchangeRunner extends CommandRunner<int> {
   late final ProviderContainer _providerContainer;
 
   PaxchangeRunner()
-      : super(
-          'paxchange',
-          'Simple dart script to passively synchronize '
-              'installed pacman packages between systems.',
-        ) {
+    : super(
+        'paxchange',
+        'Simple dart script to passively synchronize '
+            'installed pacman packages between systems.',
+      ) {
     _providerContainer = ProviderContainer(
       overrides: [
         configProvider.overrideWith((ref) => ref.watch(configProvider)),
@@ -61,7 +61,7 @@ class PaxchangeRunner extends CommandRunner<int> {
       throw Exception('Configuration file $path does not exist!');
     }
 
-    return configFile
+    return await configFile
         .openRead()
         .transform(utf8.decoder)
         .transform(json.decoder)

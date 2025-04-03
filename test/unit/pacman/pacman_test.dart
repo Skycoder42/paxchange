@@ -1,3 +1,5 @@
+// ignore_for_file: discarded_futures
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -8,7 +10,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/util/process_wrapper.dart';
 import 'package:test/test.dart';
-import 'package:tuple/tuple.dart';
 
 class ProcessWrapperMock extends Mock implements ProcessWrapper {}
 
@@ -23,14 +24,14 @@ void main() {
   });
 
   group('$InstallReason', () {
-    testData<Tuple2<InstallReason, String>>(
+    testData<(InstallReason, String)>(
       'correctly maps flag',
       const [
-        Tuple2(InstallReason.asExplicit, '--asexplicit'),
-        Tuple2(InstallReason.asDeps, '--asdeps'),
+        (InstallReason.asExplicit, '--asexplicit'),
+        (InstallReason.asDeps, '--asdeps'),
       ],
       (fixture) {
-        expect(fixture.item1.flag, fixture.item2);
+        expect(fixture.$1.flag, fixture.$2);
       },
     );
   });
@@ -40,17 +41,13 @@ void main() {
     final processMock = ProcessMock();
     final mockStderr = MockStderr();
 
-    setUp(() async {
+    setUp(() {
       reset(processWrapperMock);
       reset(processMock);
       reset(mockStderr);
 
       when(
-        () => processWrapperMock.start(
-          any(),
-          any(),
-          mode: any(named: 'mode'),
-        ),
+        () => processWrapperMock.start(any(), any(), mode: any(named: 'mode')),
       ).thenReturnAsync(processMock);
       when(() => processMock.stderr).thenStream(const Stream.empty());
       when(() => processMock.stdout).thenStream(const Stream.empty());
@@ -58,64 +55,51 @@ void main() {
     });
 
     @isTestGroup
-    void testStderrForwarding({
-      required Future<void> Function() runPacman,
-    }) {
+    void testStderrForwarding({required Future<void> Function() runPacman}) {
       test(
         'forwards errors to stderr',
-        () async => IOOverrides.runZoned(
-          stderr: () => mockStderr,
-          () async {
-            final errorStream = Stream.value([1, 2, 3]);
-            when(() => processMock.stderr).thenStream(errorStream);
-            when(() => mockStderr.addStream(any())).thenReturnAsync(null);
+        () async =>
+            await IOOverrides.runZoned(stderr: () => mockStderr, () async {
+              final errorStream = Stream.value([1, 2, 3]);
+              when(() => processMock.stderr).thenStream(errorStream);
+              when(() => mockStderr.addStream(any())).thenReturnAsync(null);
 
-            await expectLater(runPacman(), completes);
+              await expectLater(runPacman(), completes);
 
-            verify(() => mockStderr.addStream(errorStream));
-          },
-        ),
+              verify(() => mockStderr.addStream(errorStream));
+            }),
       );
 
       test(
         'waits for stderr and forwards uncaught errors to zone handler',
-        () async => runZonedGuarded(
-          () {
-            final error = Exception('error');
-            when(() => processMock.stderr).thenStream(const Stream.empty());
-            when(() => mockStderr.addStream(any())).thenThrow(error);
+        () => runZonedGuarded(() {
+          final error = Exception('error');
+          when(() => processMock.stderr).thenStream(const Stream.empty());
+          when(() => mockStderr.addStream(any())).thenThrow(error);
 
-            expect(runPacman(), completes);
+          expect(runPacman(), completes);
 
-            verify(() => mockStderr.addError(error, any(that: isNotNull)));
-          },
-          mockStderr.addError,
-        ),
+          verify(() => mockStderr.addError(error, any(that: isNotNull)));
+        }, mockStderr.addError),
       );
     }
 
     @isTestGroup
-    void testLineStreaming({
-      required Stream<String> Function() runPacman,
-    }) {
+    void testLineStreaming({required Stream<String> Function() runPacman}) {
       test('returns lines of pacman command', () {
         const lines = ['line1', 'line2', 'line3'];
-        when(() => processMock.stdout)
-            .thenStream(Stream.value(lines.join('\n')).transform(utf8.encoder));
+        when(
+          () => processMock.stdout,
+        ).thenStream(Stream.value(lines.join('\n')).transform(utf8.encoder));
 
-        expect(
-          runPacman(),
-          emitsInOrder(<dynamic>[
-            ...lines,
-            emitsDone,
-          ]),
-        );
+        expect(runPacman(), emitsInOrder(<dynamic>[...lines, emitsDone]));
       });
 
       test('emits error if pacman command fails', () {
         const firstLine = 'line';
-        when(() => processMock.stdout)
-            .thenStream(Stream.value(firstLine).transform(utf8.encoder));
+        when(
+          () => processMock.stdout,
+        ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
         when(() => processMock.exitCode).thenReturnAsync(1);
 
         expect(
@@ -128,226 +112,223 @@ void main() {
         );
       });
 
-      testStderrForwarding(runPacman: () async => runPacman().drain());
+      testStderrForwarding(runPacman: () => runPacman().drain());
     }
 
     @isTestGroup
-    void testWithFrontend(String? frontend, String process) =>
-        group('(frontend: $frontend)', () {
-          late Pacman sut;
+    void testWithFrontend(
+      String? frontend,
+      String process,
+    ) => group('(frontend: $frontend)', () {
+      late Pacman sut;
 
-          setUp(() {
-            sut = Pacman(processWrapperMock, frontend);
-          });
+      setUp(() {
+        sut = Pacman(processWrapperMock, frontend);
+      });
 
-          group('listExplicitlyInstalledPackages', () {
-            test('invokes pacman to list packages', () async {
-              final result = sut.listExplicitlyInstalledPackages();
-              await expectLater(result, emitsDone);
+      group('listExplicitlyInstalledPackages', () {
+        test('invokes pacman to list packages', () async {
+          final result = sut.listExplicitlyInstalledPackages();
+          await expectLater(result, emitsDone);
 
-              verify(() => processWrapperMock.start(process, const ['-Qqe']));
-              verifyNoMoreInteractions(processWrapperMock);
-            });
+          verify(() => processWrapperMock.start(process, const ['-Qqe']));
+          verifyNoMoreInteractions(processWrapperMock);
+        });
 
-            testLineStreaming(
-              runPacman: () => sut.listExplicitlyInstalledPackages(),
-            );
-          });
+        testLineStreaming(
+          runPacman: () => sut.listExplicitlyInstalledPackages(),
+        );
+      });
 
-          group('checkIfPackageIsInstalled', () {
-            const packageName = 'test-package';
+      group('checkIfPackageIsInstalled', () {
+        const packageName = 'test-package';
 
-            test('invokes pacman to find the package', () async {
-              await sut.checkIfPackageIsInstalled(packageName);
+        test('invokes pacman to find the package', () async {
+          await sut.checkIfPackageIsInstalled(packageName);
 
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-Qqi', packageName],
-                ),
-              );
-              verifyNoMoreInteractions(processWrapperMock);
-            });
+          verify(
+            () =>
+                processWrapperMock.start(process, const ['-Qqi', packageName]),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
 
-            test('returns true if the package was found', () async {
-              when(() => processMock.exitCode).thenReturnAsync(0);
+        test('returns true if the package was found', () async {
+          when(() => processMock.exitCode).thenReturnAsync(0);
 
-              final result = await sut.checkIfPackageIsInstalled(packageName);
-              expect(result, isTrue);
-            });
+          final result = await sut.checkIfPackageIsInstalled(packageName);
+          expect(result, isTrue);
+        });
 
-            test('returns false if the package was not found', () async {
-              when(() => processMock.exitCode).thenReturnAsync(1);
+        test('returns false if the package was not found', () async {
+          when(() => processMock.exitCode).thenReturnAsync(1);
 
-              final result = await sut.checkIfPackageIsInstalled(packageName);
-              expect(result, isFalse);
-            });
-          });
+          final result = await sut.checkIfPackageIsInstalled(packageName);
+          expect(result, isFalse);
+        });
+      });
 
-          group('queryInstalledPackage', () {
-            const testPackageName = 'test-package';
+      group('queryInstalledPackage', () {
+        const testPackageName = 'test-package';
 
-            test('invokes pacman to list packages details', () async {
-              final result = sut.queryInstalledPackage(testPackageName);
-              await expectLater(result, emitsDone);
+        test('invokes pacman to list packages details', () async {
+          final result = sut.queryInstalledPackage(testPackageName);
+          await expectLater(result, emitsDone);
 
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-Qi', testPackageName],
-                ),
-              );
-              verifyNoMoreInteractions(processWrapperMock);
-            });
+          verify(
+            () => processWrapperMock.start(process, const [
+              '-Qi',
+              testPackageName,
+            ]),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
 
-            testLineStreaming(
-              runPacman: () => sut.queryInstalledPackage(testPackageName),
-            );
-          });
+        testLineStreaming(
+          runPacman: () => sut.queryInstalledPackage(testPackageName),
+        );
+      });
 
-          group('queryUninstalledPackage', () {
-            const testPackageName = 'test-package';
+      group('queryUninstalledPackage', () {
+        const testPackageName = 'test-package';
 
-            test('invokes pacman to list packages details', () async {
-              final result = sut.queryUninstalledPackage(testPackageName);
-              await expectLater(result, emitsDone);
+        test('invokes pacman to list packages details', () async {
+          final result = sut.queryUninstalledPackage(testPackageName);
+          await expectLater(result, emitsDone);
 
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-Si', testPackageName],
-                ),
-              );
-              verifyNoMoreInteractions(processWrapperMock);
-            });
+          verify(
+            () => processWrapperMock.start(process, const [
+              '-Si',
+              testPackageName,
+            ]),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
 
-            testLineStreaming(
-              runPacman: () => sut.queryUninstalledPackage(testPackageName),
-            );
-          });
+        testLineStreaming(
+          runPacman: () => sut.queryUninstalledPackage(testPackageName),
+        );
+      });
 
-          group('installPackages', () {
-            test('starts pacman in interactive install mode', () async {
-              const testPackageName1 = 'test-package-1';
-              const testPackageName2 = 'test-package-2';
-              const exitCode = 42;
+      group('installPackages', () {
+        test('starts pacman in interactive install mode', () async {
+          const testPackageName1 = 'test-package-1';
+          const testPackageName2 = 'test-package-2';
+          const exitCode = 42;
 
-              when(() => processMock.exitCode).thenReturnAsync(exitCode);
+          when(() => processMock.exitCode).thenReturnAsync(exitCode);
 
-              final result = await sut.installPackages(const [
-                testPackageName1,
-                testPackageName2,
-              ]);
+          final result = await sut.installPackages(const [
+            testPackageName1,
+            testPackageName2,
+          ]);
 
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-S', testPackageName1, testPackageName2],
-                  mode: ProcessStartMode.inheritStdio,
-                ),
-              );
-              verifyNever(() => processMock.stdout);
-              verifyNever(() => processMock.stderr);
-              expect(result, exitCode);
-            });
+          verify(
+            () => processWrapperMock.start(process, const [
+              '-S',
+              testPackageName1,
+              testPackageName2,
+            ], mode: ProcessStartMode.inheritStdio),
+          );
+          verifyNever(() => processMock.stdout);
+          verifyNever(() => processMock.stderr);
+          expect(result, exitCode);
+        });
 
-            test(
-                'starts pacman in interactive install mode for needed packages',
-                () async {
-              const testPackageName = 'test-package';
-              const exitCode = 42;
-
-              when(() => processMock.exitCode).thenReturnAsync(exitCode);
-
-              final result = await sut.installPackages(
-                const [testPackageName],
-                onlyNeeded: true,
-              );
-
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-S', '--needed', testPackageName],
-                  mode: ProcessStartMode.inheritStdio,
-                ),
-              );
-              verifyNever(() => processMock.stdout);
-              verifyNever(() => processMock.stderr);
-              expect(result, exitCode);
-            });
-
-            test('starts pacman in automatic install mode', () async {
-              const testPackageName = 'test-package';
-              const exitCode = 42;
-
-              when(() => processMock.exitCode).thenReturnAsync(exitCode);
-
-              final result = await sut.installPackages(
-                const [testPackageName],
-                noConfirm: true,
-              );
-
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  const ['-S', '--noconfirm', testPackageName],
-                  mode: ProcessStartMode.inheritStdio,
-                ),
-              );
-              verifyNever(() => processMock.stdout);
-              verifyNever(() => processMock.stderr);
-              expect(result, exitCode);
-            });
-          });
-
-          test('removePackage starts pacman in interactive remove mode',
-              () async {
+        test(
+          'starts pacman in interactive install mode for needed packages',
+          () async {
             const testPackageName = 'test-package';
             const exitCode = 42;
 
             when(() => processMock.exitCode).thenReturnAsync(exitCode);
 
-            final result = await sut.removePackage(testPackageName);
+            final result = await sut.installPackages(const [
+              testPackageName,
+            ], onlyNeeded: true);
 
             verify(
-              () => processWrapperMock.start(
-                process,
-                const ['-R', testPackageName],
-                mode: ProcessStartMode.inheritStdio,
-              ),
+              () => processWrapperMock.start(process, const [
+                '-S',
+                '--needed',
+                testPackageName,
+              ], mode: ProcessStartMode.inheritStdio),
             );
             verifyNever(() => processMock.stdout);
             verifyNever(() => processMock.stderr);
             expect(result, exitCode);
-          });
+          },
+        );
 
-          testData<InstallReason>(
-            'changePackageInstallReason starts pacman',
-            InstallReason.values,
-            (fixture) async {
-              const testPackageName = 'test-package';
-              const exitCode = 42;
+        test('starts pacman in automatic install mode', () async {
+          const testPackageName = 'test-package';
+          const exitCode = 42;
 
-              when(() => processMock.exitCode).thenReturnAsync(exitCode);
+          when(() => processMock.exitCode).thenReturnAsync(exitCode);
 
-              final result = await sut.changePackageInstallReason(
-                testPackageName,
-                fixture,
-              );
+          final result = await sut.installPackages(const [
+            testPackageName,
+          ], noConfirm: true);
 
-              verify(
-                () => processWrapperMock.start(
-                  process,
-                  ['-D', fixture.flag, testPackageName],
-                  mode: ProcessStartMode.inheritStdio,
-                ),
-              );
-              verifyNever(() => processMock.stdout);
-              verifyNever(() => processMock.stderr);
-              expect(result, exitCode);
-            },
+          verify(
+            () => processWrapperMock.start(process, const [
+              '-S',
+              '--noconfirm',
+              testPackageName,
+            ], mode: ProcessStartMode.inheritStdio),
           );
+          verifyNever(() => processMock.stdout);
+          verifyNever(() => processMock.stderr);
+          expect(result, exitCode);
         });
+      });
+
+      test('removePackage starts pacman in interactive remove mode', () async {
+        const testPackageName = 'test-package';
+        const exitCode = 42;
+
+        when(() => processMock.exitCode).thenReturnAsync(exitCode);
+
+        final result = await sut.removePackage(testPackageName);
+
+        verify(
+          () => processWrapperMock.start(process, const [
+            '-R',
+            testPackageName,
+          ], mode: ProcessStartMode.inheritStdio),
+        );
+        verifyNever(() => processMock.stdout);
+        verifyNever(() => processMock.stderr);
+        expect(result, exitCode);
+      });
+
+      testData<InstallReason>(
+        'changePackageInstallReason starts pacman',
+        InstallReason.values,
+        (fixture) async {
+          const testPackageName = 'test-package';
+          const exitCode = 42;
+
+          when(() => processMock.exitCode).thenReturnAsync(exitCode);
+
+          final result = await sut.changePackageInstallReason(
+            testPackageName,
+            fixture,
+          );
+
+          verify(
+            () => processWrapperMock.start(process, [
+              '-D',
+              fixture.flag,
+              testPackageName,
+            ], mode: ProcessStartMode.inheritStdio),
+          );
+          verifyNever(() => processMock.stdout);
+          verifyNever(() => processMock.stderr);
+          expect(result, exitCode);
+        },
+      );
+    });
 
     testWithFrontend(null, 'pacman');
 

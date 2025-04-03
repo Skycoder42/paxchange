@@ -57,25 +57,31 @@ void main() {
             'package-8',
           ];
 
-          when(() => mockPackageFileAdapter.loadPackageFile(any()))
-              .thenStream(Stream.fromIterable(packageHistory));
-          when(mockPacman.listExplicitlyInstalledPackages)
-              .thenStream(Stream.fromIterable(installedPackages));
-          when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
-              .thenReturnAsync(null);
+          when(
+            () => mockPackageFileAdapter.loadPackageFile(any()),
+          ).thenStream(Stream.fromIterable(packageHistory));
+          when(
+            mockPacman.listExplicitlyInstalledPackages,
+          ).thenStream(Stream.fromIterable(installedPackages));
+          when(
+            () => mockDiffFileAdapter.savePackageDiff(any(), any()),
+          ).thenReturnAsync(null);
 
           final result = await sut.updatePackageDiff();
 
-          final captured = verifyInOrder([
-            () => mockPackageFileAdapter.loadPackageFile(testMachineName),
-            () => mockPacman.listExplicitlyInstalledPackages(),
-            () => mockDiffFileAdapter.savePackageDiff(
-                  testMachineName,
-                  captureAny(),
-                ),
-          ]).captured[2].single as Set<DiffEntry>;
+          final captured =
+              verifyInOrder([
+                    () =>
+                        mockPackageFileAdapter.loadPackageFile(testMachineName),
+                    () => mockPacman.listExplicitlyInstalledPackages(),
+                    () => mockDiffFileAdapter.savePackageDiff(
+                      testMachineName,
+                      captureAny(),
+                    ),
+                  ]).captured[2].single
+                  as Set<DiffEntry>;
 
-          expect(captured, isA<SplayTreeSet>());
+          expect(captured, isA<SplayTreeSet<dynamic>>());
           expect(
             captured,
             orderedEquals(const <DiffEntry>[
@@ -90,38 +96,33 @@ void main() {
         },
       );
 
-      test(
-        'generates empty diff if packages are the same',
-        () async {
-          const testMachineName = 'test-machine';
-          const packages = [
-            'package-1',
-            'package-2',
-            'package-3',
-            'package-4',
-          ];
+      test('generates empty diff if packages are the same', () async {
+        const testMachineName = 'test-machine';
+        const packages = ['package-1', 'package-2', 'package-3', 'package-4'];
 
-          when(() => mockPackageFileAdapter.loadPackageFile(any()))
-              .thenStream(Stream.fromIterable(packages));
-          when(mockPacman.listExplicitlyInstalledPackages)
-              .thenStream(Stream.fromIterable(packages));
-          when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
-              .thenReturnAsync(null);
+        when(
+          () => mockPackageFileAdapter.loadPackageFile(any()),
+        ).thenStream(Stream.fromIterable(packages));
+        when(
+          mockPacman.listExplicitlyInstalledPackages,
+        ).thenStream(Stream.fromIterable(packages));
+        when(
+          () => mockDiffFileAdapter.savePackageDiff(any(), any()),
+        ).thenReturnAsync(null);
 
-          final result = await sut.updatePackageDiff();
+        final result = await sut.updatePackageDiff();
 
-          verifyInOrder([
-            () => mockPackageFileAdapter.loadPackageFile(testMachineName),
-            () => mockPacman.listExplicitlyInstalledPackages(),
-            () => mockDiffFileAdapter.savePackageDiff(
-                  testMachineName,
-                  any(that: isEmpty),
-                ),
-          ]);
+        verifyInOrder([
+          () => mockPackageFileAdapter.loadPackageFile(testMachineName),
+          () => mockPacman.listExplicitlyInstalledPackages(),
+          () => mockDiffFileAdapter.savePackageDiff(
+            testMachineName,
+            any(that: isEmpty),
+          ),
+        ]);
 
-          expect(result, 0);
-        },
-      );
+        expect(result, 0);
+      });
     });
   });
 }

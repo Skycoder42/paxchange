@@ -19,34 +19,27 @@ void main() {
         File.fromUri(packageDir.uri.resolve(fileName));
 
     Future<void> writePackages(String fileName, Iterable<String> lines) async =>
-        packageFile(fileName).writeAsString(lines.join('\n'));
+        await packageFile(fileName).writeAsString(lines.join('\n'));
 
     Future<List<String>> readPackages(String fileName) async =>
-        packageFile(fileName).readAsLines();
+        await packageFile(fileName).readAsLines();
 
     Future<int> runPaxchange(String machineName) async {
       final configFile = File.fromUri(testDir.uri.resolve('config.json'));
       await configFile.writeAsString(
         json.encode(
-          Config(
-            storageDirectory: packageDir,
-            machineName: machineName,
-          ),
+          Config(storageDirectory: packageDir, machineName: machineName),
         ),
       );
 
-      final proc = await Process.start(
-        'dart',
-        [
-          'run',
-          'bin/paxchange.dart',
-          '--config',
-          configFile.path,
-          'update',
-          '--set-exit-on-changed',
-        ],
-        mode: ProcessStartMode.inheritStdio,
-      );
+      final proc = await Process.start('dart', [
+        'run',
+        'bin/paxchange.dart',
+        '--config',
+        configFile.path,
+        'update',
+        '--set-exit-on-changed',
+      ], mode: ProcessStartMode.inheritStdio);
       return proc.exitCode;
     }
 
@@ -70,14 +63,8 @@ void main() {
         '# other important packages',
         '::import ${packageDir.absolute.uri.resolve('base2').toFilePath()}',
       ]);
-      await writePackages('machine-1', [
-        '::import base_all',
-        ...base4,
-      ]);
-      await writePackages('machine-2', [
-        '::import base_all',
-        ...base5,
-      ]);
+      await writePackages('machine-1', ['::import base_all', ...base4]);
+      await writePackages('machine-2', ['::import base_all', ...base5]);
     });
 
     tearDown(() async {
@@ -126,8 +113,7 @@ void main() {
       );
     });
 
-    test(
-        'detects changes but does not modify them '
+    test('detects changes but does not modify them '
         'if changes are already stored in pcs file', () async {
       await writePackages('machine-2.pcs', <String>[
         ...base4.map((package) => '+$package'),

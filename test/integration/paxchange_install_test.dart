@@ -13,7 +13,7 @@ void main() {
         File.fromUri(packageDir.uri.resolve(fileName));
 
     Future<void> writePackages(String fileName, Iterable<String> lines) async =>
-        packageFile(fileName).writeAsString(lines.join('\n'));
+        await packageFile(fileName).writeAsString(lines.join('\n'));
 
     Future<bool> checkInstalled(String package) async {
       final result = await Process.run('pacman', ['-Qi', package]);
@@ -24,25 +24,18 @@ void main() {
       final configFile = File.fromUri(testDir.uri.resolve('config.json'));
       await configFile.writeAsString(
         json.encode(
-          Config(
-            storageDirectory: packageDir,
-            machineName: machineName,
-          ),
+          Config(storageDirectory: packageDir, machineName: machineName),
         ),
       );
 
-      final proc = await Process.start(
-        'dart',
-        [
-          'run',
-          'bin/paxchange.dart',
-          '--config',
-          configFile.path,
-          'install',
-          '--no-confirm',
-        ],
-        mode: ProcessStartMode.inheritStdio,
-      );
+      final proc = await Process.start('dart', [
+        'run',
+        'bin/paxchange.dart',
+        '--config',
+        configFile.path,
+        'install',
+        '--no-confirm',
+      ], mode: ProcessStartMode.inheritStdio);
       return proc.exitCode;
     }
 

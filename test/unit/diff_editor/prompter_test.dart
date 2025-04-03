@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_lambdas
+// ignore_for_file: unnecessary_lambdas, discarded_futures
 
 import 'package:dart_console/dart_console.dart';
 import 'package:mocktail/mocktail.dart';
@@ -69,7 +69,7 @@ void main() {
       final cmd1 = MockPromptCommand();
       final cmd2 = MockPromptCommand();
 
-      setUp(() async {
+      setUp(() {
         when(() => cmd1.key).thenReturn('1');
         when(() => cmd1.description).thenReturn('command 1');
         when(() => cmd1.call(any(), any())).thenReturn(PromptResult.succeeded);
@@ -79,34 +79,37 @@ void main() {
         when(() => cmd2.call(any(), any())).thenReturn(PromptResult.failed);
       });
 
-      test('writes a prompt with all options and returns result of selected',
-          () async {
-        when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
+      test(
+        'writes a prompt with all options and returns result of selected',
+        () async {
+          when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
 
-        final result = await const Prompter().prompt(
-          console: mockConsole,
-          packageName: testPackageName,
-          commands: [cmd1, cmd2],
-        );
+          final result = await const Prompter().prompt(
+            console: mockConsole,
+            packageName: testPackageName,
+            commands: [cmd1, cmd2],
+          );
 
-        verifyInOrder([
-          () => mockConsole.writeLine('What do you want to do?'),
-          () => cmd1.writeOption(mockConsole),
-          () => cmd2.writeOption(mockConsole),
-          () => mockConsole.write('> '),
-          () => mockConsole.setTextStyle(blink: true),
-          () => mockConsole.readKey(),
-          () => mockConsole.setTextStyle(),
-          () => cmd1.call(mockConsole, testPackageName),
-        ]);
-        verifyNoMoreInteractions(mockConsole);
-        expect(result, PromptResult.succeeded);
-      });
+          verifyInOrder([
+            () => mockConsole.writeLine('What do you want to do?'),
+            () => cmd1.writeOption(mockConsole),
+            () => cmd2.writeOption(mockConsole),
+            () => mockConsole.write('> '),
+            () => mockConsole.setTextStyle(blink: true),
+            () => mockConsole.readKey(),
+            () => mockConsole.setTextStyle(),
+            () => cmd1.call(mockConsole, testPackageName),
+          ]);
+          verifyNoMoreInteractions(mockConsole);
+          expect(result, PromptResult.succeeded);
+        },
+      );
 
       test('writes a looping prompt for invalid inputs', () async {
         var keyCtr = 3;
-        when(() => mockConsole.readKey())
-            .thenAnswer((i) => Key.printable('${keyCtr--}'));
+        when(
+          () => mockConsole.readKey(),
+        ).thenAnswer((i) => Key.printable('${keyCtr--}'));
 
         final result = await const Prompter().prompt(
           console: mockConsole,

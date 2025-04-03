@@ -39,9 +39,7 @@ void main() {
       reset(mockStdout);
 
       providerContainer = ProviderContainer(
-        overrides: [
-          packageSyncProvider.overrideWithValue(mockPackageSync),
-        ],
+        overrides: [packageSyncProvider.overrideWithValue(mockPackageSync)],
       );
 
       sut = TestableUpdateCommand(providerContainer)
@@ -66,7 +64,7 @@ void main() {
     group('run', () {
       test(
         'calls packageSync.updatePackageDiff',
-        () async => IOOverrides.runZoned(
+        () async => await IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
@@ -86,7 +84,7 @@ void main() {
 
       test(
         'returns 0 even if packages did change and write to stdout',
-        () async => IOOverrides.runZoned(
+        () async => await IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
@@ -99,8 +97,8 @@ void main() {
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(
-                    '>>> Please review the package changelog.',
-                  ),
+                '>>> Please review the package changelog.',
+              ),
             ]);
             expect(result, 0);
           },
@@ -109,7 +107,7 @@ void main() {
 
       test(
         'returns 2 if packages did change with option specified',
-        () async => IOOverrides.runZoned(
+        () async => await IOOverrides.runZoned(
           stdout: () => mockStdout,
           () async {
             when<dynamic>(() => mockArgResults[any()]).thenReturn(true);
@@ -122,8 +120,8 @@ void main() {
               () => mockPackageSync.updatePackageDiff(),
               () => mockStdout.writeln('>>> 10 package(s) have changed!'),
               () => mockStdout.writeln(
-                    '>>> Please review the package changelog.',
-                  ),
+                '>>> Please review the package changelog.',
+              ),
             ]);
             expect(result, 2);
           },

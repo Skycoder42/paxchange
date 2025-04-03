@@ -1,3 +1,5 @@
+// ignore_for_file: discarded_futures
+
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -34,7 +36,7 @@ void main() {
 
     late TestableReviewCommand sut;
 
-    setUp(() async {
+    setUp(() {
       reset(mockArgResults);
       reset(mockDiffEditor);
 
@@ -60,10 +62,7 @@ void main() {
       expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
       expect(sut.argParser.options, hasLength(2));
-      expect(
-        sut.argParser.options,
-        contains(ReviewCommand.machineNameOption),
-      );
+      expect(sut.argParser.options, contains(ReviewCommand.machineNameOption));
     });
 
     group('run', () {
