@@ -6,13 +6,16 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config.dart';
+import '../pacman/pacman.dart';
 
 part 'package_file_adapter.g.dart';
 
 // coverage:ignore-start
 @riverpod
-PackageFileAdapter packageFileAdapter(Ref ref) =>
-    PackageFileAdapter(ref.watch(configProvider).storageDirectory);
+PackageFileAdapter packageFileAdapter(Ref ref) => PackageFileAdapter(
+  ref.watch(configProvider).storageDirectory,
+  ref.watch(pacmanProvider),
+);
 // coverage:ignore-end
 
 class LoadPackageFailure implements Exception {
@@ -33,10 +36,12 @@ class LoadPackageFailure implements Exception {
 
 class PackageFileAdapter {
   static final _importRegExp = RegExp(r'^::import\s+(\S.*)$');
+  static final _groupRegExp = RegExp(r'^::group\s+(\S.*)$');
 
   final Directory _storageDirectory;
+  final Pacman _pacman;
 
-  PackageFileAdapter(this._storageDirectory);
+  PackageFileAdapter(this._storageDirectory, this._pacman);
 
   Stream<String> loadPackageFile(String machineName) {
     final packageFile = _packageFile(machineName);
@@ -138,6 +143,14 @@ class PackageFileAdapter {
         continue;
       }
 
+      // replace groups with their packages
+      final groupMatch = _groupRegExp.matchAsPrefix(line);
+      if (groupMatch != null) {
+        final groupName = groupMatch[1]!;
+        yield* _pacman.listPackagesForGroup(groupName);
+        continue;
+      }
+
       // simply yield normal entries
       yield line;
     }
@@ -165,6 +178,10 @@ class PackageFileAdapter {
           _updateHistory(importFileName, importHistory),
         );
       }
+
+      // skip groups
+
+      // skip packages
     }
   }
 
@@ -195,6 +212,8 @@ class PackageFileAdapter {
           return fileWithPackage;
         }
       }
+
+      // groups are ignored
 
       // return with current file if found
       if (line == package) {

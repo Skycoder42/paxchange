@@ -2,9 +2,14 @@
 
 import 'dart:io';
 
+import 'package:dart_test_tools/test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart';
+import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:test/test.dart';
+
+class MockPacman extends Mock implements Pacman {}
 
 void main() {
   group('$LoadPackageFailure', () {
@@ -23,14 +28,17 @@ void main() {
   });
 
   group('$PackageFileAdapter', () {
+    final mockPacman = MockPacman();
     late Directory testDir;
 
     late PackageFileAdapter sut;
 
     setUp(() async {
+      reset(mockPacman);
+
       testDir = await Directory.systemTemp.createTemp();
 
-      sut = PackageFileAdapter(testDir);
+      sut = PackageFileAdapter(testDir, mockPacman);
     });
 
     tearDown(() async {
@@ -166,6 +174,27 @@ void main() {
             emitsDone,
           ]),
         );
+      });
+
+      test('imports package groups', () async {
+        const fileName = 'test-file';
+        const groupName = 'test-group';
+        const lines = ['line-A', 'line-B', 'line-C'];
+        const groups = ['pkg-1', 'pkg-2', 'pkg-3'];
+        writeFile(fileName, [...lines, '::group $groupName']);
+
+        when(
+          () => mockPacman.listPackagesForGroup(any()),
+        ).thenStream(Stream.fromIterable(groups));
+
+        final stream = sut.loadPackageFile(fileName);
+
+        await expectLater(
+          stream,
+          emitsInOrder(<dynamic>[...lines, ...groups, emitsDone]),
+        );
+
+        verify(() => mockPacman.listPackagesForGroup(groupName)).called(1);
       });
     });
 
@@ -313,6 +342,17 @@ void main() {
           ]),
         );
       });
+
+      test('ignores group entries', () async {
+        const fileName = 'test-file';
+        const lines = ['line-A', 'line-B', '::group test-group', 'line-C'];
+        writeFile(fileName, lines);
+
+        final stream = sut.loadPackageFileHierarchy(fileName);
+        await expectLater(stream, emitsInOrder(<dynamic>[fileName, emitsDone]));
+
+        verifyNever(() => mockPacman.listPackagesForGroup(any()));
+      });
     });
 
     group('ensurePackageFileExists', () {
@@ -417,12 +457,13 @@ void main() {
         expect(packageFile(fileName).readAsLinesSync(), [lines[0], lines[2]]);
       });
 
-      test('skips comment and empty lines', () async {
+      test('keeps comment, group and empty lines', () async {
         const fileName = 'test-file';
         const lines = [
           '# $testPackageName',
           '',
           '    # $testPackageName',
+          '::group $testPackageName',
           '  \t    ',
           '   $testPackageName     ',
         ];
@@ -434,7 +475,9 @@ void main() {
         );
 
         expect(result, isTrue);
-        expect(packageFile(fileName).readAsLinesSync(), lines.sublist(0, 4));
+        expect(packageFile(fileName).readAsLinesSync(), lines.sublist(0, 5));
+
+        verifyNever(() => mockPacman.listPackagesForGroup(any()));
       });
 
       test('searches package files recursively', () async {

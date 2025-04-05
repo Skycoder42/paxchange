@@ -57,9 +57,12 @@ class DiffFileAdapter {
   File _diffFile(String host) =>
       File.fromUri(_storageDirectory.uri.resolve('$host.pcs'));
 
-  Stream<DiffEntry> _readDiffFile(File diffFile) => diffFile
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map(DiffEntry.decode);
+  Stream<DiffEntry> _readDiffFile(File diffFile) {
+    assert(diffFile.existsSync(), '$diffFile must exist');
+    return diffFile
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map(DiffEntry.decode);
+  }
 }
