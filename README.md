@@ -44,7 +44,7 @@
 - this is overkill for something most likely rarely needed
 - can still be added if it happens often
 
-### Update
+### ✅ Update
 - no real changes
 - `::group` entries are expanded before creating the diff
   - this means packages removed from groups are `+new`
@@ -52,7 +52,7 @@
   - package added but already installed are detected as unchanged
   - ignore errors when expanding a group
 
-### Install
+### ✅ Install
 - Only installs the group, not the packages of each group
 
 ## Drop Root

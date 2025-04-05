@@ -25,7 +25,9 @@ class PackageInstall {
     bool noConfirm = false,
   }) async {
     final packages =
-        await _packageFileAdapter.loadPackageFile(machineName).toList();
+        await _packageFileAdapter
+            .loadPackageFile(machineName, expandGroups: false)
+            .toList();
 
     return _pacman.installPackages(
       packages,

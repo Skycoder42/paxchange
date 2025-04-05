@@ -43,11 +43,14 @@ class PackageFileAdapter {
 
   PackageFileAdapter(this._storageDirectory, this._pacman);
 
-  Stream<String> loadPackageFile(String machineName) {
+  Stream<String> loadPackageFile(
+    String machineName, {
+    bool expandGroups = true,
+  }) {
     final packageFile = _packageFile(machineName);
 
     if (packageFile.existsSync()) {
-      return _streamPackageFile(packageFile, {machineName});
+      return _streamPackageFile(packageFile, {machineName}, expandGroups);
     } else {
       return const Stream.empty();
     }
@@ -123,6 +126,7 @@ class PackageFileAdapter {
   Stream<String> _streamPackageFile(
     File packageFile,
     Set<String> importHistory,
+    bool expandGroups,
   ) async* {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
@@ -139,6 +143,7 @@ class PackageFileAdapter {
         yield* _streamPackageFile(
           _findPackageFile(importFileName, importHistory),
           _updateHistory(importFileName, importHistory),
+          expandGroups,
         );
         continue;
       }
@@ -147,7 +152,11 @@ class PackageFileAdapter {
       final groupMatch = _groupRegExp.matchAsPrefix(line);
       if (groupMatch != null) {
         final groupName = groupMatch[1]!;
-        yield* _pacman.listPackagesForGroup(groupName);
+        if (expandGroups) {
+          yield* _pacman.listPackagesForGroup(groupName);
+        } else {
+          yield groupName;
+        }
         continue;
       }
 

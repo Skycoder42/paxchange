@@ -196,6 +196,27 @@ void main() {
 
         verify(() => mockPacman.listPackagesForGroup(groupName)).called(1);
       });
+
+      test('does not expand package groups if disabled', () async {
+        const fileName = 'test-file';
+        const groupName = 'test-group';
+        const lines = ['line-A', 'line-B', 'line-C'];
+        const groups = ['pkg-1', 'pkg-2', 'pkg-3'];
+        writeFile(fileName, [...lines, '::group $groupName']);
+
+        when(
+          () => mockPacman.listPackagesForGroup(any()),
+        ).thenStream(Stream.fromIterable(groups));
+
+        final stream = sut.loadPackageFile(fileName, expandGroups: false);
+
+        await expectLater(
+          stream,
+          emitsInOrder(<dynamic>[...lines, groupName, emitsDone]),
+        );
+
+        verifyNever(() => mockPacman.listPackagesForGroup(any()));
+      });
     });
 
     group('loadPackageFileHierarchy', () {

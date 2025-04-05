@@ -50,16 +50,22 @@ void main() {
     });
 
     test('installs needed packages', () async {
-      expect(await checkInstalled('bash'), isTrue);
+      expect(await checkInstalled('base'), isTrue);
       expect(await checkInstalled('p7zip'), isFalse);
+      expect(await checkInstalled('pacquery'), isFalse);
 
       const machineName = 'testMachine';
-      await writePackages(machineName, const ['bash', 'p7zip']);
+      await writePackages(machineName, const [
+        'base',
+        '::group archlinux-tools',
+        'p7zip',
+      ]);
 
       await runPaxchange(machineName);
 
-      expect(await checkInstalled('bash'), isTrue);
+      expect(await checkInstalled('base'), isTrue);
       expect(await checkInstalled('p7zip'), isTrue);
+      expect(await checkInstalled('pacquery'), isTrue);
     });
   });
 }
