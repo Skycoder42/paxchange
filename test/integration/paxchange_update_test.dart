@@ -49,6 +49,7 @@ void main() {
       await packageDir.create();
 
       final packages = await _runPacman(const ['-Qqe']);
+      packages.removeWhere((p) => p.startsWith('alpm-'));
       final oneFourth = packages.length ~/ 4;
       base1 = packages.sublist(0, oneFourth);
       base2 = packages.sublist(oneFourth, oneFourth * 2);
@@ -59,6 +60,7 @@ void main() {
       await writePackages('base2', base2);
       await writePackages('base_all', [
         '::import base1',
+        '::group alpm',
         ...base3,
         '# other important packages',
         '::import ${packageDir.absolute.uri.resolve('base2').toFilePath()}',
@@ -155,6 +157,23 @@ void main() {
           ...base4.map((package) => '+$package'),
           ...base5.map((package) => '-$package'),
         ]),
+      );
+    });
+
+    test('generates changes for package missing in group', () async {
+      await _runPacman(['-R', '--noconfirm', 'alpm-docs']);
+      addTearDown(() => _runPacman(['-S', '--noconfirm', 'alpm-docs']));
+
+      final result = await runPaxchange('machine-1');
+
+      expect(result, 2);
+
+      final files = await packageDir.list().toList();
+      expect(files, hasLength(6));
+      expect(packageFile('machine-1.pcs').existsSync(), isTrue);
+      expect(
+        await readPackages('machine-1.pcs'),
+        unorderedEquals(<String>['-alpm-docs']),
       );
     });
   });

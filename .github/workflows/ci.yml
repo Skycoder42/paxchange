@@ -29,6 +29,9 @@ jobs:
     steps:
       - name: Install unzip
         run: pacman -Sy --noconfirm unzip
+      - name: Install more packages for testing
+        # does not really matter which, except alpm, which is a group
+        run: pacman -Sy --noconfirm alpm rsync bitwarden-cli wget hurl
       - name: Install Dart-SDK
         uses: dart-lang/setup-dart@v1
       - name: Checkout repository
