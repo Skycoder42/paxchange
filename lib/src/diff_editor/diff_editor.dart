@@ -19,12 +19,16 @@ part 'diff_editor.g.dart';
 
 // coverage:ignore-start
 @riverpod
+Console console(Ref ref) => Console.scrolling();
+
+@riverpod
 DiffEditor diffEditor(Ref ref) => DiffEditor(
   ref.read(packageFileAdapterProvider),
   ref.read(diffFileAdapterProvider),
   ref.read(pacmanProvider),
   ref.read(packageSyncProvider),
   ref.read(prompterProvider),
+  ref.read(consoleProvider),
 );
 // coverage:ignore-end
 
@@ -34,8 +38,7 @@ class DiffEditor {
   final Pacman _pacman;
   final PackageSync _packageSync;
   final Prompter _prompter;
-
-  final _console = Console.scrolling();
+  final Console _console;
 
   DiffEditor(
     this._packageFileAdapter,
@@ -43,6 +46,7 @@ class DiffEditor {
     this._pacman,
     this._packageSync,
     this._prompter,
+    this._console,
   );
 
   Future<void> run(String machineName) async {

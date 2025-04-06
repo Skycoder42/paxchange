@@ -70,6 +70,7 @@ void main() {
         mockPacman,
         mockPackageSync,
         mockPrompter,
+        Console.scrolling(),
       );
     });
 

@@ -30,9 +30,10 @@ final class GlobalOptions {
 }
 
 class PaxchangeRunner extends CommandRunner<int> {
+  final List<Override> extraOverrides;
   late final ProviderContainer _providerContainer;
 
-  PaxchangeRunner()
+  PaxchangeRunner({this.extraOverrides = const []})
     : super(
         'paxchange',
         'Simple dart script to passively synchronize '
@@ -41,6 +42,7 @@ class PaxchangeRunner extends CommandRunner<int> {
     _providerContainer = ProviderContainer(
       overrides: [
         configProvider.overrideWith((ref) => ref.watch(configProvider)),
+        ...extraOverrides,
       ],
     );
 
@@ -58,6 +60,7 @@ class PaxchangeRunner extends CommandRunner<int> {
     final config = await _readConfig(options.config);
     _providerContainer.updateOverrides([
       configProvider.overrideWithValue(config),
+      ...extraOverrides,
     ]);
 
     return super.runCommand(topLevelResults);
