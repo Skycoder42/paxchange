@@ -7,6 +7,7 @@ import '../package_sync.dart';
 import '../pacman/pacman.dart';
 import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
+import 'commands/add_group_command.dart';
 import 'commands/pacman_command.dart';
 import 'commands/print_command.dart';
 import 'commands/prompt_command.dart';
@@ -96,14 +97,15 @@ class DiffEditor {
       color: ConsoleColor.green,
     );
 
-    return _prompter.prompt(
+    return _prompter.promptCommand(
       console: _console,
       packageName: package,
       commands: [
         PrintCommand.local(_pacman),
-        RemoveCommand(_pacman),
-        MarkImplicitlyInstalledCommand(_pacman),
+        RemoveCommand(_pacman, _prompter),
+        MarkImplicitlyInstalledCommand(_pacman, _prompter),
         ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
+        AddGroupCommand(_packageFileAdapter, _pacman, _prompter),
         const SkipCommand(),
         const QuitCommand(),
       ],
@@ -134,12 +136,12 @@ class DiffEditor {
       color: ConsoleColor.yellow,
     );
 
-    return _prompter.prompt(
+    return _prompter.promptCommand(
       console: _console,
       packageName: package,
       commands: [
         PrintCommand.local(_pacman),
-        MarkExplicitlyInstalledCommand(_pacman),
+        MarkExplicitlyInstalledCommand(_pacman, _prompter),
         RemoveHistoryCommand(_packageFileAdapter, machineName),
         const SkipCommand(),
         const QuitCommand(),
@@ -159,12 +161,12 @@ class DiffEditor {
       color: ConsoleColor.red,
     );
 
-    return _prompter.prompt(
+    return _prompter.promptCommand(
       console: _console,
       packageName: package,
       commands: [
         PrintCommand.remote(_pacman),
-        InstallCommand(_pacman),
+        InstallCommand(_pacman, _prompter),
         RemoveHistoryCommand(_packageFileAdapter, machineName),
         const SkipCommand(),
         const QuitCommand(),

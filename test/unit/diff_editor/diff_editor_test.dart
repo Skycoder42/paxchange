@@ -128,7 +128,7 @@ void main() {
           () => mockDiffFileAdapter.loadPackageDiff(any()),
         ).thenStream(Stream.value(diffEntry));
         when(
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
@@ -153,7 +153,7 @@ void main() {
                     messageSuffix: ' that is not in the history yet!',
                     color: ConsoleColor.green,
                   ),
-                  () => mockPrompter.prompt(
+                  () => mockPrompter.promptCommand(
                     console: any(named: 'console'),
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
@@ -217,7 +217,7 @@ void main() {
           () => mockPacman.checkIfPackageIsInstalled(any()),
         ).thenReturnAsync(false);
         when(
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
@@ -243,7 +243,7 @@ void main() {
                     messageSuffix: ' that is in the history!',
                     color: ConsoleColor.red,
                   ),
-                  () => mockPrompter.prompt(
+                  () => mockPrompter.promptCommand(
                     console: any(named: 'console'),
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
@@ -294,7 +294,7 @@ void main() {
             () => mockPacman.checkIfPackageIsInstalled(any()),
           ).thenReturnAsync(true);
           when(
-            () => mockPrompter.prompt(
+            () => mockPrompter.promptCommand(
               console: any(named: 'console'),
               packageName: any(named: 'packageName'),
               commands: any(named: 'commands'),
@@ -321,7 +321,7 @@ void main() {
                       messageSuffix: ' that is in the history!',
                       color: ConsoleColor.yellow,
                     ),
-                    () => mockPrompter.prompt(
+                    () => mockPrompter.promptCommand(
                       console: any(named: 'console'),
                       packageName: diffEntry.package,
                       commands: captureAny(named: 'commands'),
@@ -375,14 +375,14 @@ void main() {
           () => mockPacman.checkIfPackageIsInstalled(any()),
         ).thenReturnAsync(false);
         when(
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
         ).thenReturn(PromptResult.succeeded);
         when(
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: 'package-2',
             commands: any(named: 'commands'),
@@ -402,7 +402,7 @@ void main() {
             messageSuffix: any(named: 'messageSuffix'),
             color: any(named: 'color'),
           ),
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: diffEntries[0].package,
             commands: any(named: 'commands'),
@@ -414,7 +414,7 @@ void main() {
             messageSuffix: any(named: 'messageSuffix'),
             color: any(named: 'color'),
           ),
-          () => mockPrompter.prompt(
+          () => mockPrompter.promptCommand(
             console: any(named: 'console'),
             packageName: diffEntries[1].package,
             commands: any(named: 'commands'),

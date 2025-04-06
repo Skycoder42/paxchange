@@ -11,15 +11,15 @@ Prompter prompter(Ref ref) => const Prompter();
 // coverage:ignore-end
 
 class Prompter {
-  static void writeError(Console console, String message) {
+  const Prompter();
+
+  void writeError(Console console, String message) {
     console
       ..setForegroundColor(ConsoleColor.red)
       ..writeLine()
       ..writeLine(message)
       ..resetColorAttributes();
   }
-
-  const Prompter();
 
   void writeTitle({
     required Console console,
@@ -41,15 +41,20 @@ class Prompter {
       ..resetColorAttributes();
   }
 
-  FutureOr<PromptResult> prompt({
+  String promptOption({
     required Console console,
-    required String packageName,
-    required List<PromptCommand> commands,
-  }) async {
+    required String description,
+    required Map<String, String> options,
+  }) {
     while (true) {
-      console.writeLine('What do you want to do?');
-      for (final command in commands) {
-        command.writeOption(console);
+      console.writeLine(description);
+      for (final MapEntry(:key, :value) in options.entries) {
+        console
+          ..write('  ')
+          ..setForegroundColor(ConsoleColor.blue)
+          ..write(key)
+          ..resetColorAttributes()
+          ..write(': $value\n');
       }
 
       console
@@ -58,20 +63,32 @@ class Prompter {
       final key = console.readKey();
       console.setTextStyle();
 
-      var repeat = false;
-      for (final command in commands) {
-        if (command.key == key.char) {
-          final result = await command(console, packageName);
-          if (result == PromptResult.repeat) {
-            repeat = true;
-            break;
-          }
-          return result;
-        }
-      }
-
-      if (!repeat) {
+      if (options.containsKey(key.char)) {
+        return key.char;
+      } else {
         writeError(console, 'Invalid option: ${key.char}!');
+      }
+    }
+  }
+
+  FutureOr<PromptResult> promptCommand({
+    required Console console,
+    required String packageName,
+    required List<PromptCommand> commands,
+  }) async {
+    while (true) {
+      final selectedKey = promptOption(
+        console: console,
+        description: 'What do you want to do?',
+        options: {
+          for (final command in commands) command.key: command.description,
+        },
+      );
+
+      final selectedCommand = commands.singleWhere((c) => c.key == selectedKey);
+      final result = await selectedCommand(console, packageName);
+      if (result != PromptResult.repeat) {
+        return result;
       }
     }
   }

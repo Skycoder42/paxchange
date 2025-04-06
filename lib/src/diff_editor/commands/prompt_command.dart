@@ -25,7 +25,8 @@ abstract class PromptCommand {
   FutureOr<PromptResult> call(Console console, String packageName);
 
   @nonVirtual
-  void writeOption(Console console) {
+  @protected
+  void writeGenericOption(Console console, String key, String description) {
     console
       ..write('  ')
       ..setForegroundColor(ConsoleColor.blue)
@@ -33,4 +34,8 @@ abstract class PromptCommand {
       ..resetColorAttributes()
       ..write(': $description\n');
   }
+
+  @nonVirtual
+  void writeOption(Console console) =>
+      writeGenericOption(console, key, description);
 }

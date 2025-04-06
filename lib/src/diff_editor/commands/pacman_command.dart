@@ -8,8 +8,9 @@ import 'prompt_command.dart';
 abstract class PacmanCommand extends PromptCommand {
   @protected
   final Pacman pacman;
+  final Prompter _prompter;
 
-  const PacmanCommand(this.pacman);
+  const PacmanCommand(this.pacman, this._prompter);
 
   @override
   @nonVirtual
@@ -30,7 +31,7 @@ abstract class PacmanCommand extends PromptCommand {
         ..readKey();
       return PromptResult.succeeded;
     } else {
-      Prompter.writeError(
+      _prompter.writeError(
         console,
         'Failed to $operation $packageName! '
         'Package manager failed with exit code $exitCode.',
@@ -47,7 +48,7 @@ abstract class PacmanCommand extends PromptCommand {
 }
 
 class InstallCommand extends PacmanCommand {
-  const InstallCommand(super.pacman);
+  const InstallCommand(super.pacman, super._prompter);
 
   @override
   String get key => 'i';
@@ -66,7 +67,7 @@ class InstallCommand extends PacmanCommand {
 }
 
 class RemoveCommand extends PacmanCommand {
-  const RemoveCommand(super.pacman);
+  const RemoveCommand(super.pacman, super._prompter);
 
   @override
   String get key => 'r';
@@ -85,7 +86,7 @@ class RemoveCommand extends PacmanCommand {
 }
 
 class MarkImplicitlyInstalledCommand extends PacmanCommand {
-  const MarkImplicitlyInstalledCommand(super.pacman);
+  const MarkImplicitlyInstalledCommand(super.pacman, super._prompter);
 
   @override
   String get key => 'm';
@@ -104,7 +105,7 @@ class MarkImplicitlyInstalledCommand extends PacmanCommand {
 }
 
 class MarkExplicitlyInstalledCommand extends PacmanCommand {
-  const MarkExplicitlyInstalledCommand(super.pacman);
+  const MarkExplicitlyInstalledCommand(super.pacman, super._prompter);
 
   @override
   String get key => 'm';

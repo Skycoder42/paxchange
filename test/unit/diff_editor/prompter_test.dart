@@ -84,7 +84,7 @@ void main() {
         () async {
           when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
 
-          final result = await const Prompter().prompt(
+          final result = await const Prompter().promptCommand(
             console: mockConsole,
             packageName: testPackageName,
             commands: [cmd1, cmd2],
@@ -111,7 +111,7 @@ void main() {
           () => mockConsole.readKey(),
         ).thenAnswer((i) => Key.printable('${keyCtr--}'));
 
-        final result = await const Prompter().prompt(
+        final result = await const Prompter().promptCommand(
           console: mockConsole,
           packageName: testPackageName,
           commands: [cmd1, cmd2],
