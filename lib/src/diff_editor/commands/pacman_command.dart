@@ -5,16 +5,16 @@ import '../../pacman/pacman.dart';
 import '../prompter.dart';
 import 'prompt_command.dart';
 
-abstract class PacmanCommand extends PromptCommand {
+abstract base class PacmanCommand extends PromptCommand {
   @protected
   final Pacman pacman;
   final Prompter _prompter;
 
-  const PacmanCommand(this.pacman, this._prompter);
+  const PacmanCommand(this.pacman, this._prompter, super.console);
 
   @override
   @nonVirtual
-  Future<PromptResult> call(Console console, String packageName) async {
+  Future<PromptResult> call(String packageName) async {
     console
       ..clearScreen()
       ..setForegroundColor(ConsoleColor.blue)
@@ -32,7 +32,6 @@ abstract class PacmanCommand extends PromptCommand {
       return PromptResult.succeeded;
     } else {
       _prompter.writeError(
-        console,
         'Failed to $operation $packageName! '
         'Package manager failed with exit code $exitCode.',
       );
@@ -47,8 +46,8 @@ abstract class PacmanCommand extends PromptCommand {
   Future<int> runPacman(String packageName);
 }
 
-class InstallCommand extends PacmanCommand {
-  const InstallCommand(super.pacman, super._prompter);
+final class InstallCommand extends PacmanCommand {
+  const InstallCommand(super.pacman, super._prompter, super.console);
 
   @override
   String get key => 'i';
@@ -66,8 +65,8 @@ class InstallCommand extends PacmanCommand {
       super.pacman.installPackages([packageName]);
 }
 
-class RemoveCommand extends PacmanCommand {
-  const RemoveCommand(super.pacman, super._prompter);
+final class RemoveCommand extends PacmanCommand {
+  const RemoveCommand(super.pacman, super._prompter, super.console);
 
   @override
   String get key => 'r';
@@ -85,8 +84,12 @@ class RemoveCommand extends PacmanCommand {
       super.pacman.removePackage(packageName);
 }
 
-class MarkImplicitlyInstalledCommand extends PacmanCommand {
-  const MarkImplicitlyInstalledCommand(super.pacman, super._prompter);
+final class MarkImplicitlyInstalledCommand extends PacmanCommand {
+  const MarkImplicitlyInstalledCommand(
+    super.pacman,
+    super._prompter,
+    super.console,
+  );
 
   @override
   String get key => 'm';
@@ -104,8 +107,12 @@ class MarkImplicitlyInstalledCommand extends PacmanCommand {
       .changePackageInstallReason(packageName, InstallReason.asDeps);
 }
 
-class MarkExplicitlyInstalledCommand extends PacmanCommand {
-  const MarkExplicitlyInstalledCommand(super.pacman, super._prompter);
+final class MarkExplicitlyInstalledCommand extends PacmanCommand {
+  const MarkExplicitlyInstalledCommand(
+    super.pacman,
+    super._prompter,
+    super.console,
+  );
 
   @override
   String get key => 'm';

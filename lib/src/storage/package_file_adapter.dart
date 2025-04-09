@@ -87,37 +87,19 @@ class PackageFileAdapter {
     }
   }
 
-  Future<bool> removeFromPackageFile(String machineName, String package) async {
+  Future<bool> removeFromPackageFile(
+    String machineName,
+    String package, {
+    bool recursive = true,
+  }) async {
     final packageFile = _packageFile(machineName);
     if (!packageFile.existsSync()) {
       return false;
     }
 
-    final fileWithPackage = await _findPackageRecursively(
-      packageFile,
-      package,
-      {machineName},
-    );
-
-    if (fileWithPackage == null) {
-      return false;
-    }
-
-    final lines = await _streamLines(fileWithPackage, autoTrim: false).toList();
-    final sink = fileWithPackage.openWrite();
-    try {
-      for (final line in lines) {
-        if (line.trim() == package) {
-          continue;
-        }
-        sink.writeln(line);
-      }
-    } finally {
-      await sink.flush();
-      await sink.close();
-    }
-
-    return true;
+    return await _removePackageRecursively(packageFile, package, {
+      machineName,
+    }, recursive);
   }
 
   File _packageFile(String machineName) =>
@@ -194,43 +176,67 @@ class PackageFileAdapter {
     }
   }
 
-  Future<File?> _findPackageRecursively(
+  Future<bool> _removePackageRecursively(
     File packageFile,
     String package,
     Set<String> importHistory,
+    bool recursive,
   ) async {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
-    await for (final line in _streamLines(packageFile)) {
-      // skip comment lines
-      if (_isComment(line)) {
+    final checkedLines = <String>[];
+    var didRemove = false;
+    await for (final rawLine in _streamLines(packageFile, autoTrim: false)) {
+      checkedLines.add(rawLine);
+      if (didRemove) {
+        continue;
+      }
+
+      final line = rawLine.trim();
+
+      // skip empty and comment lines
+      if (line.isEmpty || _isComment(line)) {
         continue;
       }
 
       // recursively stream imported package files
-      final importMatch = _importRegExp.matchAsPrefix(line);
-      if (importMatch != null) {
-        final importFileName = importMatch[1]!;
-        final fileWithPackage = await _findPackageRecursively(
-          _findPackageFile(importFileName, importHistory),
-          package,
-          _updateHistory(importFileName, importHistory),
-        );
+      if (recursive) {
+        final importMatch = _importRegExp.matchAsPrefix(line);
+        if (importMatch != null) {
+          final importFileName = importMatch[1]!;
+          didRemove = await _removePackageRecursively(
+            _findPackageFile(importFileName, importHistory),
+            package,
+            _updateHistory(importFileName, importHistory),
+            true,
+          );
 
-        if (fileWithPackage != null) {
-          return fileWithPackage;
+          if (didRemove) {
+            return didRemove;
+          }
         }
       }
 
-      // groups are ignored
+      // groups are not processed
 
-      // return with current file if found
+      // skip line if found and mark as removed
       if (line == package) {
-        return packageFile;
+        checkedLines.removeLast();
+        didRemove = true;
       }
     }
 
-    return null;
+    if (didRemove) {
+      final sink = packageFile.openWrite();
+      try {
+        checkedLines.forEach(sink.writeln);
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
+    }
+
+    return didRemove;
   }
 
   File _findPackageFile(String fileName, Iterable<String> history) {

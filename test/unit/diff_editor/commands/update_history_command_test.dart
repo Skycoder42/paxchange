@@ -31,6 +31,7 @@ void main() {
         mockPackageFileAdapter,
         testIndex,
         testMachineName,
+        mockConsole,
       );
     });
 
@@ -45,10 +46,9 @@ void main() {
       ).thenReturnAsync(null);
 
       const testPackageName = 'test-package';
-      final result = await sut(mockConsole, testPackageName);
+      final result = await sut(testPackageName);
 
       verifyInOrder([
-        () => mockConsole.writeLine(),
         () => mockConsole.writeLine(
           'Adding $testPackageName for $testMachineName...',
         ),
@@ -68,6 +68,7 @@ void main() {
       final commands = AddHistoryCommand.generate(
         mockPackageFileAdapter,
         machineHierarchy,
+        mockConsole,
       );
 
       expect(commands, hasLength(machineHierarchy.length));
@@ -92,7 +93,11 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = RemoveHistoryCommand(mockPackageFileAdapter, testMachineName);
+      sut = RemoveHistoryCommand(
+        mockPackageFileAdapter,
+        testMachineName,
+        mockConsole,
+      );
     });
 
     test('uses correct key', () {
@@ -106,10 +111,9 @@ void main() {
       ).thenReturnAsync(true);
 
       const testPackageName = 'test-package';
-      final result = await sut(mockConsole, testPackageName);
+      final result = await sut(testPackageName);
 
       verifyInOrder([
-        () => mockConsole.writeLine(),
         () => mockConsole.writeLine(
           'Removing $testPackageName for $testMachineName...',
         ),

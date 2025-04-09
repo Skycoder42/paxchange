@@ -1,9 +1,7 @@
-import 'package:dart_console/dart_console.dart';
-
 import 'prompt_command.dart';
 
-class SkipCommand extends PromptCommand {
-  const SkipCommand();
+final class SkipCommand extends PromptCommand {
+  const SkipCommand(super.console);
 
   @override
   String get key => 's';
@@ -12,6 +10,5 @@ class SkipCommand extends PromptCommand {
   String get description => 'Skip this package for now';
 
   @override
-  PromptResult call(Console console, String packageName) =>
-      PromptResult.skipped;
+  PromptResult call(String packageName) => PromptResult.skipped;
 }

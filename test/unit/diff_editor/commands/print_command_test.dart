@@ -31,13 +31,13 @@ void main() {
         () => mockPacman.queryInstalledPackage(any()),
       ).thenStream(Stream.fromIterable(packageInfo));
 
-      final sut = PrintCommand.local(mockPacman);
+      final sut = PrintCommand.local(mockPacman, mockConsole);
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
       expect(sut.printTarget, PrintTarget.local);
 
-      final result = await sut(mockConsole, testPackageName);
+      final result = await sut(testPackageName);
 
       verifyInOrder([
         () => mockPacman.queryInstalledPackage(testPackageName),
@@ -55,13 +55,13 @@ void main() {
         () => mockPacman.queryUninstalledPackage(any()),
       ).thenStream(Stream.fromIterable(packageInfo));
 
-      final sut = PrintCommand.remote(mockPacman);
+      final sut = PrintCommand.remote(mockPacman, mockConsole);
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
       expect(sut.printTarget, PrintTarget.remote);
 
-      final result = await sut(mockConsole, testPackageName);
+      final result = await sut(testPackageName);
 
       verifyInOrder([
         () => mockPacman.queryUninstalledPackage(testPackageName),

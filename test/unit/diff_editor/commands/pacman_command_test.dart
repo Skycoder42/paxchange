@@ -5,6 +5,7 @@ import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/commands/pacman_command.dart';
 import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
+import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
@@ -29,7 +30,7 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = InstallCommand(mockPacman);
+      sut = InstallCommand(mockPacman, Prompter(mockConsole), mockConsole);
     });
 
     test('uses correct key', () {
@@ -43,7 +44,7 @@ void main() {
 
         when(() => mockPacman.installPackages(any())).thenReturnAsync(0);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -63,7 +64,7 @@ void main() {
 
         when(() => mockPacman.installPackages(any())).thenReturnAsync(10);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -99,7 +100,7 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = RemoveCommand(mockPacman);
+      sut = RemoveCommand(mockPacman, Prompter(mockConsole), mockConsole);
     });
 
     test('uses correct key', () {
@@ -113,7 +114,7 @@ void main() {
 
         when(() => mockPacman.removePackage(any())).thenReturnAsync(0);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -133,7 +134,7 @@ void main() {
 
         when(() => mockPacman.removePackage(any())).thenReturnAsync(10);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -169,7 +170,11 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = MarkImplicitlyInstalledCommand(mockPacman);
+      sut = MarkImplicitlyInstalledCommand(
+        mockPacman,
+        Prompter(mockConsole),
+        mockConsole,
+      );
     });
 
     test('uses correct key', () {
@@ -185,7 +190,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(0);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -210,7 +215,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(10);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -249,7 +254,11 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = MarkExplicitlyInstalledCommand(mockPacman);
+      sut = MarkExplicitlyInstalledCommand(
+        mockPacman,
+        Prompter(mockConsole),
+        mockConsole,
+      );
     });
 
     test('uses correct key', () {
@@ -265,7 +274,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(0);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -290,7 +299,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(10);
 
-        final result = await sut(mockConsole, testPackageName);
+        final result = await sut(testPackageName);
 
         verifyInOrder([
           () => mockConsole.clearScreen(),

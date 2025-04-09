@@ -1,10 +1,7 @@
 // ignore_for_file: unnecessary_lambdas, discarded_futures
 
-import 'dart:io';
-
 import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/commands/pacman_command.dart';
 import 'package:paxchange/src/diff_editor/commands/print_command.dart';
@@ -29,11 +26,9 @@ class MockPacman extends Mock implements Pacman {}
 
 class MockPackageSync extends Mock implements PackageSync {}
 
+class MockConsole extends Mock implements Console {}
+
 class MockPrompter extends Mock implements Prompter {}
-
-class MockStdout extends Mock implements Stdout {}
-
-final mockStdout = MockStdout();
 
 void main() {
   setUpAll(() {
@@ -48,6 +43,7 @@ void main() {
     final mockDiffFileAdapter = MockDiffFileAdapter();
     final mockPacman = MockPacman();
     final mockPackageSync = MockPackageSync();
+    final mockConsole = MockConsole();
     final mockPrompter = MockPrompter();
 
     late DiffEditor sut;
@@ -57,7 +53,7 @@ void main() {
       reset(mockDiffFileAdapter);
       reset(mockPacman);
       reset(mockPackageSync);
-      reset(mockStdout);
+      reset(mockConsole);
       reset(mockPrompter);
 
       when(
@@ -69,34 +65,27 @@ void main() {
         mockDiffFileAdapter,
         mockPacman,
         mockPackageSync,
+        mockConsole,
         mockPrompter,
       );
     });
 
-    @isTest
-    void testZoned(String description, dynamic Function() body) => test(
-      description,
-      () => IOOverrides.runZoned<dynamic>(stdout: () => mockStdout, body),
-    );
-
     group('run', () {
       setUp(() {
-        when(() => mockStdout.hasTerminal).thenReturn(true);
-        when(() => mockStdout.supportsAnsiEscapes).thenReturn(true);
-        when(() => mockStdout.terminalColumns).thenReturn(80);
+        when(() => mockConsole.hasTerminal).thenReturn(true);
 
         when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
       });
 
-      testZoned('throws exception if console does not have a terminal', () {
-        when(() => mockStdout.hasTerminal).thenReturn(false);
+      test('throws exception if console does not have a terminal', () {
+        when(() => mockConsole.hasTerminal).thenReturn(false);
 
         expect(() => sut.run(testMachineName), throwsA(isException));
 
-        verify(() => mockStdout.hasTerminal);
+        verify(() => mockConsole.hasTerminal);
       });
 
-      testZoned('does nothing if no entries are present', () async {
+      test('does nothing if no entries are present', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
 
         when(
@@ -117,7 +106,7 @@ void main() {
         verifyNoMoreInteractions(mockPackageSync);
       });
 
-      testZoned('presents added diff entry', () async {
+      test('presents added diff entry', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.added('package-1');
 
@@ -129,7 +118,6 @@ void main() {
         ).thenStream(Stream.value(diffEntry));
         when(
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
@@ -147,14 +135,12 @@ void main() {
                   ),
                   () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
                   () => mockPrompter.writeTitle(
-                    console: any(named: 'console'),
                     messagePrefix: 'Found installed package ',
-                    package: diffEntry.package,
+                    messageHighlight: diffEntry.package,
                     messageSuffix: ' that is not in the history yet!',
                     color: ConsoleColor.green,
                   ),
                   () => mockPrompter.promptCommand(
-                    console: any(named: 'console'),
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
                   ),
@@ -203,7 +189,7 @@ void main() {
         expect(captured, contains(isA<QuitCommand>()));
       });
 
-      testZoned('presents removed diff entry for removed package', () async {
+      test('presents removed diff entry for removed package', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntry = DiffEntry.removed('package-1');
 
@@ -218,7 +204,6 @@ void main() {
         ).thenReturnAsync(false);
         when(
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
@@ -237,14 +222,12 @@ void main() {
                   () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
                   () => mockPacman.checkIfPackageIsInstalled(diffEntry.package),
                   () => mockPrompter.writeTitle(
-                    console: any(named: 'console'),
                     messagePrefix: 'Found uninstalled package ',
-                    package: diffEntry.package,
+                    messageHighlight: diffEntry.package,
                     messageSuffix: ' that is in the history!',
                     color: ConsoleColor.red,
                   ),
                   () => mockPrompter.promptCommand(
-                    console: any(named: 'console'),
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
                   ),
@@ -278,7 +261,7 @@ void main() {
         expect(captured, contains(isA<QuitCommand>()));
       });
 
-      testZoned(
+      test(
         'presents removed diff entry for implicitly installed package',
         () async {
           const testHierarchy = [testMachineName, 'file2', 'file3'];
@@ -295,7 +278,6 @@ void main() {
           ).thenReturnAsync(true);
           when(
             () => mockPrompter.promptCommand(
-              console: any(named: 'console'),
               packageName: any(named: 'packageName'),
               commands: any(named: 'commands'),
             ),
@@ -315,14 +297,12 @@ void main() {
                     () =>
                         mockPacman.checkIfPackageIsInstalled(diffEntry.package),
                     () => mockPrompter.writeTitle(
-                      console: any(named: 'console'),
                       messagePrefix: 'Found implicitly installed package ',
-                      package: diffEntry.package,
+                      messageHighlight: diffEntry.package,
                       messageSuffix: ' that is in the history!',
                       color: ConsoleColor.yellow,
                     ),
                     () => mockPrompter.promptCommand(
-                      console: any(named: 'console'),
                       packageName: diffEntry.package,
                       commands: captureAny(named: 'commands'),
                     ),
@@ -357,7 +337,7 @@ void main() {
         },
       );
 
-      testZoned('aborts early if a command returns false', () async {
+      test('aborts early if a command returns false', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntries = [
           DiffEntry.removed('package-1'),
@@ -376,14 +356,12 @@ void main() {
         ).thenReturnAsync(false);
         when(
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: any(named: 'packageName'),
             commands: any(named: 'commands'),
           ),
         ).thenReturn(PromptResult.succeeded);
         when(
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: 'package-2',
             commands: any(named: 'commands'),
           ),
@@ -396,26 +374,22 @@ void main() {
               mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
           () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
           () => mockPrompter.writeTitle(
-            console: any(named: 'console'),
             messagePrefix: any(named: 'messagePrefix'),
-            package: diffEntries[0].package,
+            messageHighlight: diffEntries[0].package,
             messageSuffix: any(named: 'messageSuffix'),
             color: any(named: 'color'),
           ),
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: diffEntries[0].package,
             commands: any(named: 'commands'),
           ),
           () => mockPrompter.writeTitle(
-            console: any(named: 'console'),
             messagePrefix: any(named: 'messagePrefix'),
-            package: diffEntries[1].package,
+            messageHighlight: diffEntries[1].package,
             messageSuffix: any(named: 'messageSuffix'),
             color: any(named: 'color'),
           ),
           () => mockPrompter.promptCommand(
-            console: any(named: 'console'),
             packageName: diffEntries[1].package,
             commands: any(named: 'commands'),
           ),

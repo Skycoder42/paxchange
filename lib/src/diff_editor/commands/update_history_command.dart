@@ -4,17 +4,15 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../storage/package_file_adapter.dart';
 import 'prompt_command.dart';
 
-abstract class UpdateHistoryCommand extends PromptCommand {
+abstract base class UpdateHistoryCommand extends PromptCommand {
   @protected
   final PackageFileAdapter packageFileAdapter;
 
-  const UpdateHistoryCommand(this.packageFileAdapter);
+  const UpdateHistoryCommand(this.packageFileAdapter, super.console);
 
   @override
-  Future<PromptResult> call(Console console, String packageName) async {
-    console
-      ..writeLine()
-      ..writeLine('$operation $packageName for $machineName...');
+  Future<PromptResult> call(String packageName) async {
+    console.writeLine('$operation $packageName for $machineName...');
     await updateHistory(packageName);
     console
       ..writeLine('Success! Press any key to continue...')
@@ -33,7 +31,7 @@ abstract class UpdateHistoryCommand extends PromptCommand {
   Future<void> updateHistory(String packageName);
 }
 
-class AddHistoryCommand extends UpdateHistoryCommand {
+final class AddHistoryCommand extends UpdateHistoryCommand {
   final int index;
   @override
   final String machineName;
@@ -42,15 +40,21 @@ class AddHistoryCommand extends UpdateHistoryCommand {
     super.packageFileAdapter,
     this.index,
     this.machineName,
+    super.console,
   );
 
   static List<AddHistoryCommand> generate(
     PackageFileAdapter packageFileAdapter,
     List<String> machineHierarchy,
+    Console console,
   ) => List.generate(
     machineHierarchy.length,
-    (index) =>
-        AddHistoryCommand(packageFileAdapter, index, machineHierarchy[index]),
+    (index) => AddHistoryCommand(
+      packageFileAdapter,
+      index,
+      machineHierarchy[index],
+      console,
+    ),
   );
 
   @override
@@ -67,11 +71,15 @@ class AddHistoryCommand extends UpdateHistoryCommand {
       super.packageFileAdapter.addToPackageFile(machineName, packageName);
 }
 
-class RemoveHistoryCommand extends UpdateHistoryCommand {
+final class RemoveHistoryCommand extends UpdateHistoryCommand {
   @override
   final String machineName;
 
-  const RemoveHistoryCommand(super.packageFileAdapter, this.machineName);
+  const RemoveHistoryCommand(
+    super.packageFileAdapter,
+    this.machineName,
+    super.console,
+  );
 
   @override
   String get key => 'd';

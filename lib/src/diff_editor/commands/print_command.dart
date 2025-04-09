@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dart_console/dart_console.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../pacman/pacman.dart';
@@ -9,15 +8,17 @@ import 'prompt_command.dart';
 @visibleForTesting
 enum PrintTarget { local, remote }
 
-class PrintCommand extends PromptCommand {
+final class PrintCommand extends PromptCommand {
   final Pacman _pacman;
 
   @visibleForTesting
   final PrintTarget printTarget;
 
-  const PrintCommand.local(this._pacman) : printTarget = PrintTarget.local;
+  const PrintCommand.local(this._pacman, super.console)
+    : printTarget = PrintTarget.local;
 
-  const PrintCommand.remote(this._pacman) : printTarget = PrintTarget.remote;
+  const PrintCommand.remote(this._pacman, super.console)
+    : printTarget = PrintTarget.remote;
 
   @override
   String get key => 'p';
@@ -26,7 +27,7 @@ class PrintCommand extends PromptCommand {
   String get description => 'Print information about the package';
 
   @override
-  Future<PromptResult> call(Console console, String packageName) async {
+  Future<PromptResult> call(String packageName) async {
     Stream<String> packageStream;
     switch (printTarget) {
       case PrintTarget.local:

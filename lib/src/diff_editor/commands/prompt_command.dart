@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 enum PromptResult {
   succeeded(stopProcessing: false, didModify: true),
+  succeededReload(stopProcessing: true, didModify: true, needsReload: true),
   failed(stopProcessing: true, didModify: true),
   repeat(stopProcessing: false, didModify: false),
   skipped(stopProcessing: false, didModify: false),
@@ -12,30 +13,28 @@ enum PromptResult {
 
   final bool stopProcessing;
   final bool didModify;
+  final bool needsReload;
 
-  const PromptResult({required this.stopProcessing, required this.didModify});
+  const PromptResult({
+    required this.stopProcessing,
+    required this.didModify,
+    this.needsReload = false,
+  });
+
+  PromptResult withReload() => switch (this) {
+    PromptResult.succeeded => PromptResult.succeededReload,
+    _ => this,
+  };
 }
 
-abstract class PromptCommand {
-  const PromptCommand();
+abstract base class PromptCommand {
+  @protected
+  final Console console;
+
+  const PromptCommand(this.console);
 
   String get key;
   String get description;
 
-  FutureOr<PromptResult> call(Console console, String packageName);
-
-  @nonVirtual
-  @protected
-  void writeGenericOption(Console console, String key, String description) {
-    console
-      ..write('  ')
-      ..setForegroundColor(ConsoleColor.blue)
-      ..write(key)
-      ..resetColorAttributes()
-      ..write(': $description\n');
-  }
-
-  @nonVirtual
-  void writeOption(Console console) =>
-      writeGenericOption(console, key, description);
+  FutureOr<PromptResult> call(String packageName);
 }

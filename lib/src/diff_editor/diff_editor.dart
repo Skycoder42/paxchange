@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../diff_entry.dart';
 import '../package_sync.dart';
 import '../pacman/pacman.dart';
+import '../providers/console_provider.dart';
 import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
 import 'commands/add_group_command.dart';
@@ -25,6 +26,7 @@ DiffEditor diffEditor(Ref ref) => DiffEditor(
   ref.read(diffFileAdapterProvider),
   ref.read(pacmanProvider),
   ref.read(packageSyncProvider),
+  ref.read(consoleProvider),
   ref.read(prompterProvider),
 );
 // coverage:ignore-end
@@ -34,15 +36,15 @@ class DiffEditor {
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
   final PackageSync _packageSync;
+  final Console _console;
   final Prompter _prompter;
-
-  final _console = Console.scrolling();
 
   DiffEditor(
     this._packageFileAdapter,
     this._diffFileAdapter,
     this._pacman,
     this._packageSync,
+    this._console,
     this._prompter,
   );
 
@@ -57,32 +59,37 @@ class DiffEditor {
         await _packageFileAdapter
             .loadPackageFileHierarchy(machineName)
             .toList();
-    final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
-    var didModify = false;
-    await for (final diffEntry in diffEntries) {
-      final entryResult = await switch (diffEntry) {
-        DiffAddedEntry(:final package) => _presentAdded(
-          package,
-          machineHierarchy,
-        ),
-        DiffRemovedEntry(:final package) => _presentRemoved(
-          package,
-          machineName,
-        ),
-      };
+    var reload = false;
+    do {
+      final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
-      didModify = didModify || entryResult.didModify;
-      if (entryResult.stopProcessing) {
-        break;
+      var didModify = false;
+      await for (final diffEntry in diffEntries) {
+        final entryResult = await switch (diffEntry) {
+          DiffAddedEntry(:final package) => _presentAdded(
+            package,
+            machineHierarchy,
+          ),
+          DiffRemovedEntry(:final package) => _presentRemoved(
+            package,
+            machineName,
+          ),
+        };
+
+        reload = entryResult.needsReload;
+        didModify = didModify || entryResult.didModify;
+        if (entryResult.stopProcessing) {
+          break;
+        }
       }
-    }
 
-    if (didModify) {
-      await _updatePackageDiff();
-    } else {
-      _console.writeLine('No packages modified, nothing to do!');
-    }
+      if (didModify) {
+        await _updatePackageDiff(skipResultMessage: reload);
+      } else {
+        _console.writeLine('No packages modified, nothing to do!');
+      }
+    } while (reload);
   }
 
   Future<PromptResult> _presentAdded(
@@ -90,24 +97,32 @@ class DiffEditor {
     List<String> machineHierarchy,
   ) async {
     _prompter.writeTitle(
-      console: _console,
       messagePrefix: 'Found installed package ',
-      package: package,
+      messageHighlight: package,
       messageSuffix: ' that is not in the history yet!',
       color: ConsoleColor.green,
     );
 
     return _prompter.promptCommand(
-      console: _console,
       packageName: package,
       commands: [
-        PrintCommand.local(_pacman),
-        RemoveCommand(_pacman, _prompter),
-        MarkImplicitlyInstalledCommand(_pacman, _prompter),
-        ...AddHistoryCommand.generate(_packageFileAdapter, machineHierarchy),
-        AddGroupCommand(_packageFileAdapter, _pacman, _prompter),
-        const SkipCommand(),
-        const QuitCommand(),
+        PrintCommand.local(_pacman, _console),
+        RemoveCommand(_pacman, _prompter, _console),
+        MarkImplicitlyInstalledCommand(_pacman, _prompter, _console),
+        ...AddHistoryCommand.generate(
+          _packageFileAdapter,
+          machineHierarchy,
+          _console,
+        ),
+        AddGroupCommand(
+          _packageFileAdapter,
+          _pacman,
+          _prompter,
+          machineHierarchy,
+          _console,
+        ),
+        SkipCommand(_console),
+        QuitCommand(_console),
       ],
     );
   }
@@ -129,22 +144,20 @@ class DiffEditor {
     String machineName,
   ) async {
     _prompter.writeTitle(
-      console: _console,
       messagePrefix: 'Found implicitly installed package ',
-      package: package,
+      messageHighlight: package,
       messageSuffix: ' that is in the history!',
       color: ConsoleColor.yellow,
     );
 
     return _prompter.promptCommand(
-      console: _console,
       packageName: package,
       commands: [
-        PrintCommand.local(_pacman),
-        MarkExplicitlyInstalledCommand(_pacman, _prompter),
-        RemoveHistoryCommand(_packageFileAdapter, machineName),
-        const SkipCommand(),
-        const QuitCommand(),
+        PrintCommand.local(_pacman, _console),
+        MarkExplicitlyInstalledCommand(_pacman, _prompter, _console),
+        RemoveHistoryCommand(_packageFileAdapter, machineName, _console),
+        SkipCommand(_console),
+        QuitCommand(_console),
       ],
     );
   }
@@ -154,35 +167,35 @@ class DiffEditor {
     String machineName,
   ) async {
     _prompter.writeTitle(
-      console: _console,
       messagePrefix: 'Found uninstalled package ',
-      package: package,
+      messageHighlight: package,
       messageSuffix: ' that is in the history!',
       color: ConsoleColor.red,
     );
 
     return _prompter.promptCommand(
-      console: _console,
       packageName: package,
       commands: [
-        PrintCommand.remote(_pacman),
-        InstallCommand(_pacman, _prompter),
-        RemoveHistoryCommand(_packageFileAdapter, machineName),
-        const SkipCommand(),
-        const QuitCommand(),
+        PrintCommand.remote(_pacman, _console),
+        InstallCommand(_pacman, _prompter, _console),
+        RemoveHistoryCommand(_packageFileAdapter, machineName, _console),
+        SkipCommand(_console),
+        QuitCommand(_console),
       ],
     );
   }
 
-  Future<void> _updatePackageDiff() async {
+  Future<void> _updatePackageDiff({bool skipResultMessage = false}) async {
     _console
       ..clearScreen()
       ..writeLine('Updating package changelog, please wait...');
 
     final result = await _packageSync.updatePackageDiff();
 
-    _console
-      ..writeLine('Successfully regenerated package changelog!')
-      ..writeLine('It now contains $result entries');
+    if (!skipResultMessage) {
+      _console
+        ..writeLine('Successfully regenerated package changelog!')
+        ..writeLine('It now contains $result entries');
+    }
   }
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_lambdas, discarded_futures
 
 import 'package:dart_console/dart_console.dart';
+import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/prompter.dart';
@@ -8,7 +9,22 @@ import 'package:test/test.dart';
 
 class MockConsole extends Mock implements Console {}
 
-class MockPromptCommand extends Mock implements PromptCommand {}
+final class TestPromptCommand extends PromptCommand {
+  final _call = MockCallable1<PromptResult, String>();
+
+  @override
+  final String key;
+
+  @override
+  final String description;
+
+  TestPromptCommand(super.console, this.key, this.description);
+
+  @override
+  PromptResult call(String packageName) => _call(packageName);
+
+  void resetCall() => reset(_call);
+}
 
 void main() {
   setUpAll(() {
@@ -18,14 +34,18 @@ void main() {
   group('$Prompter', () {
     final mockConsole = MockConsole();
 
+    late Prompter sut;
+
     setUp(() {
       reset(mockConsole);
+
+      sut = Prompter(mockConsole);
     });
 
     test('writeError writes error line', () {
       const message = 'error-message';
 
-      Prompter.writeError(mockConsole, message);
+      sut.writeError(message);
 
       verifyInOrder([
         () => mockConsole.setForegroundColor(ConsoleColor.red),
@@ -41,10 +61,9 @@ void main() {
       const package = 'test-package';
       const color = ConsoleColor.magenta;
 
-      const Prompter().writeTitle(
-        console: mockConsole,
+      sut.writeTitle(
         messagePrefix: prefix,
-        package: package,
+        messageHighlight: package,
         messageSuffix: suffix,
         color: color,
       );
@@ -64,63 +83,64 @@ void main() {
       verifyNoMoreInteractions(mockConsole);
     });
 
-    group('prompt', () {
-      const testPackageName = 'test-package';
-      final cmd1 = MockPromptCommand();
-      final cmd2 = MockPromptCommand();
-
-      setUp(() {
-        when(() => cmd1.key).thenReturn('1');
-        when(() => cmd1.description).thenReturn('command 1');
-        when(() => cmd1.call(any(), any())).thenReturn(PromptResult.succeeded);
-
-        when(() => cmd2.key).thenReturn('2');
-        when(() => cmd2.description).thenReturn('command 2');
-        when(() => cmd2.call(any(), any())).thenReturn(PromptResult.failed);
-      });
+    group('promptOption', () {
+      const testDescription = 'test-description';
+      const testOptions = {'1': 'option 1', '2': 'option 2'};
 
       test(
         'writes a prompt with all options and returns result of selected',
-        () async {
+        () {
           when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
 
-          final result = await const Prompter().promptCommand(
-            console: mockConsole,
-            packageName: testPackageName,
-            commands: [cmd1, cmd2],
+          final result = sut.promptOption(
+            description: testDescription,
+            options: testOptions,
           );
 
           verifyInOrder([
-            () => mockConsole.writeLine('What do you want to do?'),
-            () => cmd1.writeOption(mockConsole),
-            () => cmd2.writeOption(mockConsole),
+            () => mockConsole.writeLine(testDescription),
+            for (final MapEntry(:key, :value) in testOptions.entries) ...[
+              () => mockConsole.write('  '),
+              () => mockConsole.setForegroundColor(ConsoleColor.blue),
+              () => mockConsole.write(key),
+              () => mockConsole.resetColorAttributes(),
+              () => mockConsole.write(': $value\n'),
+            ],
             () => mockConsole.write('> '),
             () => mockConsole.setTextStyle(blink: true),
             () => mockConsole.readKey(),
             () => mockConsole.setTextStyle(),
-            () => cmd1.call(mockConsole, testPackageName),
+            () => mockConsole.setForegroundColor(ConsoleColor.green),
+            () => mockConsole.write('1'),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.writeLine(),
           ]);
           verifyNoMoreInteractions(mockConsole);
-          expect(result, PromptResult.succeeded);
+
+          expect(result, '1');
         },
       );
 
-      test('writes a looping prompt for invalid inputs', () async {
+      test('writes a looping prompt for invalid inputs', () {
         var keyCtr = 3;
         when(
           () => mockConsole.readKey(),
         ).thenAnswer((i) => Key.printable('${keyCtr--}'));
 
-        final result = await const Prompter().promptCommand(
-          console: mockConsole,
-          packageName: testPackageName,
-          commands: [cmd1, cmd2],
+        final result = sut.promptOption(
+          description: testDescription,
+          options: testOptions,
         );
 
         verifyInOrder([
-          () => mockConsole.writeLine('What do you want to do?'),
-          () => cmd1.writeOption(mockConsole),
-          () => cmd2.writeOption(mockConsole),
+          () => mockConsole.writeLine(testDescription),
+          for (final MapEntry(:key, :value) in testOptions.entries) ...[
+            () => mockConsole.write('  '),
+            () => mockConsole.setForegroundColor(ConsoleColor.blue),
+            () => mockConsole.write(key),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.write(': $value\n'),
+          ],
           () => mockConsole.write('> '),
           () => mockConsole.setTextStyle(blink: true),
           () => mockConsole.readKey(),
@@ -129,17 +149,127 @@ void main() {
           () => mockConsole.writeLine(),
           () => mockConsole.writeLine('Invalid option: 3!'),
           () => mockConsole.resetColorAttributes(),
-          () => mockConsole.writeLine('What do you want to do?'),
-          () => cmd1.writeOption(mockConsole),
-          () => cmd2.writeOption(mockConsole),
+          () => mockConsole.writeLine(testDescription),
+          for (final MapEntry(:key, :value) in testOptions.entries) ...[
+            () => mockConsole.write('  '),
+            () => mockConsole.setForegroundColor(ConsoleColor.blue),
+            () => mockConsole.write(key),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.write(': $value\n'),
+          ],
           () => mockConsole.write('> '),
           () => mockConsole.setTextStyle(blink: true),
           () => mockConsole.readKey(),
           () => mockConsole.setTextStyle(),
-          () => cmd2.call(mockConsole, testPackageName),
+          () => mockConsole.setForegroundColor(ConsoleColor.green),
+          () => mockConsole.write('2'),
+          () => mockConsole.resetColorAttributes(),
+          () => mockConsole.writeLine(),
         ]);
         verifyNoMoreInteractions(mockConsole);
-        expect(result, PromptResult.failed);
+
+        expect(result, '2');
+      });
+    });
+
+    group('promptCommand', () {
+      const testPackageName = 'test-package';
+      final cmd1 = TestPromptCommand(mockConsole, '1', 'command 1');
+      final cmd2 = TestPromptCommand(mockConsole, '2', 'command 2');
+
+      setUp(() {
+        cmd1.resetCall();
+        cmd2.resetCall();
+
+        when(() => cmd1.call(any())).thenReturn(PromptResult.succeeded);
+        when(() => cmd2.call(any())).thenReturn(PromptResult.repeat);
+      });
+
+      test(
+        'writes a prompt with all options and returns result of selected',
+        () async {
+          when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
+
+          final result = await sut.promptCommand(
+            packageName: testPackageName,
+            commands: [cmd1, cmd2],
+          );
+
+          verifyInOrder([
+            () => mockConsole.writeLine('What do you want to do?'),
+            for (final cmd in [cmd1, cmd2]) ...[
+              () => mockConsole.write('  '),
+              () => mockConsole.setForegroundColor(ConsoleColor.blue),
+              () => mockConsole.write(cmd.key),
+              () => mockConsole.resetColorAttributes(),
+              () => mockConsole.write(': ${cmd.description}\n'),
+            ],
+            () => mockConsole.write('> '),
+            () => mockConsole.setTextStyle(blink: true),
+            () => mockConsole.readKey(),
+            () => mockConsole.setTextStyle(),
+            () => mockConsole.setForegroundColor(ConsoleColor.green),
+            () => mockConsole.write('1'),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.writeLine(),
+            () => cmd1.call(testPackageName),
+          ]);
+          // verifyNoMoreInteractions(mockConsole);
+          expect(result, PromptResult.succeeded);
+        },
+      );
+
+      test('writes a looping prompt if output is repeat', () async {
+        var keyCtr = 2;
+        when(
+          () => mockConsole.readKey(),
+        ).thenAnswer((i) => Key.printable('${keyCtr--}'));
+
+        final result = await sut.promptCommand(
+          packageName: testPackageName,
+          commands: [cmd1, cmd2],
+        );
+
+        verifyInOrder([
+          // cmd 2
+          () => mockConsole.writeLine('What do you want to do?'),
+          for (final cmd in [cmd1, cmd2]) ...[
+            () => mockConsole.write('  '),
+            () => mockConsole.setForegroundColor(ConsoleColor.blue),
+            () => mockConsole.write(cmd.key),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.write(': ${cmd.description}\n'),
+          ],
+          () => mockConsole.write('> '),
+          () => mockConsole.setTextStyle(blink: true),
+          () => mockConsole.readKey(),
+          () => mockConsole.setTextStyle(),
+          () => mockConsole.setForegroundColor(ConsoleColor.green),
+          () => mockConsole.write('2'),
+          () => mockConsole.resetColorAttributes(),
+          () => mockConsole.writeLine(),
+          () => cmd2.call(testPackageName),
+          // cmd 1
+          () => mockConsole.writeLine('What do you want to do?'),
+          for (final cmd in [cmd1, cmd2]) ...[
+            () => mockConsole.write('  '),
+            () => mockConsole.setForegroundColor(ConsoleColor.blue),
+            () => mockConsole.write(cmd.key),
+            () => mockConsole.resetColorAttributes(),
+            () => mockConsole.write(': ${cmd.description}\n'),
+          ],
+          () => mockConsole.write('> '),
+          () => mockConsole.setTextStyle(blink: true),
+          () => mockConsole.readKey(),
+          () => mockConsole.setTextStyle(),
+          () => mockConsole.setForegroundColor(ConsoleColor.green),
+          () => mockConsole.write('1'),
+          () => mockConsole.resetColorAttributes(),
+          () => mockConsole.writeLine(),
+          () => cmd1.call(testPackageName),
+        ]);
+        verifyNoMoreInteractions(mockConsole);
+        expect(result, PromptResult.succeeded);
       });
     });
   });

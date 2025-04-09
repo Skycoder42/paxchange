@@ -523,6 +523,25 @@ void main() {
         expect(packageFile(fileName1).readAsLinesSync(), lines1.sublist(0, 3));
       });
 
+      test('does not search package files recursively if disabled', () async {
+        const fileName1 = 'test-file-1';
+        const fileName2 = 'test-file-2';
+        const lines1 = ['line-A', 'line-B', 'line-C', testPackageName];
+        const lines2 = ['::import $fileName1', testPackageName];
+        writeFile(fileName1, lines1);
+        writeFile(fileName2, lines2);
+
+        final result = await sut.removeFromPackageFile(
+          fileName2,
+          testPackageName,
+          recursive: false,
+        );
+
+        expect(result, isTrue);
+        expect(packageFile(fileName2).readAsLinesSync(), lines2.sublist(0, 1));
+        expect(packageFile(fileName1).readAsLinesSync(), lines1);
+      });
+
       test('throws exception if imported file cannot be found', () {
         const fileName1 = 'test-file';
         const lines1 = ['::import non-existent-file'];
