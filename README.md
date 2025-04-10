@@ -12,7 +12,7 @@
 - can be automatically expanded to `pacman -Sgq <group>`
 
 ### Review
-#### Step 1 - added package with no group
+#### ✅ Step 1 - added package with no group
 - When reviewing an added package, the option "g" allows to add a group
   - query before printing to give a preview of the groups?
 - this then lists all available groups or uses the single group
