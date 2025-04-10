@@ -61,11 +61,16 @@ class DiffEditor {
             .toList();
 
     var reload = false;
+    final skipped = <String>{};
     do {
       final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
       var didModify = false;
       await for (final diffEntry in diffEntries) {
+        if (skipped.contains(diffEntry.package)) {
+          continue;
+        }
+
         final entryResult = await switch (diffEntry) {
           DiffAddedEntry(:final package) => _presentAdded(
             package,
@@ -77,6 +82,9 @@ class DiffEditor {
           ),
         };
 
+        if (entryResult == PromptResult.skipped) {
+          skipped.add(diffEntry.package);
+        }
         reload = entryResult.needsReload;
         didModify = didModify || entryResult.didModify;
         if (entryResult.stopProcessing) {
@@ -106,20 +114,20 @@ class DiffEditor {
     return _prompter.promptCommand(
       packageName: package,
       commands: [
-        PrintCommand.local(_pacman, _console),
-        RemoveCommand(_pacman, _prompter, _console),
-        MarkImplicitlyInstalledCommand(_pacman, _prompter, _console),
+        PrintCommand.local(_console, _pacman),
+        RemoveCommand(_console, _pacman, _prompter),
+        MarkImplicitlyInstalledCommand(_console, _pacman, _prompter),
         ...AddHistoryCommand.generate(
+          _console,
           _packageFileAdapter,
           machineHierarchy,
-          _console,
         ),
         AddGroupCommand(
+          _console,
           _packageFileAdapter,
           _pacman,
           _prompter,
           machineHierarchy,
-          _console,
         ),
         SkipCommand(_console),
         QuitCommand(_console),
@@ -153,9 +161,9 @@ class DiffEditor {
     return _prompter.promptCommand(
       packageName: package,
       commands: [
-        PrintCommand.local(_pacman, _console),
-        MarkExplicitlyInstalledCommand(_pacman, _prompter, _console),
-        RemoveHistoryCommand(_packageFileAdapter, machineName, _console),
+        PrintCommand.local(_console, _pacman),
+        MarkExplicitlyInstalledCommand(_console, _pacman, _prompter),
+        RemoveHistoryCommand(_console, _packageFileAdapter, machineName),
         SkipCommand(_console),
         QuitCommand(_console),
       ],
@@ -176,9 +184,9 @@ class DiffEditor {
     return _prompter.promptCommand(
       packageName: package,
       commands: [
-        PrintCommand.remote(_pacman, _console),
-        InstallCommand(_pacman, _prompter, _console),
-        RemoveHistoryCommand(_packageFileAdapter, machineName, _console),
+        PrintCommand.remote(_console, _pacman),
+        InstallCommand(_console, _pacman, _prompter),
+        RemoveHistoryCommand(_console, _packageFileAdapter, machineName),
         SkipCommand(_console),
         QuitCommand(_console),
       ],

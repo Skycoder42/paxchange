@@ -28,10 +28,10 @@ void main() {
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
       sut = AddHistoryCommand(
+        mockConsole,
         mockPackageFileAdapter,
         testIndex,
         testMachineName,
-        mockConsole,
       );
     });
 
@@ -66,9 +66,9 @@ void main() {
       const machineHierarchy = ['file1', 'file2', 'file3'];
 
       final commands = AddHistoryCommand.generate(
+        mockConsole,
         mockPackageFileAdapter,
         machineHierarchy,
-        mockConsole,
       );
 
       expect(commands, hasLength(machineHierarchy.length));
@@ -94,9 +94,9 @@ void main() {
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
       sut = RemoveHistoryCommand(
+        mockConsole,
         mockPackageFileAdapter,
         testMachineName,
-        mockConsole,
       );
     });
 

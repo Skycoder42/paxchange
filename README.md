@@ -19,7 +19,7 @@
   - or a different shortcut?
   - maybe just "g#", if it can be done with the handler
 - Selecting a group does:
-  1. remove all entries from that group from all package history files
+  1. remove all entries from that group from the selected package history files
   3. Add a "::group <group>" entry to the selected file
   4. Reevaluate
 

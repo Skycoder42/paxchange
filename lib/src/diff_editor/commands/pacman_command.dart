@@ -10,7 +10,7 @@ abstract base class PacmanCommand extends PromptCommand {
   final Pacman pacman;
   final Prompter _prompter;
 
-  const PacmanCommand(this.pacman, this._prompter, super.console);
+  const PacmanCommand(super.console, this.pacman, this._prompter);
 
   @override
   @nonVirtual
@@ -47,7 +47,7 @@ abstract base class PacmanCommand extends PromptCommand {
 }
 
 final class InstallCommand extends PacmanCommand {
-  const InstallCommand(super.pacman, super._prompter, super.console);
+  const InstallCommand(super.console, super.pacman, super._prompter);
 
   @override
   String get key => 'i';
@@ -66,7 +66,7 @@ final class InstallCommand extends PacmanCommand {
 }
 
 final class RemoveCommand extends PacmanCommand {
-  const RemoveCommand(super.pacman, super._prompter, super.console);
+  const RemoveCommand(super.console, super.pacman, super._prompter);
 
   @override
   String get key => 'r';
@@ -86,9 +86,9 @@ final class RemoveCommand extends PacmanCommand {
 
 final class MarkImplicitlyInstalledCommand extends PacmanCommand {
   const MarkImplicitlyInstalledCommand(
+    super.console,
     super.pacman,
     super._prompter,
-    super.console,
   );
 
   @override
@@ -109,9 +109,9 @@ final class MarkImplicitlyInstalledCommand extends PacmanCommand {
 
 final class MarkExplicitlyInstalledCommand extends PacmanCommand {
   const MarkExplicitlyInstalledCommand(
+    super.console,
     super.pacman,
     super._prompter,
-    super.console,
   );
 
   @override

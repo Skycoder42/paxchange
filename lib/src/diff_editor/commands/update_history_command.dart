@@ -8,7 +8,7 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
   @protected
   final PackageFileAdapter packageFileAdapter;
 
-  const UpdateHistoryCommand(this.packageFileAdapter, super.console);
+  const UpdateHistoryCommand(super.console, this.packageFileAdapter);
 
   @override
   Future<PromptResult> call(String packageName) async {
@@ -37,23 +37,23 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   final String machineName;
 
   const AddHistoryCommand(
+    super.console,
     super.packageFileAdapter,
     this.index,
     this.machineName,
-    super.console,
   );
 
   static List<AddHistoryCommand> generate(
+    Console console,
     PackageFileAdapter packageFileAdapter,
     List<String> machineHierarchy,
-    Console console,
   ) => List.generate(
     machineHierarchy.length,
     (index) => AddHistoryCommand(
+      console,
       packageFileAdapter,
       index,
       machineHierarchy[index],
-      console,
     ),
   );
 
@@ -76,9 +76,9 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   final String machineName;
 
   const RemoveHistoryCommand(
+    super.console,
     super.packageFileAdapter,
     this.machineName,
-    super.console,
   );
 
   @override

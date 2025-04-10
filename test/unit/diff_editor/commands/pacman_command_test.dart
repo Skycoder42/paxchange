@@ -30,7 +30,7 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = InstallCommand(mockPacman, Prompter(mockConsole), mockConsole);
+      sut = InstallCommand(mockConsole, mockPacman, Prompter(mockConsole));
     });
 
     test('uses correct key', () {
@@ -100,7 +100,7 @@ void main() {
 
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      sut = RemoveCommand(mockPacman, Prompter(mockConsole), mockConsole);
+      sut = RemoveCommand(mockConsole, mockPacman, Prompter(mockConsole));
     });
 
     test('uses correct key', () {
@@ -171,9 +171,9 @@ void main() {
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
       sut = MarkImplicitlyInstalledCommand(
+        mockConsole,
         mockPacman,
         Prompter(mockConsole),
-        mockConsole,
       );
     });
 
@@ -255,9 +255,9 @@ void main() {
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
       sut = MarkExplicitlyInstalledCommand(
+        mockConsole,
         mockPacman,
         Prompter(mockConsole),
-        mockConsole,
       );
     });
 

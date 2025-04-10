@@ -10,14 +10,15 @@ final class AddGroupCommand extends PromptCommand {
   final PackageFileAdapter _packageFileAdapter;
   final Pacman _pacman;
   final Prompter _prompter;
-  final List<String> _machineHierarchy;
+
+  final List<String> machineHierarchy;
 
   const AddGroupCommand(
+    super.console,
     this._packageFileAdapter,
     this._pacman,
     this._prompter,
-    this._machineHierarchy,
-    super.console,
+    this.machineHierarchy,
   );
 
   @override
@@ -72,9 +73,9 @@ final class AddGroupCommand extends PromptCommand {
 
   AddHistoryCommand? _selectAddCommand(String group) {
     final addCommands = AddHistoryCommand.generate(
-      _packageFileAdapter,
-      _machineHierarchy,
       console,
+      _packageFileAdapter,
+      machineHierarchy,
     );
     final selectedCommand = _prompter.promptOption(
       description: 'Which package history do you want to add $group to?',

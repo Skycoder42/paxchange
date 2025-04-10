@@ -3,6 +3,7 @@
 import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:paxchange/src/diff_editor/commands/add_group_command.dart';
 import 'package:paxchange/src/diff_editor/commands/pacman_command.dart';
 import 'package:paxchange/src/diff_editor/commands/print_command.dart';
 import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
@@ -148,7 +149,7 @@ void main() {
                 ]).captured[4].single
                 as List<PromptCommand>;
 
-        expect(captured, hasLength(8));
+        expect(captured, hasLength(9));
         expect(
           captured,
           contains(
@@ -183,6 +184,16 @@ void main() {
             isA<AddHistoryCommand>()
                 .having((c) => c.index, 'index', 2)
                 .having((c) => c.machineName, 'index', testHierarchy[2]),
+          ),
+        );
+        expect(
+          captured,
+          contains(
+            isA<AddGroupCommand>().having(
+              (m) => m.machineHierarchy,
+              'machineHierarchy',
+              testHierarchy,
+            ),
           ),
         );
         expect(captured, contains(isA<SkipCommand>()));
@@ -337,7 +348,7 @@ void main() {
         },
       );
 
-      test('aborts early if a command returns false', () async {
+      test('aborts early if a command returns failed', () async {
         const testHierarchy = [testMachineName, 'file2', 'file3'];
         const diffEntries = [
           DiffEntry.removed('package-1'),
@@ -391,6 +402,232 @@ void main() {
           ),
           () => mockPrompter.promptCommand(
             packageName: diffEntries[1].package,
+            commands: any(named: 'commands'),
+          ),
+          () => mockPackageSync.updatePackageDiff(),
+        ]);
+        verifyNoMoreInteractions(mockPrompter);
+      });
+
+      test('does not update diff if nothing was modified', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntries = [
+          DiffEntry.removed('package-1'),
+          DiffEntry.added('package-2'),
+          DiffEntry.added('package-3'),
+        ];
+
+        when(
+          () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+        ).thenStream(Stream.fromIterable(testHierarchy));
+        when(
+          () => mockDiffFileAdapter.loadPackageDiff(any()),
+        ).thenStream(Stream.fromIterable(diffEntries));
+        when(
+          () => mockPacman.checkIfPackageIsInstalled(any()),
+        ).thenReturnAsync(false);
+        when(
+          () => mockPrompter.promptCommand(
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(PromptResult.skipped);
+
+        await sut.run(testMachineName);
+
+        verifyNever(() => mockPackageSync.updatePackageDiff());
+      });
+
+      test(
+        'updates diff and restart processing if command returns reload',
+        () async {
+          const testHierarchy = [testMachineName, 'file2', 'file3'];
+          const diffEntries = [
+            DiffEntry.removed('package-1'),
+            DiffEntry.added('package-2'),
+            DiffEntry.added('package-3'),
+          ];
+
+          when(
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+          ).thenStream(Stream.fromIterable(testHierarchy));
+          when(
+            () => mockDiffFileAdapter.loadPackageDiff(any()),
+          ).thenStream(Stream.fromIterable(diffEntries));
+          when(
+            () => mockPacman.checkIfPackageIsInstalled(any()),
+          ).thenReturnAsync(false);
+          when(
+            () => mockPrompter.promptCommand(
+              packageName: any(named: 'packageName'),
+              commands: any(named: 'commands'),
+            ),
+          ).thenReturn(PromptResult.succeeded);
+          var didReload = false;
+          when(
+            () => mockPrompter.promptCommand(
+              packageName: 'package-2',
+              commands: any(named: 'commands'),
+            ),
+          ).thenAnswer((_) {
+            if (didReload) {
+              return PromptResult.succeeded;
+            } else {
+              didReload = true;
+              return PromptResult.succeededReload;
+            }
+          });
+
+          await sut.run(testMachineName);
+          verifyInOrder([
+            () =>
+                mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(
+              testMachineName,
+            ),
+            () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+            () => mockPrompter.writeTitle(
+              messagePrefix: any(named: 'messagePrefix'),
+              messageHighlight: diffEntries[0].package,
+              messageSuffix: any(named: 'messageSuffix'),
+              color: any(named: 'color'),
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntries[0].package,
+              commands: any(named: 'commands'),
+            ),
+            () => mockPrompter.writeTitle(
+              messagePrefix: any(named: 'messagePrefix'),
+              messageHighlight: diffEntries[1].package,
+              messageSuffix: any(named: 'messageSuffix'),
+              color: any(named: 'color'),
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntries[1].package,
+              commands: any(named: 'commands'),
+            ),
+            () => mockPackageSync.updatePackageDiff(),
+            () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+            () => mockPrompter.writeTitle(
+              messagePrefix: any(named: 'messagePrefix'),
+              messageHighlight: diffEntries[0].package,
+              messageSuffix: any(named: 'messageSuffix'),
+              color: any(named: 'color'),
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntries[0].package,
+              commands: any(named: 'commands'),
+            ),
+            () => mockPrompter.writeTitle(
+              messagePrefix: any(named: 'messagePrefix'),
+              messageHighlight: diffEntries[1].package,
+              messageSuffix: any(named: 'messageSuffix'),
+              color: any(named: 'color'),
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntries[1].package,
+              commands: any(named: 'commands'),
+            ),
+            () => mockPrompter.writeTitle(
+              messagePrefix: any(named: 'messagePrefix'),
+              messageHighlight: diffEntries[2].package,
+              messageSuffix: any(named: 'messageSuffix'),
+              color: any(named: 'color'),
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntries[2].package,
+              commands: any(named: 'commands'),
+            ),
+            () => mockPackageSync.updatePackageDiff(),
+          ]);
+          verifyNoMoreInteractions(mockPrompter);
+        },
+      );
+
+      test('does not repeat already skipped diff entries', () async {
+        const testHierarchy = [testMachineName, 'file2', 'file3'];
+        const diffEntries = [
+          DiffEntry.removed('package-1'),
+          DiffEntry.added('package-2'),
+          DiffEntry.added('package-3'),
+        ];
+
+        when(
+          () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+        ).thenStream(Stream.fromIterable(testHierarchy));
+        when(
+          () => mockDiffFileAdapter.loadPackageDiff(any()),
+        ).thenStream(Stream.fromIterable(diffEntries));
+        when(
+          () => mockPacman.checkIfPackageIsInstalled(any()),
+        ).thenReturnAsync(false);
+        when(
+          () => mockPrompter.promptCommand(
+            packageName: any(named: 'packageName'),
+            commands: any(named: 'commands'),
+          ),
+        ).thenReturn(PromptResult.skipped);
+        var didReload = false;
+        when(
+          () => mockPrompter.promptCommand(
+            packageName: 'package-2',
+            commands: any(named: 'commands'),
+          ),
+        ).thenAnswer((_) {
+          if (didReload) {
+            return PromptResult.succeeded;
+          } else {
+            didReload = true;
+            return PromptResult.succeededReload;
+          }
+        });
+
+        await sut.run(testMachineName);
+        verifyInOrder([
+          () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+          () =>
+              mockPackageFileAdapter.loadPackageFileHierarchy(testMachineName),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPrompter.writeTitle(
+            messagePrefix: any(named: 'messagePrefix'),
+            messageHighlight: diffEntries[0].package,
+            messageSuffix: any(named: 'messageSuffix'),
+            color: any(named: 'color'),
+          ),
+          () => mockPrompter.promptCommand(
+            packageName: diffEntries[0].package,
+            commands: any(named: 'commands'),
+          ),
+          () => mockPrompter.writeTitle(
+            messagePrefix: any(named: 'messagePrefix'),
+            messageHighlight: diffEntries[1].package,
+            messageSuffix: any(named: 'messageSuffix'),
+            color: any(named: 'color'),
+          ),
+          () => mockPrompter.promptCommand(
+            packageName: diffEntries[1].package,
+            commands: any(named: 'commands'),
+          ),
+          () => mockPackageSync.updatePackageDiff(),
+          () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+          () => mockPrompter.writeTitle(
+            messagePrefix: any(named: 'messagePrefix'),
+            messageHighlight: diffEntries[1].package,
+            messageSuffix: any(named: 'messageSuffix'),
+            color: any(named: 'color'),
+          ),
+          () => mockPrompter.promptCommand(
+            packageName: diffEntries[1].package,
+            commands: any(named: 'commands'),
+          ),
+          () => mockPrompter.writeTitle(
+            messagePrefix: any(named: 'messagePrefix'),
+            messageHighlight: diffEntries[2].package,
+            messageSuffix: any(named: 'messageSuffix'),
+            color: any(named: 'color'),
+          ),
+          () => mockPrompter.promptCommand(
+            packageName: diffEntries[2].package,
             commands: any(named: 'commands'),
           ),
           () => mockPackageSync.updatePackageDiff(),

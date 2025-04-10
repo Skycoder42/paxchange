@@ -31,7 +31,7 @@ void main() {
         () => mockPacman.queryInstalledPackage(any()),
       ).thenStream(Stream.fromIterable(packageInfo));
 
-      final sut = PrintCommand.local(mockPacman, mockConsole);
+      final sut = PrintCommand.local(mockConsole, mockPacman);
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
@@ -55,7 +55,7 @@ void main() {
         () => mockPacman.queryUninstalledPackage(any()),
       ).thenStream(Stream.fromIterable(packageInfo));
 
-      final sut = PrintCommand.remote(mockPacman, mockConsole);
+      final sut = PrintCommand.remote(mockConsole, mockPacman);
 
       expect(sut.key, 'p');
       expect(sut.description, isNotEmpty);
