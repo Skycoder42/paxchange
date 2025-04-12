@@ -185,7 +185,10 @@ void main() {
         writeFile(fileName, [...lines, '::group $groupName']);
 
         when(
-          () => mockPacman.listPackagesForGroup(any()),
+          () => mockPacman.listPackagesForGroup(
+            any(),
+            ignoreErrors: any(named: 'ignoreErrors'),
+          ),
         ).thenStream(Stream.fromIterable(groups));
 
         final stream = sut.loadPackageFile(fileName);
@@ -195,7 +198,9 @@ void main() {
           emitsInOrder(<dynamic>[...lines, ...groups, emitsDone]),
         );
 
-        verify(() => mockPacman.listPackagesForGroup(groupName)).called(1);
+        verify(
+          () => mockPacman.listPackagesForGroup(groupName, ignoreErrors: true),
+        ).called(1);
       });
 
       test('does not expand package groups if disabled', () async {

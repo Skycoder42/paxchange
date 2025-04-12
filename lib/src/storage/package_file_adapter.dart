@@ -157,7 +157,7 @@ class PackageFileAdapter {
       if (groupMatch != null) {
         final groupName = groupMatch[1]!;
         if (expandGroups) {
-          yield* _pacman.listPackagesForGroup(groupName);
+          yield* _pacman.listPackagesForGroup(groupName, ignoreErrors: true);
         } else {
           yield groupName;
         }
