@@ -31,7 +31,10 @@ void main() {
         const packages = ['p1', 'p2', 'p3'];
 
         when(
-          () => mockPackageFileAdapter.loadPackageFile(any()),
+          () => mockPackageFileAdapter.loadPackageFile(
+            any(),
+            expandGroups: any(named: 'expandGroups'),
+          ),
         ).thenStream(Stream.fromIterable(packages));
         when(
           () => mockPacman.installPackages(
@@ -47,7 +50,10 @@ void main() {
         );
 
         verifyInOrder([
-          () => mockPackageFileAdapter.loadPackageFile(testMachineName),
+          () => mockPackageFileAdapter.loadPackageFile(
+            testMachineName,
+            expandGroups: false,
+          ),
           () => mockPacman.installPackages(
             packages,
             onlyNeeded: true,
