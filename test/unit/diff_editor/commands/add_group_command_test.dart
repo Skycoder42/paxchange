@@ -117,6 +117,26 @@ void main() {
         },
       );
 
+      test('returns empty list if package has no groups', () async {
+        when(
+          () => mockPacman.queryInstalledPackage(any()),
+        ).thenStream(Stream.value('Groups : None'));
+
+        final result = await sut(testPackageName);
+        expect(result, PromptResult.repeat);
+
+        verifyInOrder([
+          () => mockPacman.queryInstalledPackage(testPackageName),
+          () => mockConsole.writeLine('No groups found for $testPackageName'),
+        ]);
+        verifyNever(
+          () => mockPrompter.promptOption(
+            description: any(named: 'description'),
+            options: any(named: 'options'),
+          ),
+        );
+      });
+
       test('returns repeat if no group was selected', () async {
         when(
           () => mockPrompter.promptOption(

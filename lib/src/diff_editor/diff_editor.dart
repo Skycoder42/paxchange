@@ -183,7 +183,6 @@ class DiffEditor {
             _prompter,
             machineName: machineName,
             group: firstGroup,
-            excludedPackage: package,
           )
         else
           RemoveHistoryCommand(

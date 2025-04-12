@@ -37,6 +37,8 @@ void main() {
   });
 
   group('$Pacman', () {
+    const testEnvironment = {'LANG': 'C.UTF-8'};
+
     final processWrapperMock = ProcessWrapperMock();
     final processMock = ProcessMock();
     final mockStderr = MockStderr();
@@ -47,7 +49,12 @@ void main() {
       reset(mockStderr);
 
       when(
-        () => processWrapperMock.start(any(), any(), mode: any(named: 'mode')),
+        () => processWrapperMock.start(
+          any(),
+          any(),
+          mode: any(named: 'mode'),
+          environment: any(named: 'environment'),
+        ),
       ).thenReturnAsync(processMock);
       when(() => processMock.stderr).thenStream(const Stream.empty());
       when(() => processMock.stdout).thenStream(const Stream.empty());
@@ -131,7 +138,13 @@ void main() {
           final result = sut.listExplicitlyInstalledPackages();
           await expectLater(result, emitsDone);
 
-          verify(() => processWrapperMock.start(process, const ['-Qqe']));
+          verify(
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qqe'],
+            ),
+          );
           verifyNoMoreInteractions(processWrapperMock);
         });
 
@@ -148,10 +161,11 @@ void main() {
           await expectLater(result, emitsDone);
 
           verify(
-            () => processWrapperMock.start(process, const [
-              '-Sgq',
-              testGroupName,
-            ]),
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Sgq', testGroupName],
+            ),
           );
           verifyNoMoreInteractions(processWrapperMock);
         });
@@ -181,8 +195,11 @@ void main() {
           await sut.checkIfPackageIsInstalled(packageName);
 
           verify(
-            () =>
-                processWrapperMock.start(process, const ['-Qqi', packageName]),
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qqi', packageName],
+            ),
           );
           verifyNoMoreInteractions(processWrapperMock);
         });
@@ -210,10 +227,11 @@ void main() {
           await expectLater(result, emitsDone);
 
           verify(
-            () => processWrapperMock.start(process, const [
-              '-Qi',
-              testPackageName,
-            ]),
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qi', testPackageName],
+            ),
           );
           verifyNoMoreInteractions(processWrapperMock);
         });
@@ -231,10 +249,11 @@ void main() {
           await expectLater(result, emitsDone);
 
           verify(
-            () => processWrapperMock.start(process, const [
-              '-Si',
-              testPackageName,
-            ]),
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Si', testPackageName],
+            ),
           );
           verifyNoMoreInteractions(processWrapperMock);
         });

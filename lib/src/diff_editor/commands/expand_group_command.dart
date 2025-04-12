@@ -11,7 +11,6 @@ final class ExpandGroupCommand extends PromptCommand {
   final Prompter _prompter;
   final String machineName;
   final String group;
-  final String excludedPackage;
 
   ExpandGroupCommand(
     super.console,
@@ -20,7 +19,6 @@ final class ExpandGroupCommand extends PromptCommand {
     this._prompter, {
     required this.machineName,
     required this.group,
-    required this.excludedPackage,
   });
 
   @override
@@ -30,11 +28,11 @@ final class ExpandGroupCommand extends PromptCommand {
   String get description => 'Expand group $group';
 
   @override
-  Future<PromptResult> call(String _) async {
+  Future<PromptResult> call(String package) async {
     final packagesInGroup =
         await _pacman
             .listPackagesForGroup(group)
-            .where((packageName) => packageName != excludedPackage)
+            .where((p) => p != package)
             .toList();
 
     final didRemove = await _packageFileAdapter.removeFromPackageFile(

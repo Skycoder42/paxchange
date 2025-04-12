@@ -30,6 +30,10 @@ final class AddGroupCommand extends PromptCommand {
   @override
   Future<PromptResult> call(String packageName) async {
     final packageGroups = await _getPackageGroups(packageName);
+    if (packageGroups.isEmpty) {
+      console.writeLine('No groups found for $packageName');
+      return PromptResult.repeat;
+    }
 
     final group = _selectGroup(packageName, packageGroups);
     if (group == null) {
@@ -46,15 +50,20 @@ final class AddGroupCommand extends PromptCommand {
     return result.withReload();
   }
 
-  Future<List<String>> _getPackageGroups(String packageName) async =>
-      await _pacman
-          .queryInstalledPackage(packageName)
-          .where((line) => line.startsWith('Groups'))
-          .map((line) => line.substring(line.indexOf(':') + 1).trim())
-          .expand((line) => line.split(RegExp(r'\s+')))
-          .map((group) => group.trim())
-          .where((group) => group != 'None')
-          .toList();
+  Future<List<String>> _getPackageGroups(String packageName) async {
+    final groups =
+        await _pacman
+            .queryInstalledPackage(packageName)
+            .where((line) => line.startsWith('Groups'))
+            .map((line) => line.substring(line.indexOf(':') + 1).trim())
+            .expand((line) => line.split(RegExp(r'\s+')))
+            .map((group) => group.trim())
+            .toList();
+    if (groups.length == 1 && groups.single == 'None') {
+      return const [];
+    }
+    return groups;
+  }
 
   String? _selectGroup(String packageName, List<String> packageGroups) {
     final selectedGroup = _prompter.promptOption(

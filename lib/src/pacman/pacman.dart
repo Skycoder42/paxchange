@@ -45,10 +45,11 @@ class Pacman {
   ], expectedExitCode: ignoreErrors ? null : 0);
 
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
-    final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', [
-      '-Qqi',
-      packageName,
-    ]);
+    final pacmanProc = await _process.start(
+      _pacmanFrontend ?? 'pacman',
+      ['-Qqi', packageName],
+      environment: {'LANG': 'C.UTF-8'},
+    );
     await pacmanProc.stdout.drain<void>();
     await pacmanProc.stderr.drain<void>();
     return (await pacmanProc.exitCode) == 0;
@@ -83,7 +84,11 @@ class Pacman {
     List<String> query, {
     int? expectedExitCode = 0,
   }) async* {
-    final pacmanProc = await _process.start(_pacmanFrontend ?? 'pacman', query);
+    final pacmanProc = await _process.start(
+      _pacmanFrontend ?? 'pacman',
+      query,
+      environment: {'LANG': 'C.UTF-8'},
+    );
 
     final stderrAdded = stderr.addStream(pacmanProc.stderr);
     try {

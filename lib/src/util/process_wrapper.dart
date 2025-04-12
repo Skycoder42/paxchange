@@ -19,5 +19,11 @@ class ProcessWrapper {
     String executable,
     List<String> arguments, {
     ProcessStartMode mode = ProcessStartMode.normal,
-  }) => Process.start(executable, arguments, mode: mode);
+    Map<String, String>? environment,
+  }) => Process.start(
+    executable,
+    arguments,
+    mode: mode,
+    environment: environment,
+  );
 }
