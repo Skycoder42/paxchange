@@ -188,6 +188,28 @@ void main() {
         });
       });
 
+      group('listInstalledPackagesForGroup', () {
+        const testGroupName = 'test-group';
+
+        test('invokes pacman to list packages in group', () async {
+          final result = sut.listInstalledPackagesForGroup(testGroupName);
+          await expectLater(result, emitsDone);
+
+          verify(
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qgq', testGroupName],
+            ),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
+
+        testLineStreaming(
+          runPacman: () => sut.listInstalledPackagesForGroup(testGroupName),
+        );
+      });
+
       group('checkIfPackageIsInstalled', () {
         const packageName = 'test-package';
 

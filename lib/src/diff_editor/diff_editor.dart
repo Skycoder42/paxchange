@@ -94,7 +94,12 @@ class DiffEditor {
           skipped.add(diffEntry.package);
         }
         reload = entryResult.needsReload;
-        didModify = didModify || entryResult.didModify;
+        if (entryResult.didModify) {
+          didModify = true;
+          _console
+            ..writeLine('Press any key to continue...')
+            ..readKey();
+        }
         if (entryResult.stopProcessing) {
           break;
         }

@@ -63,6 +63,8 @@ void main() {
         () => mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
       ).thenReturnAsync(null);
 
+      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
+
       sut = DiffEditor(
         mockPackageFileAdapter,
         mockDiffFileAdapter,
@@ -157,6 +159,8 @@ void main() {
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
                   ),
+                  () => mockConsole.writeLine(any()),
+                  () => mockConsole.readKey(),
                   () => mockPackageSync.updatePackageDiff(),
                 ]).captured[4].single
                 as List<PromptCommand>;
@@ -178,16 +182,8 @@ void main() {
           captured,
           contains(
             isA<AddHistoryCommand>()
-                .having((c) => c.index, 'index', 0)
-                .having((c) => c.machineName, 'index', testHierarchy[0]),
-          ),
-        );
-        expect(
-          captured,
-          contains(
-            isA<AddHistoryCommand>()
                 .having((c) => c.index, 'index', 1)
-                .having((c) => c.machineName, 'index', testHierarchy[1]),
+                .having((c) => c.machineName, 'index', testHierarchy[2]),
           ),
         );
         expect(
@@ -195,7 +191,15 @@ void main() {
           contains(
             isA<AddHistoryCommand>()
                 .having((c) => c.index, 'index', 2)
-                .having((c) => c.machineName, 'index', testHierarchy[2]),
+                .having((c) => c.machineName, 'index', testHierarchy[1]),
+          ),
+        );
+        expect(
+          captured,
+          contains(
+            isA<AddHistoryCommand>()
+                .having((c) => c.index, 'index', 3)
+                .having((c) => c.machineName, 'index', testHierarchy[0]),
           ),
         );
         expect(
@@ -259,6 +263,8 @@ void main() {
                     packageName: diffEntry.package,
                     commands: captureAny(named: 'commands'),
                   ),
+                  () => mockConsole.writeLine(any()),
+                  () => mockConsole.readKey(),
                   () => mockPackageSync.updatePackageDiff(),
                 ]).captured[5].single
                 as List<PromptCommand>;
@@ -339,6 +345,8 @@ void main() {
                       packageName: diffEntry.package,
                       commands: captureAny(named: 'commands'),
                     ),
+                    () => mockConsole.writeLine(any()),
+                    () => mockConsole.readKey(),
                     () => mockPackageSync.updatePackageDiff(),
                   ]).captured[5].single
                   as List<PromptCommand>;
@@ -424,6 +432,8 @@ void main() {
                       packageName: diffEntry.package,
                       commands: captureAny(named: 'commands'),
                     ),
+                    () => mockConsole.writeLine(any()),
+                    () => mockConsole.readKey(),
                     () => mockPackageSync.updatePackageDiff(),
                   ]).captured[5].single
                   as List<PromptCommand>;
@@ -507,6 +517,8 @@ void main() {
                       packageName: diffEntry.package,
                       commands: captureAny(named: 'commands'),
                     ),
+                    () => mockConsole.writeLine(any()),
+                    () => mockConsole.readKey(),
                     () => mockPackageSync.updatePackageDiff(),
                   ]).captured[5].single
                   as List<PromptCommand>;

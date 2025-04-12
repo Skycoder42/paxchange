@@ -31,7 +31,7 @@ final class ExpandGroupCommand extends PromptCommand {
   Future<PromptResult> call(String package) async {
     final packagesInGroup =
         await _pacman
-            .listPackagesForGroup(group)
+            .listInstalledPackagesForGroup(group)
             .where((p) => p != package)
             .toList();
 
@@ -43,17 +43,9 @@ final class ExpandGroupCommand extends PromptCommand {
     );
 
     if (didRemove) {
-      console
-        ..writeLine('Success! Press any key to continue...')
-        ..readKey();
-
       return PromptResult.succeededReload;
     } else {
-      _prompter.writeError('Expanding group $group failed!');
-      console
-        ..writeLine('Press any key to continue...')
-        ..readKey();
-
+      _prompter.writeError('Failed to remove group $group from $machineName!');
       return PromptResult.failed;
     }
   }

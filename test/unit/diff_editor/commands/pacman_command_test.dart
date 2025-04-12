@@ -13,24 +13,28 @@ class MockPacman extends Mock implements Pacman {}
 
 class MockConsole extends Mock implements Console {}
 
+class MockPrompter extends Mock implements Prompter {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(InstallReason.asExplicit);
   });
 
-  group('$InstallCommand', () {
-    final mockPacman = MockPacman();
-    final mockConsole = MockConsole();
+  final mockPacman = MockPacman();
+  final mockConsole = MockConsole();
+  final mockPrompter = MockPrompter();
 
+  setUp(() {
+    reset(mockPacman);
+    reset(mockConsole);
+    reset(mockPrompter);
+  });
+
+  group('$InstallCommand', () {
     late InstallCommand sut;
 
     setUp(() {
-      reset(mockPacman);
-      reset(mockConsole);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
-      sut = InstallCommand(mockConsole, mockPacman, Prompter(mockConsole));
+      sut = InstallCommand(mockConsole, mockPacman, mockPrompter);
     });
 
     test('uses correct key', () {
@@ -39,7 +43,7 @@ void main() {
     });
 
     group('call', () {
-      test('runs pacman and prints success message', () async {
+      test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
         when(() => mockPacman.installPackages(any())).thenReturnAsync(0);
@@ -49,11 +53,6 @@ void main() {
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.installPackages(const [testPackageName]),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
-            any(that: allOf(contains('install'), contains(testPackageName))),
-          ),
-          () => mockConsole.readKey(),
         ]);
 
         expect(result, PromptResult.succeeded);
@@ -69,9 +68,7 @@ void main() {
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.installPackages(const [testPackageName]),
-          () => mockConsole.setForegroundColor(ConsoleColor.red),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
+          () => mockPrompter.writeError(
             any(
               that: allOf(
                 contains('install'),
@@ -80,27 +77,18 @@ void main() {
               ),
             ),
           ),
-          () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, PromptResult.failed);
+        expect(result, PromptResult.repeat);
       });
     });
   });
 
   group('$RemoveCommand', () {
-    final mockPacman = MockPacman();
-    final mockConsole = MockConsole();
-
     late RemoveCommand sut;
 
     setUp(() {
-      reset(mockPacman);
-      reset(mockConsole);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
-      sut = RemoveCommand(mockConsole, mockPacman, Prompter(mockConsole));
+      sut = RemoveCommand(mockConsole, mockPacman, mockPrompter);
     });
 
     test('uses correct key', () {
@@ -109,7 +97,7 @@ void main() {
     });
 
     group('call', () {
-      test('runs pacman and prints success message', () async {
+      test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
         when(() => mockPacman.removePackage(any())).thenReturnAsync(0);
@@ -119,11 +107,6 @@ void main() {
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.removePackage(testPackageName),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
-            any(that: allOf(contains('uninstall'), contains(testPackageName))),
-          ),
-          () => mockConsole.readKey(),
         ]);
 
         expect(result, PromptResult.succeeded);
@@ -139,9 +122,7 @@ void main() {
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.removePackage(testPackageName),
-          () => mockConsole.setForegroundColor(ConsoleColor.red),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
+          () => mockPrompter.writeError(
             any(
               that: allOf(
                 contains('uninstall'),
@@ -150,30 +131,21 @@ void main() {
               ),
             ),
           ),
-          () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, PromptResult.failed);
+        expect(result, PromptResult.repeat);
       });
     });
   });
 
   group('$MarkImplicitlyInstalledCommand', () {
-    final mockPacman = MockPacman();
-    final mockConsole = MockConsole();
-
     late MarkImplicitlyInstalledCommand sut;
 
     setUp(() {
-      reset(mockPacman);
-      reset(mockConsole);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
       sut = MarkImplicitlyInstalledCommand(
         mockConsole,
         mockPacman,
-        Prompter(mockConsole),
+        mockPrompter,
       );
     });
 
@@ -183,7 +155,7 @@ void main() {
     });
 
     group('call', () {
-      test('runs pacman and prints success message', () async {
+      test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
         when(
@@ -198,11 +170,6 @@ void main() {
             testPackageName,
             InstallReason.asDeps,
           ),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
-            any(that: allOf(contains('mark'), contains(testPackageName))),
-          ),
-          () => mockConsole.readKey(),
         ]);
 
         expect(result, PromptResult.succeeded);
@@ -223,9 +190,7 @@ void main() {
             testPackageName,
             InstallReason.asDeps,
           ),
-          () => mockConsole.setForegroundColor(ConsoleColor.red),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
+          () => mockPrompter.writeError(
             any(
               that: allOf(
                 contains('mark'),
@@ -234,30 +199,21 @@ void main() {
               ),
             ),
           ),
-          () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, PromptResult.failed);
+        expect(result, PromptResult.repeat);
       });
     });
   });
 
   group('$MarkExplicitlyInstalledCommand', () {
-    final mockPacman = MockPacman();
-    final mockConsole = MockConsole();
-
     late MarkExplicitlyInstalledCommand sut;
 
     setUp(() {
-      reset(mockPacman);
-      reset(mockConsole);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
       sut = MarkExplicitlyInstalledCommand(
         mockConsole,
         mockPacman,
-        Prompter(mockConsole),
+        mockPrompter,
       );
     });
 
@@ -267,7 +223,7 @@ void main() {
     });
 
     group('call', () {
-      test('runs pacman and prints success message', () async {
+      test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
         when(
@@ -282,11 +238,6 @@ void main() {
             testPackageName,
             InstallReason.asExplicit,
           ),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
-            any(that: allOf(contains('mark'), contains(testPackageName))),
-          ),
-          () => mockConsole.readKey(),
         ]);
 
         expect(result, PromptResult.succeeded);
@@ -307,9 +258,7 @@ void main() {
             testPackageName,
             InstallReason.asExplicit,
           ),
-          () => mockConsole.setForegroundColor(ConsoleColor.red),
-          () => mockConsole.writeLine(),
-          () => mockConsole.writeLine(
+          () => mockPrompter.writeError(
             any(
               that: allOf(
                 contains('mark'),
@@ -318,10 +267,9 @@ void main() {
               ),
             ),
           ),
-          () => mockConsole.resetColorAttributes(),
         ]);
 
-        expect(result, PromptResult.failed);
+        expect(result, PromptResult.repeat);
       });
     });
   });

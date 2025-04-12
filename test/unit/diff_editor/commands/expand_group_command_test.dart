@@ -54,8 +54,7 @@ void main() {
 
     group('call', () {
       setUp(() {
-        when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-        when(() => mockPacman.listPackagesForGroup(any())).thenStream(
+        when(() => mockPacman.listInstalledPackagesForGroup(any())).thenStream(
           Stream.fromIterable(['package-1', testPackage, 'package-2']),
         );
       });
@@ -76,15 +75,13 @@ void main() {
 
           expect(result, PromptResult.succeededReload);
           verifyInOrder([
-            () => mockPacman.listPackagesForGroup(testGroup),
+            () => mockPacman.listInstalledPackagesForGroup(testGroup),
             () => mockPackageFileAdapter.removeFromPackageFile(
               testMachineName,
               testGroup,
               isGroup: true,
               replacement: const ['package-1', 'package-2'],
             ),
-            () => mockConsole.writeLine(any()),
-            () => mockConsole.readKey(),
           ]);
         },
       );
@@ -103,7 +100,7 @@ void main() {
 
         expect(result, PromptResult.failed);
         verifyInOrder([
-          () => mockPacman.listPackagesForGroup(testGroup),
+          () => mockPacman.listInstalledPackagesForGroup(testGroup),
           () => mockPackageFileAdapter.removeFromPackageFile(
             testMachineName,
             testGroup,
@@ -111,8 +108,6 @@ void main() {
             replacement: const ['package-1', 'package-2'],
           ),
           () => mockPrompter.writeError(any(that: contains(testGroup))),
-          () => mockConsole.writeLine(any()),
-          () => mockConsole.readKey(),
         ]);
       });
     });

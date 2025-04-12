@@ -16,22 +16,23 @@ class MockConsole extends Mock implements Console {}
 class MockPrompter extends Mock implements Prompter {}
 
 void main() {
+  final mockPackageFileAdapter = MockPackageFileAdapter();
+  final mockConsole = MockConsole();
+  final mockPrompter = MockPrompter();
+
+  setUp(() {
+    reset(mockPackageFileAdapter);
+    reset(mockConsole);
+    reset(mockPrompter);
+  });
+
   group('$AddHistoryCommand', () {
     const testMachineName = 'machine-name';
     const testIndex = 0;
-    final mockPackageFileAdapter = MockPackageFileAdapter();
-    final mockConsole = MockConsole();
-    final mockPrompter = MockPrompter();
 
     late AddHistoryCommand sut;
 
     setUp(() {
-      reset(mockPackageFileAdapter);
-      reset(mockConsole);
-      reset(mockPrompter);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
       sut = AddHistoryCommand(
         mockConsole,
         mockPackageFileAdapter,
@@ -63,8 +64,6 @@ void main() {
             testMachineName,
             testPackageName,
           ),
-          () => mockConsole.writeLine(any()),
-          () => mockConsole.readKey(),
         ]);
         expect(result, PromptResult.succeeded);
       });
@@ -81,29 +80,21 @@ void main() {
       );
 
       expect(commands, hasLength(machineHierarchy.length));
-      for (var i = 0; i < machineHierarchy.length; ++i) {
-        final command = commands[i];
+      for (var i = 1; i <= machineHierarchy.length; ++i) {
+        final command = commands[i - 1];
+        final machineIndex = machineHierarchy.length - i;
         expect(command.key, i.toString());
-        expect(command.description, contains(machineHierarchy[i]));
+        expect(command.description, contains(machineHierarchy[machineIndex]));
       }
     });
   });
 
   group('$RemoveHistoryCommand', () {
     const testMachineName = 'machine-name';
-    final mockPackageFileAdapter = MockPackageFileAdapter();
-    final mockConsole = MockConsole();
-    final mockPrompter = MockPrompter();
 
     late RemoveHistoryCommand sut;
 
     setUp(() {
-      reset(mockPackageFileAdapter);
-      reset(mockConsole);
-      reset(mockPrompter);
-
-      when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
-
       sut = RemoveHistoryCommand(
         mockConsole,
         mockPackageFileAdapter,
@@ -134,8 +125,6 @@ void main() {
             testMachineName,
             testPackageName,
           ),
-          () => mockConsole.writeLine(any()),
-          () => mockConsole.readKey(),
         ]);
         expect(result, PromptResult.succeeded);
       });
@@ -166,8 +155,6 @@ void main() {
                 ),
               ),
             ),
-            () => mockConsole.writeLine(any()),
-            () => mockConsole.readKey(),
           ]);
           expect(result, PromptResult.failed);
         },

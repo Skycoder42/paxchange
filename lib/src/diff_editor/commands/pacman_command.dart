@@ -22,20 +22,13 @@ abstract base class PacmanCommand extends PromptCommand {
       ..resetColorAttributes();
     final exitCode = await runPacman(packageName);
     if (exitCode == 0) {
-      console
-        ..writeLine()
-        ..writeLine(
-          'Successfully ${operation}ed $packageName. '
-          'Press any key to continue...',
-        )
-        ..readKey();
       return PromptResult.succeeded;
     } else {
       _prompter.writeError(
         'Failed to $operation $packageName! '
         'Package manager failed with exit code $exitCode.',
       );
-      return PromptResult.failed;
+      return PromptResult.repeat;
     }
   }
 

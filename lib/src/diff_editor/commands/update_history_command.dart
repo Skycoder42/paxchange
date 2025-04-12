@@ -21,17 +21,9 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
     console.writeLine('$operation $packageName for $machineName...');
     final success = await updateHistory(packageName);
     if (success) {
-      console
-        ..writeLine('Success! Press any key to continue...')
-        ..readKey();
-
       return PromptResult.succeeded;
     } else {
       _prompter.writeError('$operation $packageName for $machineName failed!');
-      console
-        ..writeLine('Press any key to continue...')
-        ..readKey();
-
       return PromptResult.failed;
     }
   }
@@ -65,12 +57,13 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
     Prompter prompter,
     Iterable<String> machineHierarchy,
   ) => [
-    for (final (index, packageFileName) in machineHierarchy.indexed)
+    for (final (index, packageFileName)
+        in machineHierarchy.toList().reversed.indexed)
       AddHistoryCommand(
         console,
         packageFileAdapter,
         prompter,
-        index,
+        index + 1,
         packageFileName,
       ),
   ];

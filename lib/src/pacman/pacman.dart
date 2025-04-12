@@ -44,6 +44,9 @@ class Pacman {
     groupName,
   ], expectedExitCode: ignoreErrors ? null : 0);
 
+  Stream<String> listInstalledPackagesForGroup(String groupName) =>
+      _streamPacmanLines(['-Qgq', groupName]);
+
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
     final pacmanProc = await _process.start(
       _pacmanFrontend ?? 'pacman',

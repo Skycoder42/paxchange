@@ -187,8 +187,9 @@ void main() {
             description:
                 'Which package history do you want to add $testGroup1 to?',
             options: {
-              for (final (index, machine) in testMachineHierarchy.indexed)
-                '$index': 'Add package to $machine',
+              for (final (index, machine)
+                  in testMachineHierarchy.reversed.indexed)
+                '${index + 1}': 'Add package to $machine',
               'c': 'Cancel and return to main menu',
             },
           ),
@@ -237,7 +238,7 @@ void main() {
               description: any(named: 'description'),
               options: any(named: 'options'),
             ),
-          ).thenReturn('0');
+          ).thenReturn('1');
 
           await sut(testPackageName);
 
@@ -251,10 +252,10 @@ void main() {
               description: any(named: 'description'),
               options: any(named: 'options'),
             ),
-            () => mockPacman.listPackagesForGroup(testGroup1),
+            () => mockPacman.listPackagesForGroup(testGroup2),
             for (final package in testGroupPackages)
               () => mockPackageFileAdapter.removeFromPackageFile(
-                testMachineHierarchy.first,
+                testMachineHierarchy.last,
                 package,
                 recursive: false,
               ),
