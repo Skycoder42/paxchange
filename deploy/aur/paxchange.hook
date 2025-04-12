@@ -7,5 +7,5 @@ Target = *
 [Action]
 Description = Runs paxchange update to update the package history diff
 When = PostTransaction
-Exec = /usr/bin/paxchange update
+Exec = /usr/share/libalpm/scripts/paxchange-update.sh
 Depends = paxchange

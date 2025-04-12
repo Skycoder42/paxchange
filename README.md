@@ -56,7 +56,7 @@
 #### ✅ Install
 - Only installs the group, not the packages of each group
 
-## Drop Root
+## ✅ Drop Root
 - Drop root permissions when running "update"
 
 ## Uninstall packages no longer required

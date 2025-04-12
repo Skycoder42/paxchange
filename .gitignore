@@ -26,6 +26,6 @@ lib/gen/
 *.g.dart
 
 # AUR stuff
-aur/
+/aur/
 
 *.log

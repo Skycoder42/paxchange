@@ -51,6 +51,9 @@ aur:
       target: /etc/paxchange.json
     - source: deploy/aur/paxchange.hook
       target: /usr/share/libalpm/hooks/paxchange.hook
+    - source: deploy/aur/paxchange-update.sh
+      target: /usr/share/libalpm/scripts/paxchange-update.sh
+      permissions: 755
     - source: deploy/aur/paxchange.sysusers
       target: /usr/lib/sysusers.d/paxchange.conf
   backup:
