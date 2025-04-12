@@ -55,18 +55,13 @@ void main() {
       ]);
     });
 
-    test('writeTitle writes a title', () {
-      const prefix = 'prefix';
-      const suffix = 'suffix';
+    test('writeTitle writes a title with bold segments', () {
+      const prefix = 'prefix ';
+      const suffix = ' suffix';
       const package = 'test-package';
       const color = ConsoleColor.magenta;
 
-      sut.writeTitle(
-        messagePrefix: prefix,
-        messageHighlight: package,
-        messageSuffix: suffix,
-        color: color,
-      );
+      sut.writeTitle(message: '$prefix**$package**$suffix', color: color);
 
       verifyInOrder([
         () => mockConsole.resetColorAttributes(),
@@ -77,8 +72,11 @@ void main() {
         () => mockConsole.write(package),
         () => mockConsole.setTextStyle(),
         () => mockConsole.setForegroundColor(color),
-        () => mockConsole.writeLine(suffix),
+        () => mockConsole.write(suffix),
+        () => mockConsole.setTextStyle(bold: true),
+        () => mockConsole.setTextStyle(),
         () => mockConsole.resetColorAttributes(),
+        () => mockConsole.writeLine(),
       ]);
       verifyNoMoreInteractions(mockConsole);
     });

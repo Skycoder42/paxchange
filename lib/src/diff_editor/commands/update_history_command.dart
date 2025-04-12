@@ -2,23 +2,38 @@ import 'package:dart_console/dart_console.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../storage/package_file_adapter.dart';
+import '../prompter.dart';
 import 'prompt_command.dart';
 
 abstract base class UpdateHistoryCommand extends PromptCommand {
   @protected
   final PackageFileAdapter packageFileAdapter;
+  final Prompter _prompter;
 
-  const UpdateHistoryCommand(super.console, this.packageFileAdapter);
+  const UpdateHistoryCommand(
+    super.console,
+    this.packageFileAdapter,
+    this._prompter,
+  );
 
   @override
   Future<PromptResult> call(String packageName) async {
     console.writeLine('$operation $packageName for $machineName...');
-    await updateHistory(packageName);
-    console
-      ..writeLine('Success! Press any key to continue...')
-      ..readKey();
+    final success = await updateHistory(packageName);
+    if (success) {
+      console
+        ..writeLine('Success! Press any key to continue...')
+        ..readKey();
 
-    return PromptResult.succeeded;
+      return PromptResult.succeeded;
+    } else {
+      _prompter.writeError('$operation $packageName for $machineName failed!');
+      console
+        ..writeLine('Press any key to continue...')
+        ..readKey();
+
+      return PromptResult.failed;
+    }
   }
 
   @protected
@@ -28,7 +43,7 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
   String get machineName;
 
   @protected
-  Future<void> updateHistory(String packageName);
+  Future<bool> updateHistory(String packageName);
 }
 
 final class AddHistoryCommand extends UpdateHistoryCommand {
@@ -39,6 +54,7 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   const AddHistoryCommand(
     super.console,
     super.packageFileAdapter,
+    super._prompter,
     this.index,
     this.machineName,
   );
@@ -46,16 +62,18 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   static List<AddHistoryCommand> generate(
     Console console,
     PackageFileAdapter packageFileAdapter,
-    List<String> machineHierarchy,
-  ) => List.generate(
-    machineHierarchy.length,
-    (index) => AddHistoryCommand(
-      console,
-      packageFileAdapter,
-      index,
-      machineHierarchy[index],
-    ),
-  );
+    Prompter prompter,
+    Iterable<String> machineHierarchy,
+  ) => [
+    for (final (index, packageFileName) in machineHierarchy.indexed)
+      AddHistoryCommand(
+        console,
+        packageFileAdapter,
+        prompter,
+        index,
+        packageFileName,
+      ),
+  ];
 
   @override
   String get key => index.toString();
@@ -67,8 +85,10 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   String get operation => 'Adding';
 
   @override
-  Future<void> updateHistory(String packageName) =>
-      super.packageFileAdapter.addToPackageFile(machineName, packageName);
+  Future<bool> updateHistory(String packageName) async {
+    await super.packageFileAdapter.addToPackageFile(machineName, packageName);
+    return true;
+  }
 }
 
 final class RemoveHistoryCommand extends UpdateHistoryCommand {
@@ -78,6 +98,7 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   const RemoveHistoryCommand(
     super.console,
     super.packageFileAdapter,
+    super._prompter,
     this.machineName,
   );
 
@@ -91,6 +112,6 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   String get operation => 'Removing';
 
   @override
-  Future<void> updateHistory(String packageName) =>
+  Future<bool> updateHistory(String packageName) =>
       super.packageFileAdapter.removeFromPackageFile(machineName, packageName);
 }

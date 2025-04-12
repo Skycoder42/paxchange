@@ -9,6 +9,7 @@ import '../providers/console_provider.dart';
 import '../storage/diff_file_adapter.dart';
 import '../storage/package_file_adapter.dart';
 import 'commands/add_group_command.dart';
+import 'commands/expand_group_command.dart';
 import 'commands/pacman_command.dart';
 import 'commands/print_command.dart';
 import 'commands/prompt_command.dart';
@@ -55,14 +56,11 @@ class DiffEditor {
 
     await _packageFileAdapter.ensurePackageFileExists(machineName);
 
-    final machineHierarchy =
-        await _packageFileAdapter
-            .loadPackageFileHierarchy(machineName)
-            .toList();
-
     var reload = false;
     final skipped = <String>{};
     do {
+      final packageFileHierarchy = await _packageFileAdapter
+          .loadPackageFileHierarchy(machineName);
       final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
       var didModify = false;
@@ -74,11 +72,12 @@ class DiffEditor {
         final entryResult = await switch (diffEntry) {
           DiffAddedEntry(:final package) => _presentAdded(
             package,
-            machineHierarchy,
+            packageFileHierarchy.packageFiles,
           ),
           DiffRemovedEntry(:final package) => _presentRemoved(
             package,
             machineName,
+            packageFileHierarchy.groupsByPackages,
           ),
         };
 
@@ -102,12 +101,12 @@ class DiffEditor {
 
   Future<PromptResult> _presentAdded(
     String package,
-    List<String> machineHierarchy,
+    Iterable<String> machineHierarchy,
   ) async {
     _prompter.writeTitle(
-      messagePrefix: 'Found installed package ',
-      messageHighlight: package,
-      messageSuffix: ' that is not in the history yet!',
+      message:
+          'Found installed package **$package** '
+          'that is not in the history yet!',
       color: ConsoleColor.green,
     );
 
@@ -120,6 +119,7 @@ class DiffEditor {
         ...AddHistoryCommand.generate(
           _console,
           _packageFileAdapter,
+          _prompter,
           machineHierarchy,
         ),
         AddGroupCommand(
@@ -138,55 +138,60 @@ class DiffEditor {
   Future<PromptResult> _presentRemoved(
     String package,
     String machineName,
+    Map<String, Set<String>> knownGroups,
   ) async {
     final isInstalled = await _pacman.checkIfPackageIsInstalled(package);
-    if (isInstalled) {
-      return _presentImplicitlyInstalled(package, machineName);
-    } else {
-      return _presentUninstalled(package, machineName);
+    final firstGroup = knownGroups[package]?.firstOrNull;
+
+    final messageBuffer =
+        StringBuffer()
+          ..write('Found ')
+          ..write(isInstalled ? 'implicitly installed' : 'uninstalled')
+          ..write(' package **')
+          ..write(package);
+    if (firstGroup != null) {
+      messageBuffer
+        ..write('** belonging to group **')
+        ..write(firstGroup);
     }
-  }
+    messageBuffer.write('** that is in the history!');
 
-  Future<PromptResult> _presentImplicitlyInstalled(
-    String package,
-    String machineName,
-  ) async {
     _prompter.writeTitle(
-      messagePrefix: 'Found implicitly installed package ',
-      messageHighlight: package,
-      messageSuffix: ' that is in the history!',
-      color: ConsoleColor.yellow,
+      message: messageBuffer.toString(),
+      color: switch ((firstGroup, isInstalled)) {
+        (String(), _) => ConsoleColor.blue,
+        (_, true) => ConsoleColor.yellow,
+        (_, false) => ConsoleColor.red,
+      },
     );
 
     return _prompter.promptCommand(
       packageName: package,
       commands: [
-        PrintCommand.local(_console, _pacman),
-        MarkExplicitlyInstalledCommand(_console, _pacman, _prompter),
-        RemoveHistoryCommand(_console, _packageFileAdapter, machineName),
-        SkipCommand(_console),
-        QuitCommand(_console),
-      ],
-    );
-  }
-
-  Future<PromptResult> _presentUninstalled(
-    String package,
-    String machineName,
-  ) async {
-    _prompter.writeTitle(
-      messagePrefix: 'Found uninstalled package ',
-      messageHighlight: package,
-      messageSuffix: ' that is in the history!',
-      color: ConsoleColor.red,
-    );
-
-    return _prompter.promptCommand(
-      packageName: package,
-      commands: [
-        PrintCommand.remote(_console, _pacman),
-        InstallCommand(_console, _pacman, _prompter),
-        RemoveHistoryCommand(_console, _packageFileAdapter, machineName),
+        if (isInstalled) ...[
+          PrintCommand.local(_console, _pacman),
+          MarkExplicitlyInstalledCommand(_console, _pacman, _prompter),
+        ] else ...[
+          PrintCommand.remote(_console, _pacman),
+          InstallCommand(_console, _pacman, _prompter),
+        ],
+        if (firstGroup != null)
+          ExpandGroupCommand(
+            _console,
+            _packageFileAdapter,
+            _pacman,
+            _prompter,
+            machineName: machineName,
+            group: firstGroup,
+            excludedPackage: package,
+          )
+        else
+          RemoveHistoryCommand(
+            _console,
+            _packageFileAdapter,
+            _prompter,
+            machineName,
+          ),
         SkipCommand(_console),
         QuitCommand(_console),
       ],

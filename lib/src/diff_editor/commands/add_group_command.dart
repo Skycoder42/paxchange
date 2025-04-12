@@ -11,7 +11,7 @@ final class AddGroupCommand extends PromptCommand {
   final Pacman _pacman;
   final Prompter _prompter;
 
-  final List<String> machineHierarchy;
+  final Iterable<String> machineHierarchy;
 
   const AddGroupCommand(
     super.console,
@@ -53,6 +53,7 @@ final class AddGroupCommand extends PromptCommand {
           .map((line) => line.substring(line.indexOf(':') + 1).trim())
           .expand((line) => line.split(RegExp(r'\s+')))
           .map((group) => group.trim())
+          .where((group) => group != 'None')
           .toList();
 
   String? _selectGroup(String packageName, List<String> packageGroups) {
@@ -75,6 +76,7 @@ final class AddGroupCommand extends PromptCommand {
     final addCommands = AddHistoryCommand.generate(
       console,
       _packageFileAdapter,
+      _prompter,
       machineHierarchy,
     );
     final selectedCommand = _prompter.promptOption(

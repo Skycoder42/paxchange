@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../config.dart';
 import '../pacman/pacman.dart';
+import 'package_file_hierarchy.dart';
 
 part 'package_file_adapter.g.dart';
 
@@ -56,13 +58,26 @@ class PackageFileAdapter {
     }
   }
 
-  Stream<String> loadPackageFileHierarchy(String machineName) {
+  Future<PackageFileHierarchy> loadPackageFileHierarchy(
+    String machineName,
+  ) async {
     final packageFile = _packageFile(machineName);
-
     if (packageFile.existsSync()) {
-      return _streamPackageFileHierarchy(packageFile, {machineName});
+      // ignore: prefer_collection_literals sorting is relevant
+      final packageFiles = LinkedHashSet<String>();
+      final groupsByPackages = <String, Set<String>>{};
+      await _loadPackageFileHierarchyRecursively(
+        packageFile,
+        packageFiles,
+        groupsByPackages,
+        {machineName},
+      );
+      return PackageFileHierarchy(
+        packageFiles: packageFiles,
+        groupsByPackages: groupsByPackages,
+      );
     } else {
-      return const Stream.empty();
+      return PackageFileHierarchy.empty;
     }
   }
 
@@ -91,15 +106,22 @@ class PackageFileAdapter {
     String machineName,
     String package, {
     bool recursive = true,
+    bool isGroup = false,
+    List<String> replacement = const [],
   }) async {
     final packageFile = _packageFile(machineName);
     if (!packageFile.existsSync()) {
       return false;
     }
 
-    return await _removePackageRecursively(packageFile, package, {
-      machineName,
-    }, recursive);
+    return await _removePackageRecursively(
+      packageFile,
+      package,
+      {machineName},
+      recursive,
+      isGroup,
+      replacement,
+    );
   }
 
   File _packageFile(String machineName) =>
@@ -147,30 +169,50 @@ class PackageFileAdapter {
     }
   }
 
-  Stream<String> _streamPackageFileHierarchy(
+  Future<void> _loadPackageFileHierarchyRecursively(
     File packageFile,
+    Set<String> packageFiles,
+    Map<String, Set<String>> groupsByPackages,
     Set<String> importHistory,
-  ) async* {
+  ) async {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
-    if (isWithin(_storageDirectory.path, packageFile.path)) {
-      yield relative(packageFile.path, from: _storageDirectory.path);
-    } else {
-      yield packageFile.absolute.path;
-    }
+    packageFiles.add(
+      isWithin(_storageDirectory.path, packageFile.path)
+          ? relative(packageFile.path, from: _storageDirectory.path)
+          : packageFile.absolute.path,
+    );
 
     await for (final line in _streamLines(packageFile)) {
       // recursively stream imported package files
       final importMatch = _importRegExp.matchAsPrefix(line);
       if (importMatch != null) {
         final importFileName = importMatch[1]!;
-        yield* _streamPackageFileHierarchy(
-          _findPackageFile(importFileName, importHistory),
+        await _loadPackageFileHierarchyRecursively(
+          _findPackageFile(importFileName, packageFiles),
+          packageFiles,
+          groupsByPackages,
           _updateHistory(importFileName, importHistory),
         );
+        continue;
       }
 
-      // skip groups
+      // collect groups per package
+      final groupMatch = _groupRegExp.matchAsPrefix(line);
+      if (groupMatch != null) {
+        final groupName = groupMatch[1]!;
+        await for (final package in _pacman.listPackagesForGroup(
+          groupName,
+          ignoreErrors: true,
+        )) {
+          groupsByPackages.update(
+            package,
+            (groups) => groups..add(groupName),
+            ifAbsent: () => {groupName},
+          );
+        }
+        continue;
+      }
 
       // skip packages
     }
@@ -181,6 +223,8 @@ class PackageFileAdapter {
     String package,
     Set<String> importHistory,
     bool recursive,
+    bool isGroup,
+    List<String> replacement,
   ) async {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
@@ -209,18 +253,34 @@ class PackageFileAdapter {
             package,
             _updateHistory(importFileName, importHistory),
             true,
+            isGroup,
+            replacement,
           );
 
           if (didRemove) {
             return didRemove;
+          } else {
+            continue;
           }
         }
       }
 
       // groups are not processed
+      if (isGroup) {
+        final groupMatch = _groupRegExp.matchAsPrefix(line);
+        if (groupMatch != null) {
+          final groupName = groupMatch[1]!;
+          if (groupName == package) {
+            checkedLines.removeLast();
+            didRemove = true;
+          } else {
+            continue;
+          }
+        }
+      }
 
       // skip line if found and mark as removed
-      if (line == package) {
+      if (!isGroup && line == package) {
         checkedLines.removeLast();
         didRemove = true;
       }
@@ -229,7 +289,7 @@ class PackageFileAdapter {
     if (didRemove) {
       final sink = packageFile.openWrite();
       try {
-        checkedLines.forEach(sink.writeln);
+        checkedLines.followedBy(replacement).forEach(sink.writeln);
       } finally {
         await sink.flush();
         await sink.close();

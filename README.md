@@ -23,15 +23,16 @@
   3. Add a "::group <group>" entry to the selected file
   4. Reevaluate
 
-### Step 2 - uninstalled package with group
+### ✅ Step 2 - uninstalled package with group
 - when loading the hierarchy, synced groups are loaded and cached as well
 - when handling an `-missing` package, ownership to synced groups is checked
 - if the package belongs to an owned group, a different prompt is displayed. Options:
-  - Install because group
+  - Install/mark explicit because group
   - expand group (and thus break group sync)
   - Color: blue maybe?
-- expanding a group will remove it from the history and replace it with all installed packages from that group
-  - via `pacman -Qgq <group>`
+- expanding a group will remove it from the history and replace it with all packages from that group
+  - via `pacman -Sgq <group>`
+  - exclude the package being processed
   - Reevaluate
 
 ### Step 3 - delete groups

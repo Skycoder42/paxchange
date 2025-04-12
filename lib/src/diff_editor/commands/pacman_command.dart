@@ -118,7 +118,7 @@ final class MarkExplicitlyInstalledCommand extends PacmanCommand {
   String get key => 'm';
 
   @override
-  String get description => 'Mark the package as explicitly by a dependency';
+  String get description => 'Mark the package as explicitly installed';
 
   @override
   @protected

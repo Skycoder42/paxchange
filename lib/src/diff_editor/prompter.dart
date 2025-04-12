@@ -25,23 +25,30 @@ class Prompter {
       ..resetColorAttributes();
   }
 
-  void writeTitle({
-    required String messagePrefix,
-    required String messageHighlight,
-    required String messageSuffix,
-    required ConsoleColor color,
-  }) {
+  void writeTitle({required String message, required ConsoleColor color}) {
+    final messageSegments = message.split('**');
     _console
       ..resetColorAttributes()
       ..clearScreen()
-      ..setForegroundColor(color)
-      ..write(messagePrefix)
-      ..setTextStyle(bold: true)
-      ..write(messageHighlight)
+      ..setForegroundColor(color);
+
+    var bold = false;
+    for (final segment in messageSegments) {
+      _console.write(segment);
+      if (bold) {
+        _console
+          ..setTextStyle()
+          ..setForegroundColor(color);
+        bold = false;
+      } else {
+        _console.setTextStyle(bold: true);
+        bold = true;
+      }
+    }
+    _console
       ..setTextStyle()
-      ..setForegroundColor(color)
-      ..writeLine(messageSuffix)
-      ..resetColorAttributes();
+      ..resetColorAttributes()
+      ..writeLine();
   }
 
   String promptOption({
