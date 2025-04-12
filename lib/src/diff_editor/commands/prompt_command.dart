@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 enum PromptResult {
   succeeded(stopProcessing: false, didModify: true),
-  succeededReload(stopProcessing: true, didModify: true, needsReload: true),
+  succeededReload(stopProcessing: true, didModify: true),
   failed(stopProcessing: true, didModify: true),
   repeat(stopProcessing: false, didModify: false),
   skipped(stopProcessing: false, didModify: false),
@@ -13,13 +13,8 @@ enum PromptResult {
 
   final bool stopProcessing;
   final bool didModify;
-  final bool needsReload;
 
-  const PromptResult({
-    required this.stopProcessing,
-    required this.didModify,
-    this.needsReload = false,
-  });
+  const PromptResult({required this.stopProcessing, required this.didModify});
 
   PromptResult withReload() => switch (this) {
     PromptResult.succeeded => PromptResult.succeededReload,

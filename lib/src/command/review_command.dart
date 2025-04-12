@@ -4,7 +4,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
+import '../diff_editor/cleanup_editor.dart';
 import '../diff_editor/diff_editor.dart';
+import '../diff_editor/editor.dart';
+import '../diff_editor/missing_groups_editor.dart';
 
 part 'review_command.g.dart';
 
@@ -20,7 +23,18 @@ final class ReviewOptions {
   )
   final String? machineName;
 
-  const ReviewOptions({required this.machineName});
+  @CliOption(
+    defaultsTo: false,
+    help:
+        'When enabled, the cleanup will include packages '
+        'that are referenced as optional dependency.',
+  )
+  final bool includeOptional;
+
+  const ReviewOptions({
+    required this.machineName,
+    required this.includeOptional,
+  });
 }
 
 class ReviewCommand extends _$ReviewOptionsCommand<int> {
@@ -41,9 +55,18 @@ class ReviewCommand extends _$ReviewOptionsCommand<int> {
   Future<int> run() async {
     final machineName = _options.machineName;
     final config = _providerContainer.read(configProvider);
-    final diffEditor = _providerContainer.read(diffEditorProvider);
 
-    await diffEditor.run(machineName ?? config.rootPackageFile);
+    final editors = [
+      _providerContainer.read(missingGroupsEditorProvider),
+      _providerContainer.read(diffEditorProvider),
+      _providerContainer.read(
+        cleanupEditorProvider(includeOptional: _options.includeOptional),
+      ),
+    ];
+
+    final editor = _providerContainer.read(editorProvider(editors));
+
+    await editor.run(machineName ?? config.rootPackageFile);
 
     return 0;
   }

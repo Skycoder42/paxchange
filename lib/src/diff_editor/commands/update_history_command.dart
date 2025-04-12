@@ -87,13 +87,15 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
 final class RemoveHistoryCommand extends UpdateHistoryCommand {
   @override
   final String machineName;
+  final bool isGroup;
 
   const RemoveHistoryCommand(
     super.console,
     super.packageFileAdapter,
     super._prompter,
-    this.machineName,
-  );
+    this.machineName, {
+    this.isGroup = false,
+  });
 
   @override
   String get key => 'd';
@@ -105,6 +107,6 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   String get operation => 'Removing';
 
   @override
-  Future<bool> updateHistory(String packageName) =>
-      super.packageFileAdapter.removeFromPackageFile(machineName, packageName);
+  Future<bool> updateHistory(String packageName) => super.packageFileAdapter
+      .removeFromPackageFile(machineName, packageName, isGroup: isGroup);
 }
