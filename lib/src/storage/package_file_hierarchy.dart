@@ -12,5 +12,6 @@ sealed class PackageFileHierarchy with _$PackageFileHierarchy {
   const factory PackageFileHierarchy({
     required Set<String> packageFiles,
     required Map<String, Set<String>> groupsByPackages,
+    @Default({}) Set<String> missingGroups,
   }) = _PackageFileHierarchy;
 }

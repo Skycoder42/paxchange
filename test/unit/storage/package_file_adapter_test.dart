@@ -372,6 +372,7 @@ void main() {
           'package-1': {'test-group'},
           'package-2': {'test-group'},
         });
+        expect(result.missingGroups, isEmpty);
 
         verify(
           () =>
@@ -411,6 +412,7 @@ void main() {
           'package-2': orderedEquals(['test-group-2', 'test-group-1']),
           'package-3': {'test-group-2'},
         });
+        expect(result.missingGroups, isEmpty);
 
         verifyInOrder([
           () => mockPacman.listPackagesForGroup(
@@ -422,6 +424,28 @@ void main() {
             ignoreErrors: true,
           ),
         ]);
+      });
+
+      test('collects missing group if group returns no packages', () async {
+        const fileName = 'test-file';
+        const lines = ['line-A', 'line-B', '::group test-group', 'line-C'];
+        writeFile(fileName, lines);
+
+        when(
+          () => mockPacman.listPackagesForGroup(
+            any(),
+            ignoreErrors: any(named: 'ignoreErrors'),
+          ),
+        ).thenStream(const Stream.empty());
+
+        final result = await sut.loadPackageFileHierarchy(fileName);
+        expect(result.groupsByPackages, isEmpty);
+        expect(result.missingGroups, {'test-group'});
+
+        verify(
+          () =>
+              mockPacman.listPackagesForGroup('test-group', ignoreErrors: true),
+        ).called(1);
       });
     });
 

@@ -853,6 +853,158 @@ void main() {
         ]);
         verifyNoMoreInteractions(mockPrompter);
       });
+
+      group('missing groups', () {
+        test('presents and cleans if any are found', () async {
+          const testHierarchy = [testMachineName, 'file2', 'file3'];
+          const testMissingGroup = 'test-missing-group';
+          const diffEntry = DiffEntry.added('package-1');
+
+          when(
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+          ).thenReturnAsync(
+            PackageFileHierarchy(
+              packageFiles: testHierarchy.toSet(),
+              groupsByPackages: {},
+              missingGroups: {testMissingGroup},
+            ),
+          );
+          when(
+            () => mockPackageFileAdapter.removeFromPackageFile(
+              any(),
+              any(),
+              isGroup: any(named: 'isGroup'),
+            ),
+          ).thenReturnAsync(true);
+          when(
+            () => mockPrompter.promptOption(
+              description: any(named: 'description'),
+              options: any(named: 'options'),
+            ),
+          ).thenReturn('y');
+          when(
+            () => mockDiffFileAdapter.loadPackageDiff(any()),
+          ).thenStream(Stream.value(diffEntry));
+          when(
+            () => mockPrompter.promptCommand(
+              packageName: any(named: 'packageName'),
+              commands: any(named: 'commands'),
+            ),
+          ).thenReturn(PromptResult.succeeded);
+
+          await sut.run(testMachineName);
+
+          verifyInOrder([
+            () =>
+                mockPackageFileAdapter.ensurePackageFileExists(testMachineName),
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(
+              testMachineName,
+            ),
+            () => mockPrompter.writeTitle(
+              message:
+                  'Found non existing group **$testMissingGroup** '
+                  'in the history!',
+              color: ConsoleColor.magenta,
+            ),
+            () => mockPrompter.promptOption(
+              description: 'Do you want to remove the group from the history?',
+              options: const {
+                'y': 'Yes',
+                'n': 'No',
+                'q': 'Quit the application',
+              },
+            ),
+            () => mockPackageFileAdapter.removeFromPackageFile(
+              testMachineName,
+              testMissingGroup,
+              isGroup: true,
+            ),
+            () => mockDiffFileAdapter.loadPackageDiff(testMachineName),
+            () => mockPrompter.writeTitle(
+              message: any(named: 'message'),
+              color: ConsoleColor.green,
+            ),
+            () => mockPrompter.promptCommand(
+              packageName: diffEntry.package,
+              commands: captureAny(named: 'commands'),
+            ),
+            () => mockPackageSync.updatePackageDiff(),
+          ]);
+        });
+
+        test('skips when selected', () async {
+          const testHierarchy = [testMachineName, 'file2', 'file3'];
+          const testMissingGroup = 'test-missing-group';
+          const diffEntry = DiffEntry.added('package-1');
+
+          when(
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+          ).thenReturnAsync(
+            PackageFileHierarchy(
+              packageFiles: testHierarchy.toSet(),
+              groupsByPackages: {},
+              missingGroups: {testMissingGroup},
+            ),
+          );
+          when(
+            () => mockPrompter.promptOption(
+              description: any(named: 'description'),
+              options: any(named: 'options'),
+            ),
+          ).thenReturn('n');
+          when(
+            () => mockDiffFileAdapter.loadPackageDiff(any()),
+          ).thenStream(Stream.value(diffEntry));
+          when(
+            () => mockPrompter.promptCommand(
+              packageName: any(named: 'packageName'),
+              commands: any(named: 'commands'),
+            ),
+          ).thenReturn(PromptResult.succeeded);
+
+          await sut.run(testMachineName);
+
+          verifyNever(
+            () => mockPackageFileAdapter.removeFromPackageFile(
+              any(),
+              any(),
+              isGroup: any(named: 'isGroup'),
+            ),
+          );
+        });
+
+        test('returns early when quit', () async {
+          const testHierarchy = [testMachineName, 'file2', 'file3'];
+          const testMissingGroup = 'test-missing-group';
+
+          when(
+            () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
+          ).thenReturnAsync(
+            PackageFileHierarchy(
+              packageFiles: testHierarchy.toSet(),
+              groupsByPackages: {},
+              missingGroups: {testMissingGroup},
+            ),
+          );
+          when(
+            () => mockPrompter.promptOption(
+              description: any(named: 'description'),
+              options: any(named: 'options'),
+            ),
+          ).thenReturn('q');
+
+          await sut.run(testMachineName);
+
+          verifyNever(
+            () => mockPackageFileAdapter.removeFromPackageFile(
+              any(),
+              any(),
+              isGroup: any(named: 'isGroup'),
+            ),
+          );
+          verifyNever(() => mockDiffFileAdapter.loadPackageDiff(any()));
+        });
+      });
     });
   });
 }

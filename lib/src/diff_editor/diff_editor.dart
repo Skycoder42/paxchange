@@ -61,8 +61,17 @@ class DiffEditor {
     do {
       final packageFileHierarchy = await _packageFileAdapter
           .loadPackageFileHierarchy(machineName);
-      final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
 
+      if (!reload) {
+        for (final group in packageFileHierarchy.missingGroups) {
+          final result = await _presentMissingGroup(machineName, group);
+          if (!result) {
+            return;
+          }
+        }
+      }
+
+      final diffEntries = _diffFileAdapter.loadPackageDiff(machineName);
       var didModify = false;
       await for (final diffEntry in diffEntries) {
         if (skipped.contains(diffEntry.package)) {
@@ -195,6 +204,32 @@ class DiffEditor {
         QuitCommand(_console),
       ],
     );
+  }
+
+  Future<bool> _presentMissingGroup(String machineName, String group) async {
+    _prompter.writeTitle(
+      message: 'Found non existing group **$group** in the history!',
+      color: ConsoleColor.magenta,
+    );
+
+    final result = _prompter.promptOption(
+      description: 'Do you want to remove the group from the history?',
+      options: const {'y': 'Yes', 'n': 'No', 'q': 'Quit the application'},
+    );
+
+    switch (result) {
+      case 'y':
+        await _packageFileAdapter.removeFromPackageFile(
+          machineName,
+          group,
+          isGroup: true,
+        );
+        return true;
+      case 'n':
+        return true;
+      default:
+        return false;
+    }
   }
 
   Future<void> _updatePackageDiff({bool skipResultMessage = false}) async {

@@ -66,15 +66,18 @@ class PackageFileAdapter {
       // ignore: prefer_collection_literals sorting is relevant
       final packageFiles = LinkedHashSet<String>();
       final groupsByPackages = <String, Set<String>>{};
+      final missingGroups = <String>{};
       await _loadPackageFileHierarchyRecursively(
-        packageFile,
-        packageFiles,
-        groupsByPackages,
-        {machineName},
+        packageFile: packageFile,
+        packageFiles: packageFiles,
+        groupsByPackages: groupsByPackages,
+        missingGroups: missingGroups,
+        importHistory: {machineName},
       );
       return PackageFileHierarchy(
         packageFiles: packageFiles,
         groupsByPackages: groupsByPackages,
+        missingGroups: missingGroups,
       );
     } else {
       return PackageFileHierarchy.empty;
@@ -169,12 +172,13 @@ class PackageFileAdapter {
     }
   }
 
-  Future<void> _loadPackageFileHierarchyRecursively(
-    File packageFile,
-    Set<String> packageFiles,
-    Map<String, Set<String>> groupsByPackages,
-    Set<String> importHistory,
-  ) async {
+  Future<void> _loadPackageFileHierarchyRecursively({
+    required File packageFile,
+    required Set<String> packageFiles,
+    required Map<String, Set<String>> groupsByPackages,
+    required Set<String> missingGroups,
+    required Set<String> importHistory,
+  }) async {
     assert(packageFile.existsSync(), '$packageFile must exist');
 
     packageFiles.add(
@@ -189,10 +193,11 @@ class PackageFileAdapter {
       if (importMatch != null) {
         final importFileName = importMatch[1]!;
         await _loadPackageFileHierarchyRecursively(
-          _findPackageFile(importFileName, packageFiles),
-          packageFiles,
-          groupsByPackages,
-          _updateHistory(importFileName, importHistory),
+          packageFile: _findPackageFile(importFileName, packageFiles),
+          packageFiles: packageFiles,
+          groupsByPackages: groupsByPackages,
+          missingGroups: missingGroups,
+          importHistory: _updateHistory(importFileName, importHistory),
         );
         continue;
       }
@@ -201,15 +206,21 @@ class PackageFileAdapter {
       final groupMatch = _groupRegExp.matchAsPrefix(line);
       if (groupMatch != null) {
         final groupName = groupMatch[1]!;
+        var foundAny = false;
         await for (final package in _pacman.listPackagesForGroup(
           groupName,
           ignoreErrors: true,
         )) {
+          foundAny = true;
           groupsByPackages.update(
             package,
             (groups) => groups..add(groupName),
             ifAbsent: () => {groupName},
           );
+        }
+
+        if (!foundAny) {
+          missingGroups.add(groupName);
         }
         continue;
       }
