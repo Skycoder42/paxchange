@@ -1,9 +1,9 @@
 import 'package:dart_console/dart_console.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../storage/package_file_hierarchy.dart';
-import 'commands/prompt_command.dart';
-import 'prompter.dart';
+import '../../storage/package_file_hierarchy.dart';
+import '../commands/prompt_command.dart';
+import '../prompter.dart';
 
 abstract class CommandEditor<TTarget> {
   @protected

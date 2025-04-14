@@ -6,7 +6,7 @@ import '../package_sync.dart';
 import '../providers/console_provider.dart';
 import '../storage/package_file_adapter.dart';
 import '../storage/package_file_hierarchy.dart';
-import 'command_editor.dart';
+import 'editors/command_editor.dart';
 import 'commands/prompt_command.dart';
 import 'commands/quit_command.dart';
 import 'commands/skip_command.dart';

@@ -48,7 +48,7 @@ class Pacman {
       _streamPacmanLines(['-Qgq', groupName]);
 
   Stream<String> listUnusedPackages({bool includeOptional = false}) =>
-      _streamPacmanLines(['-Qqd', if (includeOptional) '-tt' else '-t']);
+      _streamPacmanLines(['-Qdq', if (includeOptional) '-tt' else '-t']);
 
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
     final pacmanProc = await _process.start(
@@ -80,15 +80,6 @@ class Pacman {
 
   Future<int> removePackage(String packageName) =>
       _executePacmanInteractive(['-R', packageName]);
-
-  Future<int> removeAllPackage(
-    List<String> packageNames, {
-    bool noConfirm = false,
-  }) => _executePacmanInteractive([
-    '-R',
-    if (noConfirm) '--noconfirm',
-    ...packageNames,
-  ]);
 
   Future<int> changePackageInstallReason(
     String packageName,

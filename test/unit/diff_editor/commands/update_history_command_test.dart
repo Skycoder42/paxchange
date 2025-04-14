@@ -159,6 +159,38 @@ void main() {
           expect(result, PromptResult.failed);
         },
       );
+      test('removes group when in group mode', () async {
+        sut = RemoveHistoryCommand(
+          mockConsole,
+          mockPackageFileAdapter,
+          mockPrompter,
+          testMachineName,
+          isGroup: true,
+        );
+
+        when(
+          () => mockPackageFileAdapter.removeFromPackageFile(
+            any(),
+            any(),
+            isGroup: any(named: 'isGroup'),
+          ),
+        ).thenReturnAsync(true);
+
+        const testPackageName = 'test-package';
+        final result = await sut(testPackageName);
+
+        verifyInOrder([
+          () => mockConsole.writeLine(
+            'Removing $testPackageName for $testMachineName...',
+          ),
+          () => mockPackageFileAdapter.removeFromPackageFile(
+            testMachineName,
+            testPackageName,
+            isGroup: true,
+          ),
+        ]);
+        expect(result, PromptResult.succeeded);
+      });
     });
   });
 }

@@ -2,20 +2,20 @@ import 'package:dart_console/dart_console.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../diff_entry.dart';
-import '../pacman/pacman.dart';
-import '../providers/console_provider.dart';
-import '../storage/diff_file_adapter.dart';
-import '../storage/package_file_adapter.dart';
-import '../storage/package_file_hierarchy.dart';
+import '../../diff_entry.dart';
+import '../../pacman/pacman.dart';
+import '../../providers/console_provider.dart';
+import '../../storage/diff_file_adapter.dart';
+import '../../storage/package_file_adapter.dart';
+import '../../storage/package_file_hierarchy.dart';
 import 'command_editor.dart';
-import 'commands/add_group_command.dart';
-import 'commands/expand_group_command.dart';
-import 'commands/pacman_command.dart';
-import 'commands/print_command.dart';
-import 'commands/prompt_command.dart';
-import 'commands/update_history_command.dart';
-import 'prompter.dart';
+import '../commands/add_group_command.dart';
+import '../commands/expand_group_command.dart';
+import '../commands/pacman_command.dart';
+import '../commands/print_command.dart';
+import '../commands/prompt_command.dart';
+import '../commands/update_history_command.dart';
+import '../prompter.dart';
 
 part 'diff_editor.g.dart';
 

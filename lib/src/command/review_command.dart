@@ -4,10 +4,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
-import '../diff_editor/cleanup_editor.dart';
-import '../diff_editor/diff_editor.dart';
+import '../diff_editor/editors/cleanup_editor.dart';
+import '../diff_editor/editors/diff_editor.dart';
 import '../diff_editor/editor.dart';
-import '../diff_editor/missing_groups_editor.dart';
+import '../diff_editor/editors/missing_groups_editor.dart';
 
 part 'review_command.g.dart';
 

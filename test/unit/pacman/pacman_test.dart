@@ -210,6 +210,38 @@ void main() {
         );
       });
 
+      group('listUnusedPackages', () {
+        test('invokes pacman to list unused packages', () async {
+          final result = sut.listUnusedPackages();
+          await expectLater(result, emitsDone);
+
+          verify(
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qdq', '-t'],
+            ),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
+
+        test('includes optional dependencies if specified', () async {
+          final result = sut.listUnusedPackages(includeOptional: true);
+          await expectLater(result, emitsDone);
+
+          verify(
+            () => processWrapperMock.start(
+              process,
+              environment: testEnvironment,
+              const ['-Qdq', '-tt'],
+            ),
+          );
+          verifyNoMoreInteractions(processWrapperMock);
+        });
+
+        testLineStreaming(runPacman: () => sut.listUnusedPackages());
+      });
+
       group('checkIfPackageIsInstalled', () {
         const packageName = 'test-package';
 

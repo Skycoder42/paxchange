@@ -11,7 +11,7 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/commands/quit_command.dart';
 import 'package:paxchange/src/diff_editor/commands/skip_command.dart';
 import 'package:paxchange/src/diff_editor/commands/update_history_command.dart';
-import 'package:paxchange/src/diff_editor/diff_editor.dart';
+import 'package:paxchange/src/diff_editor/editors/diff_editor.dart';
 import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:paxchange/src/diff_entry.dart';
 import 'package:paxchange/src/package_sync.dart';

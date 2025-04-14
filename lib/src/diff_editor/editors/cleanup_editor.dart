@@ -2,14 +2,14 @@ import 'package:dart_console/dart_console.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../pacman/pacman.dart';
-import '../providers/console_provider.dart';
-import '../storage/package_file_hierarchy.dart';
+import '../../pacman/pacman.dart';
+import '../../providers/console_provider.dart';
+import '../../storage/package_file_hierarchy.dart';
+import '../commands/pacman_command.dart';
+import '../commands/print_command.dart';
+import '../commands/prompt_command.dart';
+import '../prompter.dart';
 import 'command_editor.dart';
-import 'commands/pacman_command.dart';
-import 'commands/print_command.dart';
-import 'commands/prompt_command.dart';
-import 'prompter.dart';
 
 part 'cleanup_editor.g.dart';
 

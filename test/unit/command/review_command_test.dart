@@ -7,7 +7,7 @@ import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/command/review_command.dart';
 import 'package:paxchange/src/config.dart';
-import 'package:paxchange/src/diff_editor/diff_editor.dart';
+import 'package:paxchange/src/diff_editor/editors/diff_editor.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
