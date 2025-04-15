@@ -8,7 +8,6 @@ import '../../providers/console_provider.dart';
 import '../../storage/diff_file_adapter.dart';
 import '../../storage/package_file_adapter.dart';
 import '../../storage/package_file_hierarchy.dart';
-import 'command_editor.dart';
 import '../commands/add_group_command.dart';
 import '../commands/expand_group_command.dart';
 import '../commands/pacman_command.dart';
@@ -16,6 +15,7 @@ import '../commands/print_command.dart';
 import '../commands/prompt_command.dart';
 import '../commands/update_history_command.dart';
 import '../prompter.dart';
+import 'command_editor.dart';
 
 part 'diff_editor.g.dart';
 
@@ -87,14 +87,15 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
       _pacman,
       super.prompter,
     );
-    yield* Stream.fromIterable(
-      AddHistoryCommand.generate(
-        super.console,
-        _packageFileAdapter,
-        super.prompter,
-        machineHierarchy,
-      ),
+    final addHistoryCommands = AddHistoryCommand.generate(
+      super.console,
+      _packageFileAdapter,
+      super.prompter,
+      machineHierarchy,
     );
+    for (final addHistoryCommand in addHistoryCommands) {
+      yield addHistoryCommand;
+    }
     yield AddGroupCommand(
       super.console,
       _packageFileAdapter,
@@ -128,9 +129,10 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
     super.prompter.writeTitle(
       message: messageBuffer.toString(),
       color: switch ((firstGroup, isInstalled)) {
-        (String(), _) => ConsoleColor.blue,
-        (_, true) => ConsoleColor.yellow,
-        (_, false) => ConsoleColor.red,
+        (String(), true) => ConsoleColor.cyan,
+        (String(), false) => ConsoleColor.blue,
+        (null, true) => ConsoleColor.yellow,
+        (null, false) => ConsoleColor.red,
       },
     );
 

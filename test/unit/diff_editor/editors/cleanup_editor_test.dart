@@ -102,7 +102,7 @@ void main() {
               'not required by any other package!',
           color: ConsoleColor.yellow,
         ),
-      );
+      ).called(1);
     });
   });
 }
