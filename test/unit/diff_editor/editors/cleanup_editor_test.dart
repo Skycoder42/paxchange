@@ -70,10 +70,6 @@ void main() {
       },
     );
 
-    test('packageForTarget returns target', () {
-      expect(sut.packageForTarget(testPackage), testPackage);
-    });
-
     test('buildCommands writes title and creates expected commands', () async {
       final result = sut.buildCommands(
         testMachineName,
@@ -84,13 +80,19 @@ void main() {
       await expectLater(
         result,
         emitsInOrder([
-          isA<PrintCommand>().having(
-            (m) => m.printTarget,
-            'printTarget',
-            PrintTarget.local,
+          isA<PrintCommand>()
+              .having((m) => m.packageName, 'packageName', testPackage)
+              .having((m) => m.printTarget, 'printTarget', PrintTarget.local),
+          isA<MarkExplicitlyInstalledCommand>().having(
+            (m) => m.packageName,
+            'packageName',
+            testPackage,
           ),
-          isA<MarkExplicitlyInstalledCommand>(),
-          isA<RemoveCommand>(),
+          isA<RemoveCommand>().having(
+            (m) => m.packageName,
+            'packageName',
+            testPackage,
+          ),
           emitsDone,
         ]),
       );

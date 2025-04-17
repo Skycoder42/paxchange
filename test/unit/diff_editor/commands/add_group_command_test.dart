@@ -74,6 +74,7 @@ void main() {
         mockPacman,
         mockPrompter,
         testMachineHierarchy,
+        testPackageName,
       );
     });
 
@@ -100,7 +101,7 @@ void main() {
             ),
           ).thenReturn('c');
 
-          await sut(testPackageName);
+          await sut();
 
           verifyInOrder([
             () => mockPacman.queryInstalledPackage(testPackageName),
@@ -122,7 +123,7 @@ void main() {
           () => mockPacman.queryInstalledPackage(any()),
         ).thenStream(Stream.value('Groups : None'));
 
-        final result = await sut(testPackageName);
+        final result = await sut();
         expect(result, PromptResult.repeat);
 
         verifyInOrder([
@@ -145,7 +146,7 @@ void main() {
           ),
         ).thenReturn('c');
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         expect(result, PromptResult.repeat);
 
@@ -175,7 +176,7 @@ void main() {
           ),
         ).thenReturn('c');
 
-        await sut(testPackageName);
+        await sut();
 
         verifyInOrder([
           () => mockPacman.queryInstalledPackage(testPackageName),
@@ -213,7 +214,7 @@ void main() {
           ),
         ).thenReturn('c');
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         expect(result, PromptResult.repeat);
 
@@ -240,7 +241,7 @@ void main() {
             ),
           ).thenReturn('1');
 
-          await sut(testPackageName);
+          await sut();
 
           verifyInOrder([
             () => mockPacman.queryInstalledPackage(testPackageName),
@@ -271,7 +272,7 @@ void main() {
           ),
         ).thenReturn('1');
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         expect(result, PromptResult.succeededReload);
 

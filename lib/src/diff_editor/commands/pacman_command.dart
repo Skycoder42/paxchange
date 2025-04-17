@@ -10,11 +10,16 @@ abstract base class PacmanCommand extends PromptCommand {
   final Pacman pacman;
   final Prompter _prompter;
 
-  const PacmanCommand(super.console, this.pacman, this._prompter);
+  const PacmanCommand(
+    super.console,
+    this.pacman,
+    this._prompter,
+    super.packageName,
+  );
 
   @override
   @nonVirtual
-  Future<PromptResult> call(String packageName) async {
+  Future<PromptResult> call() async {
     console
       ..clearScreen()
       ..setForegroundColor(ConsoleColor.blue)
@@ -40,7 +45,12 @@ abstract base class PacmanCommand extends PromptCommand {
 }
 
 final class InstallCommand extends PacmanCommand {
-  const InstallCommand(super.console, super.pacman, super._prompter);
+  const InstallCommand(
+    super.console,
+    super.pacman,
+    super._prompter,
+    super.packageName,
+  );
 
   @override
   String get key => 'i';
@@ -59,7 +69,12 @@ final class InstallCommand extends PacmanCommand {
 }
 
 final class RemoveCommand extends PacmanCommand {
-  const RemoveCommand(super.console, super.pacman, super._prompter);
+  const RemoveCommand(
+    super.console,
+    super.pacman,
+    super._prompter,
+    super.packageName,
+  );
 
   @override
   String get key => 'r';
@@ -82,6 +97,7 @@ final class MarkImplicitlyInstalledCommand extends PacmanCommand {
     super.console,
     super.pacman,
     super._prompter,
+    super.packageName,
   );
 
   @override
@@ -105,6 +121,7 @@ final class MarkExplicitlyInstalledCommand extends PacmanCommand {
     super.console,
     super.pacman,
     super._prompter,
+    super.packageName,
   );
 
   @override

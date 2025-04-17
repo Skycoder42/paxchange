@@ -85,10 +85,7 @@ class Prompter {
     }
   }
 
-  FutureOr<PromptResult> promptCommand({
-    required String packageName,
-    required List<PromptCommand> commands,
-  }) async {
+  FutureOr<PromptResult> promptCommand(List<PromptCommand> commands) async {
     while (true) {
       final selectedKey = promptOption(
         description: 'What do you want to do?',
@@ -98,7 +95,7 @@ class Prompter {
       );
 
       final selectedCommand = commands.singleWhere((c) => c.key == selectedKey);
-      final result = await selectedCommand(packageName);
+      final result = await selectedCommand();
       if (result != PromptResult.repeat) {
         return result;
       }

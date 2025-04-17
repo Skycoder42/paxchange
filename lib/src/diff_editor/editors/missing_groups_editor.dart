@@ -5,10 +5,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../providers/console_provider.dart';
 import '../../storage/package_file_adapter.dart';
 import '../../storage/package_file_hierarchy.dart';
-import 'command_editor.dart';
 import '../commands/prompt_command.dart';
 import '../commands/update_history_command.dart';
 import '../prompter.dart';
+import 'command_editor.dart';
 
 part 'missing_groups_editor.g.dart';
 
@@ -33,9 +33,6 @@ final class MissingGroupsEditor extends CommandEditor<String> {
   ) => Stream.fromIterable(hierarchy.missingGroups);
 
   @override
-  String packageForTarget(String target) => target;
-
-  @override
   Stream<PromptCommand> buildCommands(
     String machineName,
     PackageFileHierarchy hierarchy,
@@ -50,7 +47,8 @@ final class MissingGroupsEditor extends CommandEditor<String> {
       super.console,
       _packageFileAdapter,
       super.prompter,
-      machineName,
+      machineName: machineName,
+      packageName: target,
       isGroup: true,
     );
   }

@@ -18,8 +18,6 @@ abstract class CommandEditor<TTarget> {
     PackageFileHierarchy hierarchy,
   );
 
-  String packageForTarget(TTarget target);
-
   Stream<PromptCommand> buildCommands(
     String machineName,
     PackageFileHierarchy hierarchy,

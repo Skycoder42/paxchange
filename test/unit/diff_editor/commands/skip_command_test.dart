@@ -13,7 +13,7 @@ void main() {
 
       expect(sut.key, 's');
       expect(sut.description, isNotEmpty);
-      expect(sut(''), PromptResult.skipped);
+      expect(sut(), PromptResult.skipped);
     });
   });
 }

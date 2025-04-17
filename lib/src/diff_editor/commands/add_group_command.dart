@@ -19,6 +19,7 @@ final class AddGroupCommand extends PromptCommand {
     this._pacman,
     this._prompter,
     this.machineHierarchy,
+    super.packageName,
   );
 
   @override
@@ -28,7 +29,7 @@ final class AddGroupCommand extends PromptCommand {
   String get description => 'Add a group of the package to the history';
 
   @override
-  Future<PromptResult> call(String packageName) async {
+  Future<PromptResult> call() async {
     final packageGroups = await _getPackageGroups(packageName);
     if (packageGroups.isEmpty) {
       console.writeLine('No groups found for $packageName');
@@ -46,7 +47,7 @@ final class AddGroupCommand extends PromptCommand {
     }
 
     await _deleteGroupPackagesFromHistory(addCommand.machineName, group);
-    final result = await addCommand('::group $group');
+    final result = await addCommand();
     return result.withReload();
   }
 
@@ -87,6 +88,7 @@ final class AddGroupCommand extends PromptCommand {
       _packageFileAdapter,
       _prompter,
       machineHierarchy,
+      '::group $group',
     );
     final selectedCommand = _prompter.promptOption(
       description: 'Which package history do you want to add $group to?',

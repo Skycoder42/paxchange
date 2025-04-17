@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:dart_console/dart_console.dart';
+
 import '../../pacman/pacman.dart';
 import '../../storage/package_file_adapter.dart';
 import '../prompter.dart';
@@ -13,13 +15,14 @@ final class ExpandGroupCommand extends PromptCommand {
   final String group;
 
   ExpandGroupCommand(
-    super.console,
+    Console console,
     this._packageFileAdapter,
     this._pacman,
     this._prompter, {
+    required String packageName,
     required this.machineName,
     required this.group,
-  });
+  }) : super(console, packageName);
 
   @override
   String get key => 'e';
@@ -28,11 +31,11 @@ final class ExpandGroupCommand extends PromptCommand {
   String get description => 'Expand group $group';
 
   @override
-  Future<PromptResult> call(String package) async {
+  Future<PromptResult> call() async {
     final packagesInGroup =
         await _pacman
             .listInstalledPackagesForGroup(group)
-            .where((p) => p != package)
+            .where((p) => p != packageName)
             .toList();
 
     final didRemove = await _packageFileAdapter.removeFromPackageFile(

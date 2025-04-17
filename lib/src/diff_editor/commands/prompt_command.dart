@@ -25,11 +25,12 @@ enum PromptResult {
 abstract base class PromptCommand {
   @protected
   final Console console;
+  final String packageName;
 
-  const PromptCommand(this.console);
+  const PromptCommand(this.console, this.packageName);
 
   String get key;
   String get description;
 
-  FutureOr<PromptResult> call(String packageName);
+  FutureOr<PromptResult> call();
 }

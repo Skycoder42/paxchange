@@ -11,13 +11,14 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
   final Prompter _prompter;
 
   const UpdateHistoryCommand(
-    super.console,
+    Console console,
     this.packageFileAdapter,
-    this._prompter,
-  );
+    this._prompter, {
+    required String packageName,
+  }) : super(console, packageName);
 
   @override
-  Future<PromptResult> call(String packageName) async {
+  Future<PromptResult> call() async {
     console.writeLine('$operation $packageName for $machineName...');
     final success = await updateHistory(packageName);
     if (success) {
@@ -47,15 +48,17 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
     super.console,
     super.packageFileAdapter,
     super._prompter,
-    this.index,
-    this.machineName,
-  );
+    this.index, {
+    required this.machineName,
+    required super.packageName,
+  });
 
   static List<AddHistoryCommand> generate(
     Console console,
     PackageFileAdapter packageFileAdapter,
     Prompter prompter,
     Iterable<String> machineHierarchy,
+    String packageName,
   ) => [
     for (final (index, packageFileName)
         in machineHierarchy.toList().reversed.indexed)
@@ -64,7 +67,8 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
         packageFileAdapter,
         prompter,
         index + 1,
-        packageFileName,
+        machineName: packageFileName,
+        packageName: packageName,
       ),
   ];
 
@@ -92,8 +96,9 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   const RemoveHistoryCommand(
     super.console,
     super.packageFileAdapter,
-    super._prompter,
-    this.machineName, {
+    super._prompter, {
+    required this.machineName,
+    required super.packageName,
     this.isGroup = false,
   });
 

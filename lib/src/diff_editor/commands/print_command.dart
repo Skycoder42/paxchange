@@ -14,10 +14,10 @@ final class PrintCommand extends PromptCommand {
   @visibleForTesting
   final PrintTarget printTarget;
 
-  const PrintCommand.local(super.console, this._pacman)
+  const PrintCommand.local(super.console, this._pacman, super.packageName)
     : printTarget = PrintTarget.local;
 
-  const PrintCommand.remote(super.console, this._pacman)
+  const PrintCommand.remote(super.console, this._pacman, super.packageName)
     : printTarget = PrintTarget.remote;
 
   @override
@@ -27,7 +27,7 @@ final class PrintCommand extends PromptCommand {
   String get description => 'Print information about the package';
 
   @override
-  Future<PromptResult> call(String packageName) async {
+  Future<PromptResult> call() async {
     Stream<String> packageStream;
     switch (printTarget) {
       case PrintTarget.local:

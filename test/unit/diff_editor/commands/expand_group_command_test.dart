@@ -42,6 +42,7 @@ void main() {
         mockPackageFileAdapter,
         mockPacman,
         mockPrompter,
+        packageName: testPackage,
         machineName: testMachineName,
         group: testGroup,
       );
@@ -71,7 +72,7 @@ void main() {
             ),
           ).thenReturnAsync(true);
 
-          final result = await sut.call(testPackage);
+          final result = await sut.call();
 
           expect(result, PromptResult.succeededReload);
           verifyInOrder([
@@ -96,7 +97,7 @@ void main() {
           ),
         ).thenReturnAsync(false);
 
-        final result = await sut.call(testPackage);
+        final result = await sut.call();
 
         expect(result, PromptResult.failed);
         verifyInOrder([

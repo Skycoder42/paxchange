@@ -50,9 +50,6 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
   ) => _diffFileAdapter.loadPackageDiff(machineName);
 
   @override
-  String packageForTarget(DiffEntry target) => target.package;
-
-  @override
   Stream<PromptCommand> buildCommands(
     String machineName,
     PackageFileHierarchy hierarchy,
@@ -80,18 +77,20 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
       color: ConsoleColor.green,
     );
 
-    yield PrintCommand.local(super.console, _pacman);
-    yield RemoveCommand(super.console, _pacman, super.prompter);
+    yield PrintCommand.local(super.console, _pacman, package);
+    yield RemoveCommand(super.console, _pacman, super.prompter, package);
     yield MarkImplicitlyInstalledCommand(
       super.console,
       _pacman,
       super.prompter,
+      package,
     );
     final addHistoryCommands = AddHistoryCommand.generate(
       super.console,
       _packageFileAdapter,
       super.prompter,
       machineHierarchy,
+      package,
     );
     for (final addHistoryCommand in addHistoryCommands) {
       yield addHistoryCommand;
@@ -102,6 +101,7 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
       _pacman,
       super.prompter,
       machineHierarchy,
+      package,
     );
   }
 
@@ -137,15 +137,16 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
     );
 
     if (isInstalled) {
-      yield PrintCommand.local(super.console, _pacman);
+      yield PrintCommand.local(super.console, _pacman, package);
       yield MarkExplicitlyInstalledCommand(
         super.console,
         _pacman,
         super.prompter,
+        package,
       );
     } else {
-      yield PrintCommand.remote(super.console, _pacman);
-      yield InstallCommand(super.console, _pacman, super.prompter);
+      yield PrintCommand.remote(super.console, _pacman, package);
+      yield InstallCommand(super.console, _pacman, super.prompter, package);
     }
 
     if (firstGroup != null) {
@@ -154,6 +155,7 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
         _packageFileAdapter,
         _pacman,
         super.prompter,
+        packageName: package,
         machineName: machineName,
         group: firstGroup,
       );
@@ -162,7 +164,8 @@ final class DiffEditor extends CommandEditor<DiffEntry> {
         super.console,
         _packageFileAdapter,
         super.prompter,
-        machineName,
+        machineName: machineName,
+        packageName: package,
       );
     }
   }

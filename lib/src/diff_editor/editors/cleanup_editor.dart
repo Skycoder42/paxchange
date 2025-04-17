@@ -43,9 +43,6 @@ final class CleanupEditor extends CommandEditor<String> {
   ) => _pacman.listUnusedPackages(includeOptional: includeOptional);
 
   @override
-  String packageForTarget(String target) => target;
-
-  @override
   Stream<PromptCommand> buildCommands(
     String machineName,
     PackageFileHierarchy hierarchy,
@@ -58,12 +55,13 @@ final class CleanupEditor extends CommandEditor<String> {
       color: ConsoleColor.yellow,
     );
 
-    yield PrintCommand.local(super.console, _pacman);
+    yield PrintCommand.local(super.console, _pacman, target);
     yield MarkExplicitlyInstalledCommand(
       super.console,
       _pacman,
       super.prompter,
+      target,
     );
-    yield RemoveCommand(super.console, _pacman, super.prompter);
+    yield RemoveCommand(super.console, _pacman, super.prompter, target);
   }
 }

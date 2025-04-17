@@ -75,17 +75,6 @@ void main() {
       verify(() => mockDiffFileAdapter.loadPackageDiff(testMachineName));
     });
 
-    testData(
-      'packageForTarget returns package of diff entry',
-      [
-        const DiffEntry.added('package-1'),
-        const DiffEntry.removed('package-2'),
-      ],
-      (fixture) {
-        expect(sut.packageForTarget(fixture), fixture.package);
-      },
-    );
-
     group('buildCommands', () {
       test('writes title and builds commands for added diff entry', () async {
         final result = sut.buildCommands(
@@ -97,27 +86,38 @@ void main() {
         await expectLater(
           result,
           emitsInOrder([
-            isA<PrintCommand>().having(
-              (c) => c.printTarget,
-              'printTarget',
-              PrintTarget.local,
+            isA<PrintCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((c) => c.printTarget, 'printTarget', PrintTarget.local),
+            isA<RemoveCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
             ),
-            isA<RemoveCommand>(),
-            isA<MarkImplicitlyInstalledCommand>(),
+            isA<MarkImplicitlyInstalledCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
+            ),
             isA<AddHistoryCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
                 .having((c) => c.index, 'index', 1)
                 .having((c) => c.machineName, 'index', testPackageFiles[2]),
             isA<AddHistoryCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
                 .having((c) => c.index, 'index', 2)
                 .having((c) => c.machineName, 'index', testPackageFiles[1]),
             isA<AddHistoryCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
                 .having((c) => c.index, 'index', 3)
                 .having((c) => c.machineName, 'index', testPackageFiles[0]),
-            isA<AddGroupCommand>().having(
-              (m) => m.machineHierarchy,
-              'machineHierarchy',
-              testPackageFiles,
-            ),
+            isA<AddGroupCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having(
+                  (m) => m.machineHierarchy,
+                  'machineHierarchy',
+                  testPackageFiles,
+                ),
             emitsDone,
           ]),
         );
@@ -147,17 +147,21 @@ void main() {
         await expectLater(
           result,
           emitsInOrder([
-            isA<PrintCommand>().having(
-              (c) => c.printTarget,
-              'printTarget',
-              PrintTarget.remote,
+            isA<PrintCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having(
+                  (c) => c.printTarget,
+                  'printTarget',
+                  PrintTarget.remote,
+                ),
+            isA<InstallCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
             ),
-            isA<InstallCommand>(),
-            isA<RemoveHistoryCommand>().having(
-              (c) => c.machineName,
-              'index',
-              testMachineName,
-            ),
+            isA<RemoveHistoryCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((c) => c.machineName, 'index', testMachineName),
             emitsDone,
           ]),
         );
@@ -190,17 +194,17 @@ void main() {
         await expectLater(
           result,
           emitsInOrder([
-            isA<PrintCommand>().having(
-              (c) => c.printTarget,
-              'printTarget',
-              PrintTarget.local,
+            isA<PrintCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((c) => c.printTarget, 'printTarget', PrintTarget.local),
+            isA<MarkExplicitlyInstalledCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
             ),
-            isA<MarkExplicitlyInstalledCommand>(),
-            isA<RemoveHistoryCommand>().having(
-              (c) => c.machineName,
-              'index',
-              testMachineName,
-            ),
+            isA<RemoveHistoryCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((c) => c.machineName, 'index', testMachineName),
             emitsDone,
           ]),
         );
@@ -239,13 +243,20 @@ void main() {
         await expectLater(
           result,
           emitsInOrder([
-            isA<PrintCommand>().having(
-              (c) => c.printTarget,
-              'printTarget',
-              PrintTarget.remote,
+            isA<PrintCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having(
+                  (c) => c.printTarget,
+                  'printTarget',
+                  PrintTarget.remote,
+                ),
+            isA<InstallCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
             ),
-            isA<InstallCommand>(),
             isA<ExpandGroupCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
                 .having((m) => m.machineName, 'machineName', testMachineName)
                 .having((m) => m.group, 'group', testGroup),
             emitsDone,
@@ -287,13 +298,16 @@ void main() {
         await expectLater(
           result,
           emitsInOrder([
-            isA<PrintCommand>().having(
-              (c) => c.printTarget,
-              'printTarget',
-              PrintTarget.local,
+            isA<PrintCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((c) => c.printTarget, 'printTarget', PrintTarget.local),
+            isA<MarkExplicitlyInstalledCommand>().having(
+              (m) => m.packageName,
+              'packageName',
+              testPackage,
             ),
-            isA<MarkExplicitlyInstalledCommand>(),
             isA<ExpandGroupCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
                 .having((m) => m.machineName, 'machineName', testMachineName)
                 .having((m) => m.group, 'group', testGroup),
             emitsDone,

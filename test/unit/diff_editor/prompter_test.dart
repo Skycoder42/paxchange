@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 class MockConsole extends Mock implements Console {}
 
 final class TestPromptCommand extends PromptCommand {
-  final _call = MockCallable1<PromptResult, String>();
+  final _call = MockCallable0<PromptResult>();
 
   @override
   final String key;
@@ -18,10 +18,15 @@ final class TestPromptCommand extends PromptCommand {
   @override
   final String description;
 
-  TestPromptCommand(super.console, this.key, this.description);
+  TestPromptCommand(
+    super.console,
+    super.packageName,
+    this.key,
+    this.description,
+  );
 
   @override
-  PromptResult call(String packageName) => _call(packageName);
+  PromptResult call() => _call();
 
   void resetCall() => reset(_call);
 }
@@ -172,15 +177,25 @@ void main() {
 
     group('promptCommand', () {
       const testPackageName = 'test-package';
-      final cmd1 = TestPromptCommand(mockConsole, '1', 'command 1');
-      final cmd2 = TestPromptCommand(mockConsole, '2', 'command 2');
+      final cmd1 = TestPromptCommand(
+        mockConsole,
+        testPackageName,
+        '1',
+        'command 1',
+      );
+      final cmd2 = TestPromptCommand(
+        mockConsole,
+        testPackageName,
+        '2',
+        'command 2',
+      );
 
       setUp(() {
         cmd1.resetCall();
         cmd2.resetCall();
 
-        when(() => cmd1.call(any())).thenReturn(PromptResult.succeeded);
-        when(() => cmd2.call(any())).thenReturn(PromptResult.repeat);
+        when(() => cmd1.call()).thenReturn(PromptResult.succeeded);
+        when(() => cmd2.call()).thenReturn(PromptResult.repeat);
       });
 
       test(
@@ -188,10 +203,7 @@ void main() {
         () async {
           when(() => mockConsole.readKey()).thenReturn(Key.printable('1'));
 
-          final result = await sut.promptCommand(
-            packageName: testPackageName,
-            commands: [cmd1, cmd2],
-          );
+          final result = await sut.promptCommand([cmd1, cmd2]);
 
           verifyInOrder([
             () => mockConsole.writeLine('What do you want to do?'),
@@ -210,7 +222,7 @@ void main() {
             () => mockConsole.write('1'),
             () => mockConsole.resetColorAttributes(),
             () => mockConsole.writeLine(),
-            () => cmd1.call(testPackageName),
+            () => cmd1.call(),
           ]);
           // verifyNoMoreInteractions(mockConsole);
           expect(result, PromptResult.succeeded);
@@ -223,10 +235,7 @@ void main() {
           () => mockConsole.readKey(),
         ).thenAnswer((i) => Key.printable('${keyCtr--}'));
 
-        final result = await sut.promptCommand(
-          packageName: testPackageName,
-          commands: [cmd1, cmd2],
-        );
+        final result = await sut.promptCommand([cmd1, cmd2]);
 
         verifyInOrder([
           // cmd 2
@@ -246,7 +255,7 @@ void main() {
           () => mockConsole.write('2'),
           () => mockConsole.resetColorAttributes(),
           () => mockConsole.writeLine(),
-          () => cmd2.call(testPackageName),
+          () => cmd2.call(),
           // cmd 1
           () => mockConsole.writeLine('What do you want to do?'),
           for (final cmd in [cmd1, cmd2]) ...[
@@ -264,7 +273,7 @@ void main() {
           () => mockConsole.write('1'),
           () => mockConsole.resetColorAttributes(),
           () => mockConsole.writeLine(),
-          () => cmd1.call(testPackageName),
+          () => cmd1.call(),
         ]);
         verifyNoMoreInteractions(mockConsole);
         expect(result, PromptResult.succeeded);

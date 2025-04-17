@@ -28,6 +28,7 @@ void main() {
 
   group('$AddHistoryCommand', () {
     const testMachineName = 'machine-name';
+    const testPackageName = 'test-package';
     const testIndex = 0;
 
     late AddHistoryCommand sut;
@@ -38,7 +39,8 @@ void main() {
         mockPackageFileAdapter,
         mockPrompter,
         testIndex,
-        testMachineName,
+        machineName: testMachineName,
+        packageName: testPackageName,
       );
     });
 
@@ -53,8 +55,7 @@ void main() {
           () => mockPackageFileAdapter.addToPackageFile(any(), any()),
         ).thenReturnAsync(null);
 
-        const testPackageName = 'test-package';
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.writeLine(
@@ -77,6 +78,7 @@ void main() {
         mockPackageFileAdapter,
         mockPrompter,
         machineHierarchy,
+        testPackageName,
       );
 
       expect(commands, hasLength(machineHierarchy.length));
@@ -91,6 +93,7 @@ void main() {
 
   group('$RemoveHistoryCommand', () {
     const testMachineName = 'machine-name';
+    const testPackageName = 'test-package';
 
     late RemoveHistoryCommand sut;
 
@@ -99,7 +102,8 @@ void main() {
         mockConsole,
         mockPackageFileAdapter,
         mockPrompter,
-        testMachineName,
+        machineName: testMachineName,
+        packageName: testPackageName,
       );
     });
 
@@ -114,8 +118,7 @@ void main() {
           () => mockPackageFileAdapter.removeFromPackageFile(any(), any()),
         ).thenReturnAsync(true);
 
-        const testPackageName = 'test-package';
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.writeLine(
@@ -137,7 +140,7 @@ void main() {
           ).thenReturnAsync(false);
 
           const testPackageName = 'test-package';
-          final result = await sut(testPackageName);
+          final result = await sut();
 
           verifyInOrder([
             () => mockConsole.writeLine(
@@ -164,7 +167,8 @@ void main() {
           mockConsole,
           mockPackageFileAdapter,
           mockPrompter,
-          testMachineName,
+          machineName: testMachineName,
+          packageName: testPackageName,
           isGroup: true,
         );
 
@@ -176,8 +180,7 @@ void main() {
           ),
         ).thenReturnAsync(true);
 
-        const testPackageName = 'test-package';
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.writeLine(

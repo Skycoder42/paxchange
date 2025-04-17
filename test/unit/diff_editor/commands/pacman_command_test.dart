@@ -20,6 +20,8 @@ void main() {
     registerFallbackValue(InstallReason.asExplicit);
   });
 
+  const testPackageName = 'test-package';
+
   final mockPacman = MockPacman();
   final mockConsole = MockConsole();
   final mockPrompter = MockPrompter();
@@ -34,7 +36,12 @@ void main() {
     late InstallCommand sut;
 
     setUp(() {
-      sut = InstallCommand(mockConsole, mockPacman, mockPrompter);
+      sut = InstallCommand(
+        mockConsole,
+        mockPacman,
+        mockPrompter,
+        testPackageName,
+      );
     });
 
     test('uses correct key', () {
@@ -44,11 +51,9 @@ void main() {
 
     group('call', () {
       test('runs pacman and returns success', () async {
-        const testPackageName = 'test-package';
-
         when(() => mockPacman.installPackages(any())).thenReturnAsync(0);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -63,7 +68,7 @@ void main() {
 
         when(() => mockPacman.installPackages(any())).thenReturnAsync(10);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -88,7 +93,12 @@ void main() {
     late RemoveCommand sut;
 
     setUp(() {
-      sut = RemoveCommand(mockConsole, mockPacman, mockPrompter);
+      sut = RemoveCommand(
+        mockConsole,
+        mockPacman,
+        mockPrompter,
+        testPackageName,
+      );
     });
 
     test('uses correct key', () {
@@ -102,7 +112,7 @@ void main() {
 
         when(() => mockPacman.removePackage(any())).thenReturnAsync(0);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -117,7 +127,7 @@ void main() {
 
         when(() => mockPacman.removePackage(any())).thenReturnAsync(10);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -146,6 +156,7 @@ void main() {
         mockConsole,
         mockPacman,
         mockPrompter,
+        testPackageName,
       );
     });
 
@@ -162,7 +173,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(0);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -182,7 +193,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(10);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -214,6 +225,7 @@ void main() {
         mockConsole,
         mockPacman,
         mockPrompter,
+        testPackageName,
       );
     });
 
@@ -230,7 +242,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(0);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
@@ -250,7 +262,7 @@ void main() {
           () => mockPacman.changePackageInstallReason(any(), any()),
         ).thenReturnAsync(10);
 
-        final result = await sut(testPackageName);
+        final result = await sut();
 
         verifyInOrder([
           () => mockConsole.clearScreen(),
