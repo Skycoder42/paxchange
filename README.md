@@ -1,64 +1,61 @@
 # paxchange
+[![Continuous Integration and Deployment](https://github.com/Skycoder42/paxchange/actions/workflows/ci.yml/badge.svg)](https://github.com/Skycoder42/paxchange/actions/workflows/ci.yml)
+[![AUR Version](https://img.shields.io/aur/version/paxchange)](https://aur.archlinux.org/packages/paxchange)
 
-## ✅ Group Handling
-### ✅ Pacman capabilities
-- List ALL groups with ALL packages (`-Sgg`)
-- List LOCAL groups with INSTALLED package (`-Qgg`)
-  - only lists groups with at least one package installed
 
-### ✅ Format
-- New type: `::group <group>`
-- Represents a pacman group
-- can be automatically expanded to `pacman -Sgq <group>`
+Simple dart script to passively synchronize installed pacman packages between systems.
 
-### ✅ Review
-#### ✅ Step 1 - added package with no group
-- When reviewing an added package, the option "g" allows to add a group
-  - query before printing to give a preview of the groups?
-- this then lists all available groups or uses the single group
-  - or a different shortcut?
-  - maybe just "g#", if it can be done with the handler
-- Selecting a group does:
-  1. remove all entries from that group from the selected package history files
-  3. Add a "::group <group>" entry to the selected file
-  4. Reevaluate
+## Installation
+- Archlinux / Manjaro: https://aur.archlinux.org/packages/paxchange
 
-#### ✅ Step 2 - uninstalled package with group
-- when loading the hierarchy, synced groups are loaded and cached as well
-- when handling an `-missing` package, ownership to synced groups is checked
-- if the package belongs to an owned group, a different prompt is displayed. Options:
-  - Install/mark explicit because group
-  - expand group (and thus break group sync)
-  - Color: blue maybe?
-- expanding a group will remove it from the history and replace it with all packages from that group
-  - via `pacman -Sgq <group>`
-  - exclude the package being processed
-  - Reevaluate
+## Usage
+```
+Simple dart script to passively synchronize installed pacman packages between systems.
 
-#### ✅ Step 3 - delete groups
-- If expanding a group fails, add a special prompt
-- informs that the group is missing and will be removed (yes, skip, quit)
-- should always be the first steps
+Usage: paxchange <command> [arguments]
 
-#### ❌ Step 4 - removed package with group
-- ignored for now, as this would require me to keep a cached copy of the groups
-- this is overkill for something most likely rarely needed
-- can still be added if it happens often
+Global options:
+-h, --help             Print this usage information.
+-c, --config=<path>    Path to the configuration file to be used.
+                       (defaults to "/etc/paxchange.json")
 
-#### ✅ Update
-- no real changes
-- `::group` entries are expanded before creating the diff
-  - this means packages removed from groups are `+new`
-  - and packages added to a group (not installed) are `-missing`
-  - package added but already installed are detected as unchanged
-  - ignore errors when expanding a group
+Available commands:
+  install   Triggers installation of all packages for this machine.
+  review    Review the package diff for the given machine.
+  update    Update the package diff with the current system package configuration.
+```
 
-#### ✅ Install
-- Only installs the group, not the packages of each group
+### Install
+```
+Triggers installation of all packages for this machine.
 
-## ✅ Drop Root
-- Drop root permissions when running "update"
+This will start the install command with all packages listed in the package file
+of this machine, by only packages that are not already installed will be
+installed. If you need fine control over which packages to install, run the
+review command instead.
 
-## Uninstall packages no longer required
-- Check with `pacman -Qdtq`
-- Prompt for every package
+Usage: paxchange install [arguments]
+-h, --help                   Print this usage information.
+-n, --machine-name=<name>    Specify a custom machine name to install packages for. By default, this machine is used.
+    --[no-]confirm           When disabled, the pacman installation will run without confirmation. Use carefully!
+                             (defaults to on)
+```
+
+### Review
+```
+Review the package diff for the given machine.
+
+Usage: paxchange review [arguments]
+-h, --help                     Print this usage information.
+-n, --machine-name=<name>      Specify a custom machine name to review the diff for. By default, this machine is used.
+    --[no-]include-optional    When enabled, the cleanup will include packages that are referenced as optional dependency.
+```
+
+### Update
+```
+Update the package diff with the current system package configuration.
+
+Usage: paxchange update [arguments]
+-h, --help                        Print this usage information.
+-e, --[no-]set-exit-on-changed    Causes the tool to exit with code 2 if packages have changed.
+```
