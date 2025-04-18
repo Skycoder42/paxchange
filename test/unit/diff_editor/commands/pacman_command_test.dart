@@ -89,7 +89,7 @@ void main() {
     });
   });
 
-  group('$RemoveCommand', () {
+  group('$RemoveCommand (normal)', () {
     late RemoveCommand sut;
 
     setUp(() {
@@ -102,7 +102,7 @@ void main() {
     });
 
     test('uses correct key', () {
-      expect(sut.key, 'r');
+      expect(sut.key, 'u');
       expect(sut.description, isNotEmpty);
     });
 
@@ -132,6 +132,76 @@ void main() {
         verifyInOrder([
           () => mockConsole.clearScreen(),
           () => mockPacman.removePackage(testPackageName),
+          () => mockPrompter.writeError(
+            any(
+              that: allOf(
+                contains('uninstall'),
+                contains(testPackageName),
+                contains('exit code 10'),
+              ),
+            ),
+          ),
+        ]);
+
+        expect(result, PromptResult.repeat);
+      });
+    });
+  });
+
+  group('$RemoveCommand (recursive)', () {
+    late RemoveCommand sut;
+
+    setUp(() {
+      sut = RemoveCommand(
+        mockConsole,
+        mockPacman,
+        mockPrompter,
+        testPackageName,
+        recursive: true,
+      );
+    });
+
+    test('uses correct key', () {
+      expect(sut.key, 'r');
+      expect(sut.description, isNotEmpty);
+    });
+
+    group('call', () {
+      test('runs pacman and returns success', () async {
+        const testPackageName = 'test-package';
+
+        when(
+          () => mockPacman.removePackage(
+            any(),
+            recursive: any(named: 'recursive'),
+          ),
+        ).thenReturnAsync(0);
+
+        final result = await sut();
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.removePackage(testPackageName, recursive: true),
+        ]);
+
+        expect(result, PromptResult.succeeded);
+      });
+
+      test('runs pacman and prints error message if pacman fails', () async {
+        const testPackageName = 'test-package';
+
+        when(
+          () => mockPacman.removePackage(
+            any(),
+            recursive: any(named: 'recursive'),
+          ),
+        ).thenReturnAsync(10);
+
+        final result = await sut();
+
+        verifyInOrder([
+          () => mockConsole.clearScreen(),
+          () => mockPacman.removePackage(testPackageName, recursive: true),
           () => mockPrompter.writeError(
             any(
               that: allOf(

@@ -79,6 +79,13 @@ class DiffEditor extends CommandEditor<DiffEntry> {
 
     yield PrintCommand.local(super.console, _pacman, package);
     yield RemoveCommand(super.console, _pacman, super.prompter, package);
+    yield RemoveCommand(
+      super.console,
+      _pacman,
+      super.prompter,
+      package,
+      recursive: true,
+    );
     yield MarkImplicitlyInstalledCommand(
       super.console,
       _pacman,

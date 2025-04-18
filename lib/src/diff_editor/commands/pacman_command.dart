@@ -69,27 +69,34 @@ final class InstallCommand extends PacmanCommand {
 }
 
 final class RemoveCommand extends PacmanCommand {
+  final bool recursive;
+
   const RemoveCommand(
     super.console,
     super.pacman,
     super._prompter,
-    super.packageName,
-  );
+    super.packageName, {
+    this.recursive = false,
+  });
 
   @override
-  String get key => 'r';
+  String get key => recursive ? 'r' : 'u';
 
   @override
-  String get description => 'Remove the package from this machine';
+  String get description =>
+      recursive
+          ? 'Remove the package and all its unneeded, implicitly installed, '
+              'dependencies from this machine'
+          : 'Remove the package from this machine';
 
   @override
   @protected
-  String get operation => 'uninstall';
+  String get operation => recursive ? 'uninstall recursively' : 'uninstall';
 
   @override
   @protected
   Future<int> runPacman(String packageName) =>
-      super.pacman.removePackage(packageName);
+      super.pacman.removePackage(packageName, recursive: recursive);
 }
 
 final class MarkImplicitlyInstalledCommand extends PacmanCommand {

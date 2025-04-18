@@ -89,11 +89,12 @@ void main() {
             isA<PrintCommand>()
                 .having((m) => m.packageName, 'packageName', testPackage)
                 .having((c) => c.printTarget, 'printTarget', PrintTarget.local),
-            isA<RemoveCommand>().having(
-              (m) => m.packageName,
-              'packageName',
-              testPackage,
-            ),
+            isA<RemoveCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((m) => m.recursive, 'recursive', isFalse),
+            isA<RemoveCommand>()
+                .having((m) => m.packageName, 'packageName', testPackage)
+                .having((m) => m.recursive, 'recursive', isTrue),
             isA<MarkImplicitlyInstalledCommand>().having(
               (m) => m.packageName,
               'packageName',

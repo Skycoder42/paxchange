@@ -88,11 +88,12 @@ void main() {
             'packageName',
             testPackage,
           ),
-          isA<RemoveCommand>().having(
-            (m) => m.packageName,
-            'packageName',
-            testPackage,
-          ),
+          isA<RemoveCommand>()
+              .having((m) => m.packageName, 'packageName', testPackage)
+              .having((m) => m.recursive, 'recursive', isFalse),
+          isA<RemoveCommand>()
+              .having((m) => m.packageName, 'packageName', testPackage)
+              .having((m) => m.recursive, 'recursive', isTrue),
           emitsDone,
         ]),
       );

@@ -78,8 +78,8 @@ class Pacman {
     ...packageNames,
   ]);
 
-  Future<int> removePackage(String packageName) =>
-      _executePacmanInteractive(['-R', packageName]);
+  Future<int> removePackage(String packageName, {bool recursive = false}) =>
+      _executePacmanInteractive(['-R', if (recursive) '-s', packageName]);
 
   Future<int> changePackageInstallReason(
     String packageName,

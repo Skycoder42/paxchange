@@ -63,5 +63,12 @@ class CleanupEditor extends CommandEditor<String> {
       target,
     );
     yield RemoveCommand(super.console, _pacman, super.prompter, target);
+    yield RemoveCommand(
+      super.console,
+      _pacman,
+      super.prompter,
+      target,
+      recursive: true,
+    );
   }
 }
