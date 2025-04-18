@@ -24,7 +24,7 @@ CleanupEditor cleanupEditor(Ref ref, {required bool includeOptional}) =>
     );
 // coverage:ignore-end
 
-final class CleanupEditor extends CommandEditor<String> {
+class CleanupEditor extends CommandEditor<String> {
   final Pacman _pacman;
 
   final bool includeOptional;

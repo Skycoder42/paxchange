@@ -21,7 +21,7 @@ MissingGroupsEditor missingGroupsEditor(Ref ref) => MissingGroupsEditor(
 );
 // coverage:ignore-end
 
-final class MissingGroupsEditor extends CommandEditor<String> {
+class MissingGroupsEditor extends CommandEditor<String> {
   final PackageFileAdapter _packageFileAdapter;
 
   MissingGroupsEditor(super.console, super.prompter, this._packageFileAdapter);

@@ -7,13 +7,22 @@ import 'package:dart_test_tools/test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:paxchange/src/command/review_command.dart';
 import 'package:paxchange/src/config.dart';
+import 'package:paxchange/src/diff_editor/editor.dart';
+import 'package:paxchange/src/diff_editor/editors/cleanup_editor.dart';
 import 'package:paxchange/src/diff_editor/editors/diff_editor.dart';
+import 'package:paxchange/src/diff_editor/editors/missing_groups_editor.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
 class MockArgResults extends Mock implements ArgResults {}
 
+class MockEditor extends Mock implements Editor {}
+
+class MockMissingGroupsEditor extends Mock implements MissingGroupsEditor {}
+
 class MockDiffEditor extends Mock implements DiffEditor {}
+
+class MockCleanupEditor extends Mock implements CleanupEditor {}
 
 class TestableReviewCommand extends ReviewCommand {
   @override
@@ -25,6 +34,7 @@ class TestableReviewCommand extends ReviewCommand {
 void main() {
   group('$ReviewCommand', () {
     const testMachineNameOption = 'machine-name';
+    const testIncludeOptionalOption = 'include-optional';
 
     const rootPackageFile = 'root-package';
     final testConfig = Config(
@@ -32,7 +42,10 @@ void main() {
       machineName: rootPackageFile,
     );
     final mockArgResults = MockArgResults();
+    final mockEditor = MockEditor();
+    final mockMissingGroupsEditor = MockMissingGroupsEditor();
     final mockDiffEditor = MockDiffEditor();
+    final mockCleanupEditor = MockCleanupEditor();
 
     late ProviderContainer providerContainer;
 
@@ -40,14 +53,33 @@ void main() {
 
     setUp(() {
       reset(mockArgResults);
+      reset(mockEditor);
+      reset(mockMissingGroupsEditor);
       reset(mockDiffEditor);
+      reset(mockCleanupEditor);
 
-      when(() => mockDiffEditor.run(any())).thenReturnAsync(null);
+      when(() => mockEditor.run(any())).thenReturnAsync(null);
 
       providerContainer = ProviderContainer(
         overrides: [
-          configProvider.overrideWithValue(testConfig),
+          missingGroupsEditorProvider.overrideWithValue(
+            mockMissingGroupsEditor,
+          ),
           diffEditorProvider.overrideWithValue(mockDiffEditor),
+          cleanupEditorProvider(
+            includeOptional: false,
+          ).overrideWithValue(mockCleanupEditor),
+          cleanupEditorProvider(
+            includeOptional: true,
+          ).overrideWithValue(mockCleanupEditor),
+          configProvider.overrideWithValue(testConfig),
+          editorProvider(
+            Editors([
+              mockMissingGroupsEditor,
+              mockDiffEditor,
+              mockCleanupEditor,
+            ]),
+          ).overrideWithValue(mockEditor),
         ],
       );
 
@@ -63,32 +95,45 @@ void main() {
       expect(sut.name, 'review');
       expect(sut.description, isNotEmpty);
       expect(sut.takesArguments, isFalse);
-      expect(sut.argParser.options, hasLength(2));
+      expect(sut.argParser.options, hasLength(3));
       expect(sut.argParser.options, contains(testMachineNameOption));
+      expect(sut.argParser.options, contains(testIncludeOptionalOption));
     });
 
     group('run', () {
       test('runs diff editor with default machine name', () async {
-        when<dynamic>(() => mockArgResults[any()]).thenReturn(null);
+        when<dynamic>(
+          () => mockArgResults[testMachineNameOption],
+        ).thenReturn(null);
+        when<dynamic>(
+          () => mockArgResults[testIncludeOptionalOption],
+        ).thenReturn(false);
 
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
           () => mockArgResults[testMachineNameOption],
-          () => mockDiffEditor.run(rootPackageFile),
+          () => mockArgResults[testIncludeOptionalOption],
+          () => mockEditor.run(rootPackageFile),
         ]);
         expect(result, 0);
       });
 
       test('runs diff editor with custom machine name', () async {
         const givenPackageFile = 'other-package';
-        when<dynamic>(() => mockArgResults[any()]).thenReturn(givenPackageFile);
 
+        when<dynamic>(
+          () => mockArgResults[testMachineNameOption],
+        ).thenReturn(givenPackageFile);
+        when<dynamic>(
+          () => mockArgResults[testIncludeOptionalOption],
+        ).thenReturn(false);
         final result = await sut.run();
 
         verifyInOrder<dynamic>([
           () => mockArgResults[testMachineNameOption],
-          () => mockDiffEditor.run(givenPackageFile),
+          () => mockArgResults[testIncludeOptionalOption],
+          () => mockEditor.run(givenPackageFile),
         ]);
         expect(result, 0);
       });

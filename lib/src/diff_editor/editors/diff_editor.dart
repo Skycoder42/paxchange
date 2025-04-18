@@ -30,7 +30,7 @@ DiffEditor diffEditor(Ref ref) => DiffEditor(
 );
 // coverage:ignore-end
 
-final class DiffEditor extends CommandEditor<DiffEntry> {
+class DiffEditor extends CommandEditor<DiffEntry> {
   final PackageFileAdapter _packageFileAdapter;
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;

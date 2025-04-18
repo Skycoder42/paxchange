@@ -30,7 +30,7 @@ dev_dependencies:
   dart_pre_commit: ^5.4.4
   dart_test_tools: ^6.1.1
   freezed: ^3.0.6
-  json_serializable: ^6.9.4
+  json_serializable: ^6.9.5
   mocktail: ^1.0.4
   riverpod_generator: ^2.6.5
   riverpod_lint: ^2.6.5

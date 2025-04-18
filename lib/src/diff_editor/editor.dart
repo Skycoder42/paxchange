@@ -1,4 +1,5 @@
 import 'package:dart_console/dart_console.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -6,22 +7,28 @@ import '../package_sync.dart';
 import '../providers/console_provider.dart';
 import '../storage/package_file_adapter.dart';
 import '../storage/package_file_hierarchy.dart';
-import 'editors/command_editor.dart';
 import 'commands/prompt_command.dart';
 import 'commands/quit_command.dart';
 import 'commands/skip_command.dart';
+import 'editors/command_editor.dart';
 import 'prompter.dart';
 
+part 'editor.freezed.dart';
 part 'editor.g.dart';
 
 // coverage:ignore-start
+@freezed
+sealed class Editors with _$Editors {
+  const factory Editors(List<CommandEditor<dynamic>> editors) = _Editors;
+}
+
 @riverpod
-Editor editor(Ref ref, List<dynamic> editors) => Editor(
+Editor editor(Ref ref, Editors editors) => Editor(
   ref.watch(consoleProvider),
   ref.watch(prompterProvider),
   ref.watch(packageFileAdapterProvider),
   ref.watch(packageSyncProvider),
-  editors.cast<CommandEditor<dynamic>>(),
+  editors.editors,
 );
 // coverage:ignore-end
 
@@ -34,7 +41,7 @@ class Editor {
   final PackageSync _packageSync;
   final List<CommandEditor<dynamic>> _editors;
 
-  final _skipped = <String>{};
+  final _skipped = <dynamic>{};
   var _didModify = false;
 
   Editor(
@@ -55,6 +62,7 @@ class Editor {
     _skipped.clear();
     var reload = false;
     do {
+      reload = false;
       _didModify = false;
 
       final packageFileHierarchy = await _packageFileAdapter
@@ -93,26 +101,22 @@ class Editor {
   }) async {
     final targets = editor.loadTargets(machineName, packageFileHierarchy);
     await for (final target in targets) {
-      final package = editor.packageForTarget(target);
-      if (_skipped.contains(package)) {
+      if (_skipped.contains(target)) {
         continue;
       }
 
-      final entryResult = await _prompter.promptCommand(
-        packageName: package,
-        commands: [
-          await for (final command in editor.buildCommands(
-            machineName,
-            packageFileHierarchy,
-            target,
-          ))
-            command,
-          SkipCommand(_console),
-          QuitCommand(_console),
-        ],
-      );
+      final entryResult = await _prompter.promptCommand([
+        await for (final command in editor.buildCommands(
+          machineName,
+          packageFileHierarchy,
+          target,
+        ))
+          command,
+        SkipCommand(_console),
+        QuitCommand(_console),
+      ]);
 
-      if (entryResult.didModify) {
+      if (entryResult case PromptResult(didModify: true)) {
         _didModify = true;
         _console
           ..writeLine('Press any key to continue...')
@@ -121,7 +125,7 @@ class Editor {
 
       switch (entryResult) {
         case PromptResult.skipped:
-          _skipped.add(package);
+          _skipped.add(target);
         case PromptResult.succeededReload:
           return EditorResult.reload;
         case PromptResult(stopProcessing: true):

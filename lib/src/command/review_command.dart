@@ -4,9 +4,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config.dart';
+import '../diff_editor/editor.dart';
 import '../diff_editor/editors/cleanup_editor.dart';
 import '../diff_editor/editors/diff_editor.dart';
-import '../diff_editor/editor.dart';
 import '../diff_editor/editors/missing_groups_editor.dart';
 
 part 'review_command.g.dart';
@@ -56,13 +56,13 @@ class ReviewCommand extends _$ReviewOptionsCommand<int> {
     final machineName = _options.machineName;
     final config = _providerContainer.read(configProvider);
 
-    final editors = [
+    final editors = Editors([
       _providerContainer.read(missingGroupsEditorProvider),
       _providerContainer.read(diffEditorProvider),
       _providerContainer.read(
         cleanupEditorProvider(includeOptional: _options.includeOptional),
       ),
-    ];
+    ]);
 
     final editor = _providerContainer.read(editorProvider(editors));
 
