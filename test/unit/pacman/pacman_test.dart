@@ -92,7 +92,10 @@ void main() {
     }
 
     @isTestGroup
-    void testLineStreaming({required Stream<String> Function() runPacman}) {
+    void testLineStreaming({
+      required Stream<String> Function() runPacman,
+      bool failsOnError = true,
+    }) {
       test('returns lines of pacman command', () {
         const lines = ['line1', 'line2', 'line3'];
         when(
@@ -102,22 +105,27 @@ void main() {
         expect(runPacman(), emitsInOrder(<dynamic>[...lines, emitsDone]));
       });
 
-      test('emits error if pacman command fails', () {
-        const firstLine = 'line';
-        when(
-          () => processMock.stdout,
-        ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
-        when(() => processMock.exitCode).thenReturnAsync(1);
+      test(
+        failsOnError
+            ? 'emits error if pacman command fails'
+            : 'does not emit error if command fails',
+        () {
+          const firstLine = 'line';
+          when(
+            () => processMock.stdout,
+          ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
+          when(() => processMock.exitCode).thenReturnAsync(1);
 
-        expect(
-          runPacman(),
-          emitsInOrder(<dynamic>[
-            firstLine,
-            emitsError(isException),
-            emitsDone,
-          ]),
-        );
-      });
+          expect(
+            runPacman(),
+            emitsInOrder(<dynamic>[
+              firstLine,
+              if (failsOnError) emitsError(isException),
+              emitsDone,
+            ]),
+          );
+        },
+      );
 
       testStderrForwarding(runPacman: () => runPacman().drain());
     }
@@ -238,7 +246,10 @@ void main() {
             verifyNoMoreInteractions(processWrapperMock);
           });
 
-          testLineStreaming(runPacman: () => sut.listUnusedPackages());
+          testLineStreaming(
+            runPacman: () => sut.listUnusedPackages(),
+            failsOnError: false,
+          );
         });
 
         group('checkIfPackageIsInstalled', () {

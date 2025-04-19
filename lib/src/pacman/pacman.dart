@@ -48,7 +48,10 @@ class Pacman {
       _streamPacmanLines(['-Qgq', groupName]);
 
   Stream<String> listUnusedPackages({bool includeOptional = false}) =>
-      _streamPacmanLines(['-Qdq', if (includeOptional) '-tt' else '-t']);
+      _streamPacmanLines([
+        '-Qdq',
+        if (includeOptional) '-tt' else '-t',
+      ], expectedExitCode: null);
 
   Future<bool> checkIfPackageIsInstalled(String packageName) async {
     final pacmanProc = await _process.start(
