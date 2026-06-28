@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_lambdas
+// ignore_for_file: unnecessary_lambdas for tests
 
 import 'package:dart_console/dart_console.dart';
 import 'package:dart_test_tools/test.dart';
@@ -42,7 +42,10 @@ void main() {
       verifyInOrder([
         () => mockPacman.queryInstalledPackage(testPackageName),
         () => mockConsole.clearScreen(),
-        ...packageInfo.map((line) => () => mockConsole.writeLine(line)),
+        ...packageInfo.map(
+          (line) =>
+              () => mockConsole.writeLine(line),
+        ),
         () => mockConsole.writeLine(),
       ]);
       expect(result, PromptResult.repeat);
@@ -66,7 +69,10 @@ void main() {
       verifyInOrder([
         () => mockPacman.queryUninstalledPackage(testPackageName),
         () => mockConsole.clearScreen(),
-        ...packageInfo.map((line) => () => mockConsole.writeLine(line)),
+        ...packageInfo.map(
+          (line) =>
+              () => mockConsole.writeLine(line),
+        ),
         () => mockConsole.writeLine(),
       ]);
       expect(result, PromptResult.repeat);

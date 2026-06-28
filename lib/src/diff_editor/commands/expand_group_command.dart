@@ -32,11 +32,10 @@ final class ExpandGroupCommand extends PromptCommand {
 
   @override
   Future<PromptResult> call() async {
-    final packagesInGroup =
-        await _pacman
-            .listInstalledPackagesForGroup(group)
-            .where((p) => p != packageName)
-            .toList();
+    final packagesInGroup = await _pacman
+        .listInstalledPackagesForGroup(group)
+        .where((p) => p != packageName)
+        .toList();
 
     final didRemove = await _packageFileAdapter.removeFromPackageFile(
       machineName,

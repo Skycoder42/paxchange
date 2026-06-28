@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_lambdas, discarded_futures
+// ignore_for_file: unnecessary_lambdas for tests
 
 import 'dart:async';
 

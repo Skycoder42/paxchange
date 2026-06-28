@@ -52,14 +52,13 @@ final class AddGroupCommand extends PromptCommand {
   }
 
   Future<List<String>> _getPackageGroups(String packageName) async {
-    final groups =
-        await _pacman
-            .queryInstalledPackage(packageName)
-            .where((line) => line.startsWith('Groups'))
-            .map((line) => line.substring(line.indexOf(':') + 1).trim())
-            .expand((line) => line.split(RegExp(r'\s+')))
-            .map((group) => group.trim())
-            .toList();
+    final groups = await _pacman
+        .queryInstalledPackage(packageName)
+        .where((line) => line.startsWith('Groups'))
+        .map((line) => line.substring(line.indexOf(':') + 1).trim())
+        .expand((line) => line.split(RegExp(r'\s+')))
+        .map((group) => group.trim())
+        .toList();
     if (groups.length == 1 && groups.single == 'None') {
       return const [];
     }

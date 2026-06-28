@@ -1,4 +1,3 @@
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'pacman/pacman.dart';
@@ -24,10 +23,9 @@ class PackageInstall {
     String machineName, {
     bool noConfirm = false,
   }) async {
-    final packages =
-        await _packageFileAdapter
-            .loadPackageFile(machineName, expandGroups: false)
-            .toList();
+    final packages = await _packageFileAdapter
+        .loadPackageFile(machineName, expandGroups: false)
+        .toList();
 
     return _pacman.installPackages(
       packages,

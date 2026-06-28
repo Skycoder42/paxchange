@@ -1,5 +1,4 @@
 import 'package:dart_console/dart_console.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../diff_entry.dart';
@@ -120,12 +119,11 @@ class DiffEditor extends CommandEditor<DiffEntry> {
     final isInstalled = await _pacman.checkIfPackageIsInstalled(package);
     final firstGroup = knownGroups[package]?.firstOrNull;
 
-    final messageBuffer =
-        StringBuffer()
-          ..write('Found ')
-          ..write(isInstalled ? 'implicitly installed' : 'uninstalled')
-          ..write(' package **')
-          ..write(package);
+    final messageBuffer = StringBuffer()
+      ..write('Found ')
+      ..write(isInstalled ? 'implicitly installed' : 'uninstalled')
+      ..write(' package **')
+      ..write(package);
     if (firstGroup != null) {
       messageBuffer
         ..write('** belonging to group **')

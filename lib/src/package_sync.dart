@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'config.dart';
@@ -36,12 +35,14 @@ class PackageSync {
 
   Future<int> updatePackageDiff() async {
     // load package history
-    final packageHistory =
-        await _packageFileAdapter.loadPackageFile(_rootPackageName).toSet();
+    final packageHistory = await _packageFileAdapter
+        .loadPackageFile(_rootPackageName)
+        .toSet();
 
     // load installed packages
-    final installedPackages =
-        await _pacman.listExplicitlyInstalledPackages().toSet();
+    final installedPackages = await _pacman
+        .listExplicitlyInstalledPackages()
+        .toSet();
 
     // create diff entries
     final diffEntries = SplayTreeSet<DiffEntry>();

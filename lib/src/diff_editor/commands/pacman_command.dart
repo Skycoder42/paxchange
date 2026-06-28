@@ -83,11 +83,10 @@ final class RemoveCommand extends PacmanCommand {
   String get key => recursive ? 'r' : 'u';
 
   @override
-  String get description =>
-      recursive
-          ? 'Remove the package and all its unneeded, implicitly installed, '
-              'dependencies from this machine'
-          : 'Remove the package from this machine';
+  String get description => recursive
+      ? 'Remove the package and all its unneeded, implicitly installed, '
+            'dependencies from this machine'
+      : 'Remove the package from this machine';
 
   @override
   @protected
