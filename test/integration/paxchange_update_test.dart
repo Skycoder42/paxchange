@@ -48,8 +48,9 @@ void main() {
       packageDir = Directory.fromUri(testDir.uri.resolve('packages'));
       await packageDir.create();
 
+      final alpmGroup = await _runPacman(const ['-Sgq', 'alpm']);
       final packages = await _runPacman(const ['-Qqe']);
-      packages.removeWhere((p) => p.startsWith('alpm-'));
+      packages.removeWhere(alpmGroup.contains);
       final oneFourth = packages.length ~/ 4;
       base1 = packages.sublist(0, oneFourth);
       base2 = packages.sublist(oneFourth, oneFourth * 2);
