@@ -43,23 +43,29 @@ jobs:
       - name: Run integration tests
         run: dart test --reporter github --preset integration
 
-  cd:
+  build:
     name: CD
     needs:
       - ci
       - integration_tests
     uses: Skycoder42/dart_test_tools/.github/workflows/compile.yml@main
-    permissions:
-      contents: write
     with:
       enabledPlatforms: ${{ needs.ci.outputs.enabledPlatforms }}
       buildRunner: true
 
-  aur:
-    name: AUR
+  release:
+    name: CD
     needs:
-      - cd
-    if: needs.cd.outputs.releaseCreated == 'true'
+      - build
+    uses: Skycoder42/dart_test_tools/.github/workflows/create-release.yml@main
+    permissions:
+      contents: write
+
+  aur:
+    name: CD
+    needs:
+      - release
+    if: needs.release.outputs.releaseCreated == 'true'
     uses: Skycoder42/dart_test_tools/.github/workflows/aur.yml@main
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
