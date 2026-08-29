@@ -28,7 +28,7 @@ class CleanupEditor extends CommandEditor<String> {
 
   final bool includeOptional;
 
-  CleanupEditor(
+  new(
     super.console,
     super.prompter,
     this._pacman, {

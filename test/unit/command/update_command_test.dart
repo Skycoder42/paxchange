@@ -10,17 +10,17 @@ import 'package:paxchange/src/package_sync.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults {}
+class MockArgResults extends Mock implements ArgResults;
 
-class MockPackageSync extends Mock implements PackageSync {}
+class MockPackageSync extends Mock implements PackageSync;
 
-class MockStdout extends Mock implements Stdout {}
+class MockStdout extends Mock implements Stdout;
 
 class TestableUpdateCommand extends UpdateCommand {
   @override
   ArgResults? argResults;
 
-  TestableUpdateCommand(super._providerContainer);
+  new(super._providerContainer);
 }
 
 void main() {
@@ -63,64 +63,61 @@ void main() {
     group('run', () {
       test(
         'calls packageSync.updatePackageDiff',
-        () async => await IOOverrides.runZoned(
-          stdout: () => mockStdout,
-          () async {
-            when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
+        () async =>
+            await IOOverrides.runZoned(stdout: () => mockStdout, () async {
+              when(() => mockPackageSync.updatePackageDiff())
+                  .thenReturnAsync(0);
 
-            final result = await sut.run();
+              final result = await sut.run();
 
-            verify(() => mockPackageSync.updatePackageDiff());
-            verifyZeroInteractions(mockStdout);
-            expect(result, 0);
-          },
-        ),
+              verify(() => mockPackageSync.updatePackageDiff());
+              verifyZeroInteractions(mockStdout);
+              expect(result, 0);
+            }),
       );
 
       test(
         'returns 0 even if packages did change and write to stdout',
-        () async => await IOOverrides.runZoned(
-          stdout: () => mockStdout,
-          () async {
-            when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
-            when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(10);
+        () async =>
+            await IOOverrides.runZoned(stdout: () => mockStdout, () async {
+              when<dynamic>(() => mockArgResults[any()]).thenReturn(false);
+              when(() => mockPackageSync.updatePackageDiff())
+                  .thenReturnAsync(10);
 
-            final result = await sut.run();
+              final result = await sut.run();
 
-            verifyInOrder<dynamic>([
-              () => mockPackageSync.updatePackageDiff(),
-              () => mockStdout.writeln('>>> 10 package(s) have changed!'),
-              () => mockStdout.writeln(
-                '>>> Please review the package changelog.',
-              ),
-              () => mockArgResults[testSetExitOnChangedFlag],
-            ]);
-            expect(result, 0);
-          },
-        ),
+              verifyInOrder<dynamic>([
+                () => mockPackageSync.updatePackageDiff(),
+                () => mockStdout.writeln('>>> 10 package(s) have changed!'),
+                () => mockStdout.writeln(
+                  '>>> Please review the package changelog.',
+                ),
+                () => mockArgResults[testSetExitOnChangedFlag],
+              ]);
+              expect(result, 0);
+            }),
       );
 
       test(
         'returns 2 if packages did change with option specified',
-        () async => await IOOverrides.runZoned(
-          stdout: () => mockStdout,
-          () async {
-            when<dynamic>(() => mockArgResults[any()]).thenReturn(true);
-            when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(10);
+        () async =>
+            await IOOverrides.runZoned(stdout: () => mockStdout, () async {
+              when<dynamic>(() => mockArgResults[any()]).thenReturn(true);
+              when(() => mockPackageSync.updatePackageDiff())
+                  .thenReturnAsync(10);
 
-            final result = await sut.run();
+              final result = await sut.run();
 
-            verifyInOrder<dynamic>([
-              () => mockPackageSync.updatePackageDiff(),
-              () => mockStdout.writeln('>>> 10 package(s) have changed!'),
-              () => mockStdout.writeln(
-                '>>> Please review the package changelog.',
-              ),
-              () => mockArgResults[testSetExitOnChangedFlag],
-            ]);
-            expect(result, 2);
-          },
-        ),
+              verifyInOrder<dynamic>([
+                () => mockPackageSync.updatePackageDiff(),
+                () => mockStdout.writeln('>>> 10 package(s) have changed!'),
+                () => mockStdout.writeln(
+                  '>>> Please review the package changelog.',
+                ),
+                () => mockArgResults[testSetExitOnChangedFlag],
+              ]);
+              expect(result, 2);
+            }),
       );
     });
   });

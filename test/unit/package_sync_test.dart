@@ -11,11 +11,11 @@ import 'package:paxchange/src/storage/diff_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:test/test.dart';
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter {}
+class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
 
-class MockDiffFileAdapter extends Mock implements DiffFileAdapter {}
+class MockDiffFileAdapter extends Mock implements DiffFileAdapter;
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
 void main() {
   group('$PackageSync', () {
@@ -57,15 +57,12 @@ void main() {
             'package-8',
           ];
 
-          when(
-            () => mockPackageFileAdapter.loadPackageFile(any()),
-          ).thenStream(Stream.fromIterable(packageHistory));
-          when(
-            mockPacman.listExplicitlyInstalledPackages,
-          ).thenStream(Stream.fromIterable(installedPackages));
-          when(
-            () => mockDiffFileAdapter.savePackageDiff(any(), any()),
-          ).thenReturnAsync(null);
+          when(() => mockPackageFileAdapter.loadPackageFile(any()))
+              .thenStream(Stream.fromIterable(packageHistory));
+          when(mockPacman.listExplicitlyInstalledPackages)
+              .thenStream(Stream.fromIterable(installedPackages));
+          when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
+              .thenReturnAsync(null);
 
           final result = await sut.updatePackageDiff();
 
@@ -100,15 +97,12 @@ void main() {
         const testMachineName = 'test-machine';
         const packages = ['package-1', 'package-2', 'package-3', 'package-4'];
 
-        when(
-          () => mockPackageFileAdapter.loadPackageFile(any()),
-        ).thenStream(Stream.fromIterable(packages));
-        when(
-          mockPacman.listExplicitlyInstalledPackages,
-        ).thenStream(Stream.fromIterable(packages));
-        when(
-          () => mockDiffFileAdapter.savePackageDiff(any(), any()),
-        ).thenReturnAsync(null);
+        when(() => mockPackageFileAdapter.loadPackageFile(any()))
+            .thenStream(Stream.fromIterable(packages));
+        when(mockPacman.listExplicitlyInstalledPackages)
+            .thenStream(Stream.fromIterable(packages));
+        when(() => mockDiffFileAdapter.savePackageDiff(any(), any()))
+            .thenReturnAsync(null);
 
         final result = await sut.updatePackageDiff();
 

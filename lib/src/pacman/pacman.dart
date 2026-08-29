@@ -23,14 +23,14 @@ enum InstallReason {
 
   final String flag;
 
-  const InstallReason(this.flag);
+  new(this.flag);
 }
 
 class Pacman {
   final ProcessWrapper _process;
   final String? _pacmanFrontend;
 
-  Pacman(this._process, this._pacmanFrontend);
+  new(this._process, this._pacmanFrontend);
 
   Stream<String> listExplicitlyInstalledPackages() =>
       _streamPacmanLines(const ['-Qqe']);
@@ -123,6 +123,6 @@ class Pacman {
       mode: ProcessStartMode.inheritStdio,
     );
 
-    return pacmanProc.exitCode;
+    return await pacmanProc.exitCode;
   }
 }

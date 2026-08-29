@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:json_annotation/json_annotation.dart';
 
 class DirectoryJsonConverter implements JsonConverter<Directory, String> {
-  const DirectoryJsonConverter();
+  const new();
 
   @override
   Directory fromJson(String json) => Directory(json);

@@ -23,7 +23,7 @@ MissingGroupsEditor missingGroupsEditor(Ref ref) => MissingGroupsEditor(
 class MissingGroupsEditor extends CommandEditor<String> {
   final PackageFileAdapter _packageFileAdapter;
 
-  MissingGroupsEditor(super.console, super.prompter, this._packageFileAdapter);
+  new(super.console, super.prompter, this._packageFileAdapter);
 
   @override
   Stream<String> loadTargets(

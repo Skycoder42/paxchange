@@ -10,7 +10,7 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
   final PackageFileAdapter packageFileAdapter;
   final Prompter _prompter;
 
-  const UpdateHistoryCommand(
+  const new(
     Console console,
     this.packageFileAdapter,
     this._prompter, {
@@ -44,7 +44,7 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   @override
   final String machineName;
 
-  const AddHistoryCommand(
+  const new(
     super.console,
     super.packageFileAdapter,
     super._prompter,
@@ -93,7 +93,7 @@ final class RemoveHistoryCommand extends UpdateHistoryCommand {
   final String machineName;
   final bool isGroup;
 
-  const RemoveHistoryCommand(
+  const new(
     super.console,
     super.packageFileAdapter,
     super._prompter, {

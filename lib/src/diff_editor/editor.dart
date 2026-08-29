@@ -18,7 +18,7 @@ part 'editor.g.dart';
 // coverage:ignore-start
 @freezed
 sealed class Editors with _$Editors {
-  const factory Editors(List<CommandEditor<dynamic>> editors) = _Editors;
+  const factory(List<CommandEditor<dynamic>> editors) = _Editors;
 }
 
 @riverpod
@@ -43,7 +43,7 @@ class Editor {
   final _skipped = <dynamic>{};
   var _didModify = false;
 
-  Editor(
+  new(
     this._console,
     this._prompter,
     this._packageFileAdapter,

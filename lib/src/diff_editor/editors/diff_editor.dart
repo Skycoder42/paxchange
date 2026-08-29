@@ -34,7 +34,7 @@ class DiffEditor extends CommandEditor<DiffEntry> {
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
 
-  DiffEditor(
+  new(
     super.console,
     super.prompter,
     this._packageFileAdapter,

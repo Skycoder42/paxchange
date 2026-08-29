@@ -9,7 +9,7 @@ sealed class PackageFileHierarchy with _$PackageFileHierarchy {
     groupsByPackages: {},
   );
 
-  const factory PackageFileHierarchy({
+  const factory({
     required Set<String> packageFiles,
     required Map<String, Set<String>> groupsByPackages,
     @Default({}) Set<String> missingGroups,

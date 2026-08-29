@@ -15,15 +15,15 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter {}
+class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
 
-class MockDiffFileAdapter extends Mock implements DiffFileAdapter {}
+class MockDiffFileAdapter extends Mock implements DiffFileAdapter;
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
 void main() {
   group('$DiffEditor', () {
@@ -64,9 +64,8 @@ void main() {
         DiffEntry.added('package-1'),
         DiffEntry.removed('package-2'),
       ];
-      when(
-        () => mockDiffFileAdapter.loadPackageDiff(any()),
-      ).thenStream(Stream.fromIterable(testDiff));
+      when(() => mockDiffFileAdapter.loadPackageDiff(any()))
+          .thenStream(Stream.fromIterable(testDiff));
 
       final result = sut.loadTargets(testMachineName, testHierarchy);
 
@@ -135,9 +134,8 @@ void main() {
 
       test('writes title and builds commands for '
           'removed diff entry with removed package', () async {
-        when(
-          () => mockPacman.checkIfPackageIsInstalled(any()),
-        ).thenReturnAsync(false);
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(false);
 
         final result = sut.buildCommands(
           testMachineName,
@@ -167,9 +165,8 @@ void main() {
           ]),
         );
 
-        verify(
-          () => mockPacman.checkIfPackageIsInstalled(testPackage),
-        ).called(1);
+        verify(() => mockPacman.checkIfPackageIsInstalled(testPackage))
+            .called(1);
         verify(
           () => mockPrompter.writeTitle(
             message:
@@ -182,9 +179,8 @@ void main() {
 
       test('writes title and builds commands for removed diff entry '
           'with implicitly installed package', () async {
-        when(
-          () => mockPacman.checkIfPackageIsInstalled(any()),
-        ).thenReturnAsync(true);
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(true);
 
         final result = sut.buildCommands(
           testMachineName,
@@ -210,9 +206,8 @@ void main() {
           ]),
         );
 
-        verify(
-          () => mockPacman.checkIfPackageIsInstalled(testPackage),
-        ).called(1);
+        verify(() => mockPacman.checkIfPackageIsInstalled(testPackage))
+            .called(1);
         verify(
           () => mockPrompter.writeTitle(
             message:
@@ -227,9 +222,8 @@ void main() {
           'with removed package that belongs to a group', () async {
         const testGroup = 'group-1';
 
-        when(
-          () => mockPacman.checkIfPackageIsInstalled(any()),
-        ).thenReturnAsync(false);
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(false);
 
         final result = sut.buildCommands(
           testMachineName,
@@ -264,9 +258,8 @@ void main() {
           ]),
         );
 
-        verify(
-          () => mockPacman.checkIfPackageIsInstalled(testPackage),
-        ).called(1);
+        verify(() => mockPacman.checkIfPackageIsInstalled(testPackage))
+            .called(1);
         verify(
           () => mockPrompter.writeTitle(
             message:
@@ -282,9 +275,8 @@ void main() {
           'implicitly installed package that belongs to a group', () async {
         const testGroup = 'group-1';
 
-        when(
-          () => mockPacman.checkIfPackageIsInstalled(any()),
-        ).thenReturnAsync(true);
+        when(() => mockPacman.checkIfPackageIsInstalled(any()))
+            .thenReturnAsync(true);
 
         final result = sut.buildCommands(
           testMachineName,
@@ -315,9 +307,8 @@ void main() {
           ]),
         );
 
-        verify(
-          () => mockPacman.checkIfPackageIsInstalled(testPackage),
-        ).called(1);
+        verify(() => mockPacman.checkIfPackageIsInstalled(testPackage))
+            .called(1);
         verify(
           () => mockPrompter.writeTitle(
             message:

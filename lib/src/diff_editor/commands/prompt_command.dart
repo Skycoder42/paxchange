@@ -14,7 +14,7 @@ enum PromptResult {
   final bool stopProcessing;
   final bool didModify;
 
-  const PromptResult({required this.stopProcessing, required this.didModify});
+  new({required this.stopProcessing, required this.didModify});
 
   PromptResult withReload() => switch (this) {
     PromptResult.succeeded => PromptResult.succeededReload,
@@ -27,7 +27,7 @@ abstract base class PromptCommand {
   final Console console;
   final String packageName;
 
-  const PromptCommand(this.console, this.packageName);
+  const new(this.console, this.packageName);
 
   String get key;
   String get description;

@@ -9,11 +9,11 @@ import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/util/process_wrapper.dart';
 import 'package:test/test.dart';
 
-class ProcessWrapperMock extends Mock implements ProcessWrapper {}
+class ProcessWrapperMock extends Mock implements ProcessWrapper;
 
-class ProcessMock extends Mock implements Process {}
+class ProcessMock extends Mock implements Process;
 
-class MockStderr extends Mock implements Stdout {}
+class MockStderr extends Mock implements Stdout;
 
 void main() {
   setUpAll(() {
@@ -96,9 +96,8 @@ void main() {
     }) {
       test('returns lines of pacman command', () {
         const lines = ['line1', 'line2', 'line3'];
-        when(
-          () => processMock.stdout,
-        ).thenStream(Stream.value(lines.join('\n')).transform(utf8.encoder));
+        when(() => processMock.stdout)
+            .thenStream(Stream.value(lines.join('\n')).transform(utf8.encoder));
 
         expect(runPacman(), emitsInOrder(<dynamic>[...lines, emitsDone]));
       });
@@ -109,9 +108,8 @@ void main() {
             : 'does not emit error if command fails',
         () {
           const firstLine = 'line';
-          when(
-            () => processMock.stdout,
-          ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
+          when(() => processMock.stdout)
+              .thenStream(Stream.value(firstLine).transform(utf8.encoder));
           when(() => processMock.exitCode).thenReturnAsync(1);
 
           expect(
@@ -181,9 +179,8 @@ void main() {
 
           test('ignores if pacman command fails when ignoreErrors is true', () {
             const firstLine = 'line';
-            when(
-              () => processMock.stdout,
-            ).thenStream(Stream.value(firstLine).transform(utf8.encoder));
+            when(() => processMock.stdout)
+                .thenStream(Stream.value(firstLine).transform(utf8.encoder));
             when(() => processMock.exitCode).thenReturnAsync(1);
 
             expect(

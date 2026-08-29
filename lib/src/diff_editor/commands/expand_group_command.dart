@@ -14,7 +14,7 @@ final class ExpandGroupCommand extends PromptCommand {
   final String machineName;
   final String group;
 
-  ExpandGroupCommand(
+  new(
     Console console,
     this._packageFileAdapter,
     this._pacman,

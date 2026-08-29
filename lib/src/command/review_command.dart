@@ -31,10 +31,7 @@ final class ReviewOptions {
   )
   final bool includeOptional;
 
-  const ReviewOptions({
-    required this.machineName,
-    required this.includeOptional,
-  });
+  const new({required this.machineName, required this.includeOptional});
 }
 
 class ReviewCommand extends _$ReviewOptionsCommand<int> {
@@ -49,7 +46,7 @@ class ReviewCommand extends _$ReviewOptionsCommand<int> {
   @override
   bool get takesArguments => false;
 
-  ReviewCommand(this._providerContainer);
+  new(this._providerContainer);
 
   @override
   Future<int> run() async {
