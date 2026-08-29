@@ -40,7 +40,7 @@ void main() {
         'update',
         '--set-exit-on-changed',
       ], mode: ProcessStartMode.inheritStdio);
-      return proc.exitCode;
+      return await proc.exitCode;
     }
 
     setUp(() async {

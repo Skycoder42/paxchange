@@ -27,7 +27,7 @@ class PackageInstall {
         .loadPackageFile(machineName, expandGroups: false)
         .toList();
 
-    return _pacman.installPackages(
+    return await _pacman.installPackages(
       packages,
       onlyNeeded: true,
       noConfirm: noConfirm,

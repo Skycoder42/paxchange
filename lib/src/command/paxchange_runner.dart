@@ -60,7 +60,7 @@ class PaxchangeRunner extends CommandRunner<int> {
       configProvider.overrideWithValue(config),
     ]);
 
-    return super.runCommand(topLevelResults);
+    return await super.runCommand(topLevelResults);
   }
 
   Future<Config> _readConfig(String path) async {

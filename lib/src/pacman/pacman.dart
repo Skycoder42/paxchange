@@ -123,6 +123,6 @@ class Pacman {
       mode: ProcessStartMode.inheritStdio,
     );
 
-    return pacmanProc.exitCode;
+    return await pacmanProc.exitCode;
   }
 }
