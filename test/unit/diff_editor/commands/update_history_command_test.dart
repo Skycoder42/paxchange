@@ -7,11 +7,11 @@ import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:test/test.dart';
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter {}
+class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
 void main() {
   final mockPackageFileAdapter = MockPackageFileAdapter();
@@ -49,9 +49,8 @@ void main() {
 
     group('call', () {
       test('adds package to history', () async {
-        when(
-          () => mockPackageFileAdapter.addToPackageFile(any(), any()),
-        ).thenReturnAsync(null);
+        when(() => mockPackageFileAdapter.addToPackageFile(any(), any()))
+            .thenReturnAsync(null);
 
         final result = await sut();
 
@@ -112,9 +111,8 @@ void main() {
 
     group('call', () {
       test('removes package from history', () async {
-        when(
-          () => mockPackageFileAdapter.removeFromPackageFile(any(), any()),
-        ).thenReturnAsync(true);
+        when(() => mockPackageFileAdapter.removeFromPackageFile(any(), any()))
+            .thenReturnAsync(true);
 
         final result = await sut();
 
@@ -133,9 +131,8 @@ void main() {
       test(
         'prints error and returns failure if package was not removed',
         () async {
-          when(
-            () => mockPackageFileAdapter.removeFromPackageFile(any(), any()),
-          ).thenReturnAsync(false);
+          when(() => mockPackageFileAdapter.removeFromPackageFile(any(), any()))
+              .thenReturnAsync(false);
 
           const testPackageName = 'test-package';
           final result = await sut();

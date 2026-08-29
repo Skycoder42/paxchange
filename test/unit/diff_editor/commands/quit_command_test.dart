@@ -4,7 +4,7 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/commands/quit_command.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
 void main() {
   group('$QuitCommand', () {

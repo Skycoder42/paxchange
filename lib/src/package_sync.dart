@@ -26,7 +26,7 @@ class PackageSync {
   final DiffFileAdapter _diffFileAdapter;
   final Pacman _pacman;
 
-  PackageSync(
+  new(
     this._rootPackageName,
     this._packageFileAdapter,
     this._diffFileAdapter,

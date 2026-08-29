@@ -14,7 +14,7 @@ Prompter prompter(Ref ref) => Prompter(ref.watch(consoleProvider));
 class Prompter {
   final Console _console;
 
-  const Prompter(this._console);
+  const new(this._console);
 
   void writeError(String message) {
     _console

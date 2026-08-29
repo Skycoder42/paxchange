@@ -7,7 +7,7 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
 final class TestPromptCommand extends PromptCommand {
   final _call = MockCallable0<PromptResult>();
@@ -18,12 +18,7 @@ final class TestPromptCommand extends PromptCommand {
   @override
   final String description;
 
-  TestPromptCommand(
-    super.console,
-    super.packageName,
-    this.key,
-    this.description,
-  );
+  new(super.console, super.packageName, this.key, this.description);
 
   @override
   PromptResult call() => _call();
@@ -126,9 +121,8 @@ void main() {
 
       test('writes a looping prompt for invalid inputs', () {
         var keyCtr = 3;
-        when(
-          () => mockConsole.readKey(),
-        ).thenAnswer((i) => Key.printable('${keyCtr--}'));
+        when(() => mockConsole.readKey())
+            .thenAnswer((i) => Key.printable('${keyCtr--}'));
 
         final result = sut.promptOption(
           description: testDescription,
@@ -231,9 +225,8 @@ void main() {
 
       test('writes a looping prompt if output is repeat', () async {
         var keyCtr = 2;
-        when(
-          () => mockConsole.readKey(),
-        ).thenAnswer((i) => Key.printable('${keyCtr--}'));
+        when(() => mockConsole.readKey())
+            .thenAnswer((i) => Key.printable('${keyCtr--}'));
 
         final result = await sut.promptCommand([cmd1, cmd2]);
 

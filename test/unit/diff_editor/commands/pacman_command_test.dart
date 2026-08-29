@@ -9,11 +9,11 @@ import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
 void main() {
   setUpAll(() {
@@ -239,9 +239,8 @@ void main() {
       test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
-        when(
-          () => mockPacman.changePackageInstallReason(any(), any()),
-        ).thenReturnAsync(0);
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(0);
 
         final result = await sut();
 
@@ -259,9 +258,8 @@ void main() {
       test('runs pacman and prints error message if pacman fails', () async {
         const testPackageName = 'test-package';
 
-        when(
-          () => mockPacman.changePackageInstallReason(any(), any()),
-        ).thenReturnAsync(10);
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(10);
 
         final result = await sut();
 
@@ -308,9 +306,8 @@ void main() {
       test('runs pacman and returns success', () async {
         const testPackageName = 'test-package';
 
-        when(
-          () => mockPacman.changePackageInstallReason(any(), any()),
-        ).thenReturnAsync(0);
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(0);
 
         final result = await sut();
 
@@ -328,9 +325,8 @@ void main() {
       test('runs pacman and prints error message if pacman fails', () async {
         const testPackageName = 'test-package';
 
-        when(
-          () => mockPacman.changePackageInstallReason(any(), any()),
-        ).thenReturnAsync(10);
+        when(() => mockPacman.changePackageInstallReason(any(), any()))
+            .thenReturnAsync(10);
 
         final result = await sut();
 

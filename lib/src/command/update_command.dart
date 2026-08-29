@@ -19,7 +19,7 @@ final class UpdateOptions {
   )
   final bool setExitOnChanged;
 
-  const UpdateOptions({required this.setExitOnChanged});
+  const new({required this.setExitOnChanged});
 }
 
 class UpdateCommand extends _$UpdateOptionsCommand<int> {
@@ -35,7 +35,7 @@ class UpdateCommand extends _$UpdateOptionsCommand<int> {
   @override
   bool get takesArguments => false;
 
-  UpdateCommand(this._providerContainer);
+  new(this._providerContainer);
 
   @override
   Future<int> run() async {

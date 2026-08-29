@@ -7,11 +7,11 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter {}
+class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
 
 void main() {
   group('$MissingGroupsEditor', () {

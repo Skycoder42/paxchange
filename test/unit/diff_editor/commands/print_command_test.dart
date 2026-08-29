@@ -8,9 +8,9 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
 void main() {
   group('$PrintCommand', () {
@@ -27,9 +27,8 @@ void main() {
     test('local prints local package status', () async {
       const testPackageName = 'test-package';
       const packageInfo = ['line-1', 'line-2', 'line-3'];
-      when(
-        () => mockPacman.queryInstalledPackage(any()),
-      ).thenStream(Stream.fromIterable(packageInfo));
+      when(() => mockPacman.queryInstalledPackage(any()))
+          .thenStream(Stream.fromIterable(packageInfo));
 
       final sut = PrintCommand.local(mockConsole, mockPacman, testPackageName);
 
@@ -54,9 +53,8 @@ void main() {
     test('remote prints remote package status', () async {
       const testPackageName = 'test-package';
       const packageInfo = ['line-1', 'line-2', 'line-3'];
-      when(
-        () => mockPacman.queryUninstalledPackage(any()),
-      ).thenStream(Stream.fromIterable(packageInfo));
+      when(() => mockPacman.queryUninstalledPackage(any()))
+          .thenStream(Stream.fromIterable(packageInfo));
 
       final sut = PrintCommand.remote(mockConsole, mockPacman, testPackageName);
 

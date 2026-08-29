@@ -17,15 +17,15 @@ Config config(Ref ref) =>
 @freezed
 sealed class Config with _$Config {
   @DirectoryJsonConverter()
-  const factory Config({
+  const factory({
     required Directory storageDirectory,
     String? machineName,
     String? pacmanFrontend,
   }) = _Config;
 
-  factory Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 
-  const Config._();
+  const new _();
 
   String get rootPackageFile => machineName ?? Platform.localHostname;
 }

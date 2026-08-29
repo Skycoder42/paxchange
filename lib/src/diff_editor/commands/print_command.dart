@@ -14,10 +14,10 @@ final class PrintCommand extends PromptCommand {
   @visibleForTesting
   final PrintTarget printTarget;
 
-  const PrintCommand.local(super.console, this._pacman, super.packageName)
+  const new local(super.console, this._pacman, super.packageName)
     : printTarget = PrintTarget.local;
 
-  const PrintCommand.remote(super.console, this._pacman, super.packageName)
+  const new remote(super.console, this._pacman, super.packageName)
     : printTarget = PrintTarget.remote;
 
   @override

@@ -20,9 +20,9 @@ void main() {
       await testDir.delete(recursive: true);
     });
 
-    void writeFile(String name, Iterable<String> lines) => File.fromUri(
-      testDir.uri.resolve('$name.pcs'),
-    ).writeAsStringSync(lines.join('\n'));
+    void writeFile(String name, Iterable<String> lines) =>
+        File.fromUri(testDir.uri.resolve('$name.pcs'))
+            .writeAsStringSync(lines.join('\n'));
 
     group('loadPackageDiff', () {
       test('returns empty stream if file does not exist', () {

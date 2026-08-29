@@ -8,7 +8,7 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
 void main() {
   group('$LoadPackageFailure', () {
@@ -208,9 +208,8 @@ void main() {
         const groups = ['pkg-1', 'pkg-2', 'pkg-3'];
         writeFile(fileName, [...lines, '::group $groupName']);
 
-        when(
-          () => mockPacman.listPackagesForGroup(any()),
-        ).thenStream(Stream.fromIterable(groups));
+        when(() => mockPacman.listPackagesForGroup(any()))
+            .thenStream(Stream.fromIterable(groups));
 
         final stream = sut.loadPackageFile(fileName, expandGroups: false);
 

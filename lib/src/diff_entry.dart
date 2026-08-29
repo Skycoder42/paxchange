@@ -5,7 +5,7 @@ part 'diff_entry.freezed.dart';
 class DecodingFailure implements Exception {
   final String line;
 
-  DecodingFailure(this.line);
+  new(this.line);
 
   @override
   String toString() => '"$line"is not a diff entry. Must start with + or -';
@@ -13,12 +13,12 @@ class DecodingFailure implements Exception {
 
 @freezed
 sealed class DiffEntry with _$DiffEntry implements Comparable<DiffEntry> {
-  const DiffEntry._();
+  const new _();
 
-  const factory DiffEntry.added(String package) = DiffAddedEntry;
-  const factory DiffEntry.removed(String package) = DiffRemovedEntry;
+  const factory added(String package) = DiffAddedEntry;
+  const factory removed(String package) = DiffRemovedEntry;
 
-  factory DiffEntry.decode(String line) {
+  factory decode(String line) {
     switch (line.substring(0, 1)) {
       case '+':
         return DiffEntry.added(line.substring(1));

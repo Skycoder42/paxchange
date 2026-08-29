@@ -10,12 +10,7 @@ abstract base class PacmanCommand extends PromptCommand {
   final Pacman pacman;
   final Prompter _prompter;
 
-  const PacmanCommand(
-    super.console,
-    this.pacman,
-    this._prompter,
-    super.packageName,
-  );
+  const new(super.console, this.pacman, this._prompter, super.packageName);
 
   @override
   @nonVirtual
@@ -45,12 +40,7 @@ abstract base class PacmanCommand extends PromptCommand {
 }
 
 final class InstallCommand extends PacmanCommand {
-  const InstallCommand(
-    super.console,
-    super.pacman,
-    super._prompter,
-    super.packageName,
-  );
+  const new(super.console, super.pacman, super._prompter, super.packageName);
 
   @override
   String get key => 'i';
@@ -71,7 +61,7 @@ final class InstallCommand extends PacmanCommand {
 final class RemoveCommand extends PacmanCommand {
   final bool recursive;
 
-  const RemoveCommand(
+  const new(
     super.console,
     super.pacman,
     super._prompter,
@@ -99,12 +89,7 @@ final class RemoveCommand extends PacmanCommand {
 }
 
 final class MarkImplicitlyInstalledCommand extends PacmanCommand {
-  const MarkImplicitlyInstalledCommand(
-    super.console,
-    super.pacman,
-    super._prompter,
-    super.packageName,
-  );
+  const new(super.console, super.pacman, super._prompter, super.packageName);
 
   @override
   String get key => 'm';
@@ -123,12 +108,7 @@ final class MarkImplicitlyInstalledCommand extends PacmanCommand {
 }
 
 final class MarkExplicitlyInstalledCommand extends PacmanCommand {
-  const MarkExplicitlyInstalledCommand(
-    super.console,
-    super.pacman,
-    super._prompter,
-    super.packageName,
-  );
+  const new(super.console, super.pacman, super._prompter, super.packageName);
 
   @override
   String get key => 'm';

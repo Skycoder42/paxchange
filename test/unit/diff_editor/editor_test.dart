@@ -16,18 +16,18 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter {}
+class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
 
-class MockPackageSync extends Mock implements PackageSync {}
+class MockPackageSync extends Mock implements PackageSync;
 
-class MockCommandEditor<T> extends Mock implements CommandEditor<T> {}
+class MockCommandEditor<T> extends Mock implements CommandEditor<T>;
 
 final class FakePromptCommand extends PromptCommand with Fake {
-  FakePromptCommand() : super(MockConsole(), '');
+  new() : super(MockConsole(), '');
 }
 
 void main() {
@@ -64,31 +64,24 @@ void main() {
       when(() => mockConsole.hasTerminal).thenReturn(true);
       when(() => mockConsole.readKey()).thenReturn(Key.printable(' '));
 
-      when(
-        () => mockPackageFileAdapter.ensurePackageFileExists(any()),
-      ).thenReturnAsync(null);
-      when(
-        () => mockPackageFileAdapter.loadPackageFileHierarchy(any()),
-      ).thenReturnAsync(testHierarchy);
+      when(() => mockPackageFileAdapter.ensurePackageFileExists(any()))
+          .thenReturnAsync(null);
+      when(() => mockPackageFileAdapter.loadPackageFileHierarchy(any()))
+          .thenReturnAsync(testHierarchy);
 
       when(() => mockPackageSync.updatePackageDiff()).thenReturnAsync(0);
 
-      when(
-        () => mockCommandEditor1.loadTargets(any(), any()),
-      ).thenStream(const Stream.empty());
-      when(
-        () => mockCommandEditor1.buildCommands(any(), any(), any()),
-      ).thenAnswer((_) => Stream.value(testCommand1));
-      when(
-        () => mockCommandEditor2.loadTargets(any(), any()),
-      ).thenStream(const Stream.empty());
-      when(
-        () => mockCommandEditor2.buildCommands(any(), any(), any()),
-      ).thenAnswer((_) => Stream.value(testCommand2));
+      when(() => mockCommandEditor1.loadTargets(any(), any()))
+          .thenStream(const Stream.empty());
+      when(() => mockCommandEditor1.buildCommands(any(), any(), any()))
+          .thenAnswer((_) => Stream.value(testCommand1));
+      when(() => mockCommandEditor2.loadTargets(any(), any()))
+          .thenStream(const Stream.empty());
+      when(() => mockCommandEditor2.buildCommands(any(), any(), any()))
+          .thenAnswer((_) => Stream.value(testCommand2));
 
-      when(
-        () => mockPrompter.promptCommand(any()),
-      ).thenReturn(PromptResult.succeeded);
+      when(() => mockPrompter.promptCommand(any()))
+          .thenReturn(PromptResult.succeeded);
 
       sut = Editor(
         mockConsole,
@@ -154,12 +147,10 @@ void main() {
 
           const targets1 = ['target-1-1', 'target-1-2'];
           const targets2 = [21, 22];
-          when(
-            () => mockCommandEditor1.loadTargets(any(), any()),
-          ).thenStream(Stream.fromIterable(targets1));
-          when(
-            () => mockCommandEditor2.loadTargets(any(), any()),
-          ).thenStream(Stream.fromIterable(targets2));
+          when(() => mockCommandEditor1.loadTargets(any(), any()))
+              .thenStream(Stream.fromIterable(targets1));
+          when(() => mockCommandEditor2.loadTargets(any(), any()))
+              .thenStream(Stream.fromIterable(targets2));
 
           await sut.run(testMachineName);
 
@@ -213,13 +204,11 @@ void main() {
       );
 
       test('skips other editors if first editor returns quit', () async {
-        when(
-          () => mockCommandEditor1.loadTargets(any(), any()),
-        ).thenStream(Stream.value('test-target'));
+        when(() => mockCommandEditor1.loadTargets(any(), any()))
+            .thenStream(Stream.value('test-target'));
 
-        when(
-          () => mockPrompter.promptCommand(any()),
-        ).thenReturn(PromptResult.quit);
+        when(() => mockPrompter.promptCommand(any()))
+            .thenReturn(PromptResult.quit);
 
         await sut.run(testMachineName);
 
@@ -237,13 +226,11 @@ void main() {
           ensureNoMoreInteractions();
 
           const target1 = 'target-1';
-          when(
-            () => mockCommandEditor1.loadTargets(any(), any()),
-          ).thenStream(Stream.value(target1));
+          when(() => mockCommandEditor1.loadTargets(any(), any()))
+              .thenStream(Stream.value(target1));
 
-          when(
-            () => mockPrompter.promptCommand(any()),
-          ).thenReturn(PromptResult.failed);
+          when(() => mockPrompter.promptCommand(any()))
+              .thenReturn(PromptResult.failed);
 
           await sut.run(testMachineName);
 
@@ -275,12 +262,10 @@ void main() {
           const target11 = 'target-1-1';
           const targets1 = [target11, 'target-1-2'];
           const target2 = 2;
-          when(
-            () => mockCommandEditor1.loadTargets(any(), any()),
-          ).thenAnswer((_) => Stream.fromIterable(targets1));
-          when(
-            () => mockCommandEditor2.loadTargets(any(), any()),
-          ).thenAnswer((_) => Stream.value(target2));
+          when(() => mockCommandEditor1.loadTargets(any(), any()))
+              .thenAnswer((_) => Stream.fromIterable(targets1));
+          when(() => mockCommandEditor2.loadTargets(any(), any()))
+              .thenAnswer((_) => Stream.value(target2));
 
           var didReload = false;
           when(() => mockPrompter.promptCommand(any())).thenAnswer((_) {
@@ -344,12 +329,10 @@ void main() {
 
         const target1 = 'target-1';
         const targets2 = [21, 22, 23];
-        when(
-          () => mockCommandEditor1.loadTargets(any(), any()),
-        ).thenAnswer((_) => Stream.value(target1));
-        when(
-          () => mockCommandEditor2.loadTargets(any(), any()),
-        ).thenAnswer((_) => Stream.fromIterable(targets2));
+        when(() => mockCommandEditor1.loadTargets(any(), any()))
+            .thenAnswer((_) => Stream.value(target1));
+        when(() => mockCommandEditor2.loadTargets(any(), any()))
+            .thenAnswer((_) => Stream.fromIterable(targets2));
 
         var promptCnt = 0;
         when(() => mockPrompter.promptCommand(any())).thenAnswer((_) {

@@ -26,13 +26,13 @@ final class GlobalOptions {
   )
   final String config;
 
-  const GlobalOptions({required this.config});
+  const new({required this.config});
 }
 
 class PaxchangeRunner extends CommandRunner<int> {
   late final ProviderContainer _providerContainer;
 
-  PaxchangeRunner()
+  new()
     : super(
         'paxchange',
         'Simple dart script to passively synchronize '

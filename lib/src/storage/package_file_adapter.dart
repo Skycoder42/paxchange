@@ -24,7 +24,7 @@ class LoadPackageFailure implements Exception {
   final List<String> history;
   final String message;
 
-  LoadPackageFailure({
+  new({
     required this.fileName,
     required Iterable<String> history,
     required this.message,
@@ -42,7 +42,7 @@ class PackageFileAdapter {
   final Directory _storageDirectory;
   final Pacman _pacman;
 
-  PackageFileAdapter(this._storageDirectory, this._pacman);
+  new(this._storageDirectory, this._pacman);
 
   Stream<String> loadPackageFile(
     String machineName, {

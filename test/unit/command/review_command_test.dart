@@ -12,21 +12,21 @@ import 'package:paxchange/src/diff_editor/editors/missing_groups_editor.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults {}
+class MockArgResults extends Mock implements ArgResults;
 
-class MockEditor extends Mock implements Editor {}
+class MockEditor extends Mock implements Editor;
 
-class MockMissingGroupsEditor extends Mock implements MissingGroupsEditor {}
+class MockMissingGroupsEditor extends Mock implements MissingGroupsEditor;
 
-class MockDiffEditor extends Mock implements DiffEditor {}
+class MockDiffEditor extends Mock implements DiffEditor;
 
-class MockCleanupEditor extends Mock implements CleanupEditor {}
+class MockCleanupEditor extends Mock implements CleanupEditor;
 
 class TestableReviewCommand extends ReviewCommand {
   @override
   ArgResults? argResults;
 
-  TestableReviewCommand(super._providerContainer);
+  new(super._providerContainer);
 }
 
 void main() {
@@ -64,12 +64,10 @@ void main() {
             mockMissingGroupsEditor,
           ),
           diffEditorProvider.overrideWithValue(mockDiffEditor),
-          cleanupEditorProvider(
-            includeOptional: false,
-          ).overrideWithValue(mockCleanupEditor),
-          cleanupEditorProvider(
-            includeOptional: true,
-          ).overrideWithValue(mockCleanupEditor),
+          cleanupEditorProvider(includeOptional: false)
+              .overrideWithValue(mockCleanupEditor),
+          cleanupEditorProvider(includeOptional: true)
+              .overrideWithValue(mockCleanupEditor),
           configProvider.overrideWithValue(testConfig),
           editorProvider(
             Editors([
@@ -100,12 +98,10 @@ void main() {
 
     group('run', () {
       test('runs diff editor with default machine name', () async {
-        when<dynamic>(
-          () => mockArgResults[testMachineNameOption],
-        ).thenReturn(null);
-        when<dynamic>(
-          () => mockArgResults[testIncludeOptionalOption],
-        ).thenReturn(false);
+        when<dynamic>(() => mockArgResults[testMachineNameOption])
+            .thenReturn(null);
+        when<dynamic>(() => mockArgResults[testIncludeOptionalOption])
+            .thenReturn(false);
 
         final result = await sut.run();
 
@@ -120,12 +116,10 @@ void main() {
       test('runs diff editor with custom machine name', () async {
         const givenPackageFile = 'other-package';
 
-        when<dynamic>(
-          () => mockArgResults[testMachineNameOption],
-        ).thenReturn(givenPackageFile);
-        when<dynamic>(
-          () => mockArgResults[testIncludeOptionalOption],
-        ).thenReturn(false);
+        when<dynamic>(() => mockArgResults[testMachineNameOption])
+            .thenReturn(givenPackageFile);
+        when<dynamic>(() => mockArgResults[testIncludeOptionalOption])
+            .thenReturn(false);
         final result = await sut.run();
 
         verifyInOrder<dynamic>([

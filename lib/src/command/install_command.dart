@@ -28,7 +28,7 @@ final class InstallOptions {
   )
   final bool confirm;
 
-  const InstallOptions({required this.machineName, required this.confirm});
+  const new({required this.machineName, required this.confirm});
 }
 
 class InstallCommand extends _$InstallOptionsCommand<int> {
@@ -49,7 +49,7 @@ review command instead.''';
   @override
   bool get takesArguments => false;
 
-  InstallCommand(this._providerContainer);
+  new(this._providerContainer);
 
   @override
   Future<int> run() {

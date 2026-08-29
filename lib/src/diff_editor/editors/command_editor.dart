@@ -11,7 +11,7 @@ abstract class CommandEditor<TTarget> {
   @protected
   final Prompter prompter;
 
-  CommandEditor(this.console, this.prompter);
+  new(this.console, this.prompter);
 
   Stream<TTarget> loadTargets(
     String machineName,

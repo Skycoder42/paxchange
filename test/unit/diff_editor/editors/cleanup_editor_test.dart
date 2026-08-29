@@ -9,11 +9,11 @@ import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console {}
+class MockConsole extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter {}
+class MockPrompter extends Mock implements Prompter;
 
-class MockPacman extends Mock implements Pacman {}
+class MockPacman extends Mock implements Pacman;
 
 void main() {
   group('$CleanupEditor', () {
@@ -64,9 +64,8 @@ void main() {
           emitsInOrder([...testPackages, emitsDone]),
         );
 
-        verify(
-          () => mockPacman.listUnusedPackages(includeOptional: fixture),
-        ).called(1);
+        verify(() => mockPacman.listUnusedPackages(includeOptional: fixture))
+            .called(1);
       },
     );
 

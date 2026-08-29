@@ -13,7 +13,7 @@ final class AddGroupCommand extends PromptCommand {
 
   final Iterable<String> machineHierarchy;
 
-  const AddGroupCommand(
+  const new(
     super.console,
     this._packageFileAdapter,
     this._pacman,

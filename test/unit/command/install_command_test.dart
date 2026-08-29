@@ -9,15 +9,15 @@ import 'package:paxchange/src/package_install.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults {}
+class MockArgResults extends Mock implements ArgResults;
 
-class MockPackageInstall extends Mock implements PackageInstall {}
+class MockPackageInstall extends Mock implements PackageInstall;
 
 class TestableInstallCommand extends InstallCommand {
   @override
   ArgResults? argResults;
 
-  TestableInstallCommand(super._providerContainer);
+  new(super._providerContainer);
 }
 
 void main() {
@@ -74,9 +74,8 @@ void main() {
 
     group('run', () {
       test('runs install with default machine name', () async {
-        when<dynamic>(
-          () => mockArgResults[testMachineNameOption],
-        ).thenReturn(null);
+        when<dynamic>(() => mockArgResults[testMachineNameOption])
+            .thenReturn(null);
         when<dynamic>(() => mockArgResults[testConfirmFlag]).thenReturn(true);
 
         final result = await sut.run();
@@ -90,9 +89,8 @@ void main() {
 
       test('runs install with custom machine name and no-confirm', () async {
         const givenPackageFile = 'other-package';
-        when<dynamic>(
-          () => mockArgResults[testMachineNameOption],
-        ).thenReturn(givenPackageFile);
+        when<dynamic>(() => mockArgResults[testMachineNameOption])
+            .thenReturn(givenPackageFile);
         when<dynamic>(() => mockArgResults[testConfirmFlag]).thenReturn(false);
 
         final result = await sut.run();

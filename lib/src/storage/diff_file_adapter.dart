@@ -17,7 +17,7 @@ DiffFileAdapter diffFileAdapter(Ref ref) =>
 class DiffFileAdapter {
   final Directory _storageDirectory;
 
-  DiffFileAdapter(this._storageDirectory);
+  new(this._storageDirectory);
 
   Stream<DiffEntry> loadPackageDiff(String machineName) {
     final diffFile = _diffFile(machineName);

@@ -12,7 +12,7 @@ ProcessWrapper process(Ref ref) => const ProcessWrapper();
 // coverage:ignore-end
 
 class ProcessWrapper {
-  const ProcessWrapper();
+  const new();
 
   Future<Process> start(
     String executable,

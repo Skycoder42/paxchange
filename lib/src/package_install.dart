@@ -17,7 +17,7 @@ class PackageInstall {
   final PackageFileAdapter _packageFileAdapter;
   final Pacman _pacman;
 
-  const PackageInstall(this._packageFileAdapter, this._pacman);
+  const new(this._packageFileAdapter, this._pacman);
 
   Future<int> installPackages(
     String machineName, {
