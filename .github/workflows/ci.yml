@@ -33,7 +33,7 @@ jobs:
         # does not really matter which, except alpm, which is a group
         run: pacman -Sy --noconfirm alpm rsync bitwarden-cli wget hurl
       - name: Install Dart-SDK
-        uses: dart-lang/setup-dart@v1.8.0
+        uses: dart-lang/setup-dart@v1.8.1
       - name: Checkout repository
         uses: actions/checkout@v7
       - name: Restore dart packages
