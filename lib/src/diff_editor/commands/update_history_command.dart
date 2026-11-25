@@ -5,17 +5,13 @@ import '../../storage/package_file_adapter.dart';
 import '../prompter.dart';
 import 'prompt_command.dart';
 
-abstract base class UpdateHistoryCommand extends PromptCommand {
-  @protected
-  final PackageFileAdapter packageFileAdapter;
-  final Prompter _prompter;
-
-  const new(
-    Console console,
-    this.packageFileAdapter,
-    this._prompter, {
-    required String packageName,
-  }) : super(console, packageName);
+abstract base class const UpdateHistoryCommand(
+  Console console,
+  @protected final PackageFileAdapter packageFileAdapter,
+  final Prompter _prompter, {
+  required String packageName,
+}) extends PromptCommand {
+  this : super(console, packageName);
 
   @override
   Future<PromptResult> call() async {
@@ -39,20 +35,14 @@ abstract base class UpdateHistoryCommand extends PromptCommand {
   Future<bool> updateHistory(String packageName);
 }
 
-final class AddHistoryCommand extends UpdateHistoryCommand {
-  final int index;
-  @override
-  final String machineName;
-
-  const new(
-    super.console,
-    super.packageFileAdapter,
-    super._prompter,
-    this.index, {
-    required this.machineName,
-    required super.packageName,
-  });
-
+final class const AddHistoryCommand(
+  super.console,
+  super.packageFileAdapter,
+  super._prompter,
+  final int index, {
+  @override required final String machineName,
+  required super.packageName,
+}) extends UpdateHistoryCommand {
   static List<AddHistoryCommand> generate(
     Console console,
     PackageFileAdapter packageFileAdapter,
@@ -88,20 +78,14 @@ final class AddHistoryCommand extends UpdateHistoryCommand {
   }
 }
 
-final class RemoveHistoryCommand extends UpdateHistoryCommand {
-  @override
-  final String machineName;
-  final bool isGroup;
-
-  const new(
-    super.console,
-    super.packageFileAdapter,
-    super._prompter, {
-    required this.machineName,
-    required super.packageName,
-    this.isGroup = false,
-  });
-
+final class const RemoveHistoryCommand(
+  super.console,
+  super.packageFileAdapter,
+  super._prompter, {
+  @override required final String machineName,
+  required super.packageName,
+  final bool isGroup = false,
+}) extends UpdateHistoryCommand {
   @override
   String get key => 'd';
 

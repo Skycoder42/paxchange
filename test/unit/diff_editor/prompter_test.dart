@@ -7,18 +7,15 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/diff_editor/prompter.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console;
+class MockConsole() extends Mock implements Console;
 
-final class TestPromptCommand extends PromptCommand {
+final class TestPromptCommand(
+  super.console,
+  super.packageName,
+  @override final String key,
+  @override final String description,
+) extends PromptCommand {
   final _call = MockCallable0<PromptResult>();
-
-  @override
-  final String key;
-
-  @override
-  final String description;
-
-  new(super.console, super.packageName, this.key, this.description);
 
   @override
   PromptResult call() => _call();

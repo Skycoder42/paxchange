@@ -23,18 +23,12 @@ CleanupEditor cleanupEditor(Ref ref, {required bool includeOptional}) =>
     );
 // coverage:ignore-end
 
-class CleanupEditor extends CommandEditor<String> {
-  final Pacman _pacman;
-
-  final bool includeOptional;
-
-  new(
-    super.console,
-    super.prompter,
-    this._pacman, {
-    required this.includeOptional,
-  });
-
+class CleanupEditor(
+  super.console,
+  super.prompter,
+  final Pacman _pacman, {
+  required final bool includeOptional,
+}) extends CommandEditor<String> {
   @override
   Stream<String> loadTargets(
     String machineName,

@@ -10,7 +10,7 @@ part 'install_command.g.dart';
 
 @immutable
 @CliOptions(createCommand: true)
-final class InstallOptions {
+final class const InstallOptions({
   @CliOption(
     abbr: 'n',
     valueHelp: 'name',
@@ -18,22 +18,18 @@ final class InstallOptions {
         'Specify a custom machine name to install packages for. '
         'By default, this machine is used.',
   )
-  final String? machineName;
-
+  required final String? machineName,
   @CliOption(
     defaultsTo: true,
     help:
         'When disabled, the pacman installation will run '
         'without confirmation. Use carefully!',
   )
-  final bool confirm;
+  required final bool confirm,
+});
 
-  const new({required this.machineName, required this.confirm});
-}
-
-class InstallCommand extends _$InstallOptionsCommand<int> {
-  final ProviderContainer _providerContainer;
-
+class InstallCommand(final ProviderContainer _providerContainer)
+    extends _$InstallOptionsCommand<int> {
   @override
   String get name => 'install';
 
@@ -48,8 +44,6 @@ review command instead.''';
 
   @override
   bool get takesArguments => false;
-
-  new(this._providerContainer);
 
   @override
   Future<int> run() {

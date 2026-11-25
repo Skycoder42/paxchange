@@ -12,19 +12,16 @@ part 'update_command.g.dart';
 
 @immutable
 @CliOptions(createCommand: true)
-final class UpdateOptions {
+final class const UpdateOptions({
   @CliOption(
     abbr: 'e',
     help: 'Causes the tool to exit with code 2 if packages have changed.',
   )
-  final bool setExitOnChanged;
+  required final bool setExitOnChanged,
+});
 
-  const new({required this.setExitOnChanged});
-}
-
-class UpdateCommand extends _$UpdateOptionsCommand<int> {
-  final ProviderContainer _providerContainer;
-
+class UpdateCommand(final ProviderContainer _providerContainer)
+    extends _$UpdateOptionsCommand<int> {
   @override
   String get name => 'update';
 
@@ -34,8 +31,6 @@ class UpdateCommand extends _$UpdateOptionsCommand<int> {
 
   @override
   bool get takesArguments => false;
-
-  new(this._providerContainer);
 
   @override
   Future<int> run() async {

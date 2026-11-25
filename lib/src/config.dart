@@ -15,7 +15,7 @@ Config config(Ref ref) =>
 // coverage:ignore-end
 
 @freezed
-sealed class Config with _$Config {
+sealed class const Config._() with _$Config {
   @DirectoryJsonConverter()
   const factory({
     required Directory storageDirectory,
@@ -24,8 +24,6 @@ sealed class Config with _$Config {
   }) = _Config;
 
   factory fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
-
-  const new _();
 
   String get rootPackageFile => machineName ?? Platform.localHostname;
 }

@@ -31,25 +31,21 @@ Editor editor(Ref ref, Editors editors) => Editor(
 );
 // coverage:ignore-end
 
-enum EditorResult { quit, next, reload }
+enum EditorResult() {
+  quit,
+  next,
+  reload,
+}
 
-class Editor {
-  final Console _console;
-  final Prompter _prompter;
-  final PackageFileAdapter _packageFileAdapter;
-  final PackageSync _packageSync;
-  final List<CommandEditor<dynamic>> _editors;
-
+class Editor(
+  final Console _console,
+  final Prompter _prompter,
+  final PackageFileAdapter _packageFileAdapter,
+  final PackageSync _packageSync,
+  final List<CommandEditor<dynamic>> _editors,
+) {
   final _skipped = <dynamic>{};
   var _didModify = false;
-
-  new(
-    this._console,
-    this._prompter,
-    this._packageFileAdapter,
-    this._packageSync,
-    this._editors,
-  );
 
   Future<void> run(String machineName) async {
     if (!_console.hasTerminal) {

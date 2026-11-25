@@ -11,9 +11,7 @@ part 'process_wrapper.g.dart';
 ProcessWrapper process(Ref ref) => const ProcessWrapper();
 // coverage:ignore-end
 
-class ProcessWrapper {
-  const new();
-
+class const ProcessWrapper() {
   Future<Process> start(
     String executable,
     List<String> arguments, {

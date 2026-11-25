@@ -6,22 +6,14 @@ import '../prompter.dart';
 import 'prompt_command.dart';
 import 'update_history_command.dart';
 
-final class AddGroupCommand extends PromptCommand {
-  final PackageFileAdapter _packageFileAdapter;
-  final Pacman _pacman;
-  final Prompter _prompter;
-
-  final Iterable<String> machineHierarchy;
-
-  const new(
-    super.console,
-    this._packageFileAdapter,
-    this._pacman,
-    this._prompter,
-    this.machineHierarchy,
-    super.packageName,
-  );
-
+final class const AddGroupCommand(
+  super.console,
+  final PackageFileAdapter _packageFileAdapter,
+  final Pacman _pacman,
+  final Prompter _prompter,
+  final Iterable<String> machineHierarchy,
+  super.packageName,
+) extends PromptCommand {
   @override
   String get key => 'g';
 

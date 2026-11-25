@@ -13,7 +13,7 @@ part 'review_command.g.dart';
 
 @immutable
 @CliOptions(createCommand: true)
-final class ReviewOptions {
+final class const ReviewOptions({
   @CliOption(
     abbr: 'n',
     valueHelp: 'name',
@@ -21,22 +21,18 @@ final class ReviewOptions {
         'Specify a custom machine name to review the diff for. '
         'By default, this machine is used.',
   )
-  final String? machineName;
-
+  required final String? machineName,
   @CliOption(
     defaultsTo: false,
     help:
         'When enabled, the cleanup will include packages '
         'that are referenced as optional dependency.',
   )
-  final bool includeOptional;
+  required final bool includeOptional,
+});
 
-  const new({required this.machineName, required this.includeOptional});
-}
-
-class ReviewCommand extends _$ReviewOptionsCommand<int> {
-  final ProviderContainer _providerContainer;
-
+class ReviewCommand(final ProviderContainer _providerContainer)
+    extends _$ReviewOptionsCommand<int> {
   @override
   String get name => 'review';
 
@@ -45,8 +41,6 @@ class ReviewCommand extends _$ReviewOptionsCommand<int> {
 
   @override
   bool get takesArguments => false;
-
-  new(this._providerContainer);
 
   @override
   Future<int> run() async {

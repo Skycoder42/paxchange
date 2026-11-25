@@ -7,22 +7,16 @@ import '../../storage/package_file_adapter.dart';
 import '../prompter.dart';
 import 'prompt_command.dart';
 
-final class ExpandGroupCommand extends PromptCommand {
-  final PackageFileAdapter _packageFileAdapter;
-  final Pacman _pacman;
-  final Prompter _prompter;
-  final String machineName;
-  final String group;
-
-  new(
-    Console console,
-    this._packageFileAdapter,
-    this._pacman,
-    this._prompter, {
-    required String packageName,
-    required this.machineName,
-    required this.group,
-  }) : super(console, packageName);
+final class ExpandGroupCommand(
+  Console console,
+  final PackageFileAdapter _packageFileAdapter,
+  final Pacman _pacman,
+  final Prompter _prompter, {
+  required String packageName,
+  required final String machineName,
+  required final String group,
+}) extends PromptCommand {
+  this : super(console, packageName);
 
   @override
   String get key => 'e';

@@ -11,11 +11,11 @@ import 'package:paxchange/src/storage/diff_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:test/test.dart';
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
+class MockPackageFileAdapter() extends Mock implements PackageFileAdapter;
 
-class MockDiffFileAdapter extends Mock implements DiffFileAdapter;
+class MockDiffFileAdapter() extends Mock implements DiffFileAdapter;
 
-class MockPacman extends Mock implements Pacman;
+class MockPacman() extends Mock implements Pacman;
 
 void main() {
   group('$PackageSync', () {

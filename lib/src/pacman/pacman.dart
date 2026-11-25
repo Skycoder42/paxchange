@@ -17,21 +17,12 @@ Pacman pacman(Ref ref) => Pacman(
 );
 // coverage:ignore-end
 
-enum InstallReason {
+enum InstallReason(final String flag) {
   asExplicit('--asexplicit'),
-  asDeps('--asdeps');
-
-  final String flag;
-
-  new(this.flag);
+  asDeps('--asdeps'),
 }
 
-class Pacman {
-  final ProcessWrapper _process;
-  final String? _pacmanFrontend;
-
-  new(this._process, this._pacmanFrontend);
-
+class Pacman(final ProcessWrapper _process, final String? _pacmanFrontend) {
   Stream<String> listExplicitlyInstalledPackages() =>
       _streamPacmanLines(const ['-Qqe']);
 

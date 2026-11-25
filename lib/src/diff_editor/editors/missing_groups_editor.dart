@@ -20,11 +20,11 @@ MissingGroupsEditor missingGroupsEditor(Ref ref) => MissingGroupsEditor(
 );
 // coverage:ignore-end
 
-class MissingGroupsEditor extends CommandEditor<String> {
-  final PackageFileAdapter _packageFileAdapter;
-
-  new(super.console, super.prompter, this._packageFileAdapter);
-
+class MissingGroupsEditor(
+  super.console,
+  super.prompter,
+  final PackageFileAdapter _packageFileAdapter,
+) extends CommandEditor<String> {
   @override
   Stream<String> loadTargets(
     String machineName,
