@@ -19,30 +19,24 @@ PackageFileAdapter packageFileAdapter(Ref ref) => PackageFileAdapter(
 );
 // coverage:ignore-end
 
-class LoadPackageFailure implements Exception {
-  final String fileName;
-  final List<String> history;
-  final String message;
-
-  new({
-    required this.fileName,
-    required Iterable<String> history,
-    required this.message,
-  }) : history = history.toList();
+class LoadPackageFailure({
+  required final String fileName,
+  required Iterable<String> history,
+  required final String message,
+}) implements Exception {
+  final List<String> history = history.toList();
 
   @override
   String toString() =>
       '$fileName: $message. Import history: ${history.join(' -> ')}';
 }
 
-class PackageFileAdapter {
+class PackageFileAdapter(
+  final Directory _storageDirectory,
+  final Pacman _pacman,
+) {
   static final _importRegExp = RegExp(r'^::import\s+(\S.*)$');
   static final _groupRegExp = RegExp(r'^::group\s+(\S.*)$');
-
-  final Directory _storageDirectory;
-  final Pacman _pacman;
-
-  new(this._storageDirectory, this._pacman);
 
   Stream<String> loadPackageFile(
     String machineName, {

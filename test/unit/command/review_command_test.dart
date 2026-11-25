@@ -12,21 +12,19 @@ import 'package:paxchange/src/diff_editor/editors/missing_groups_editor.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults;
+class MockArgResults() extends Mock implements ArgResults;
 
-class MockEditor extends Mock implements Editor;
+class MockEditor() extends Mock implements Editor;
 
-class MockMissingGroupsEditor extends Mock implements MissingGroupsEditor;
+class MockMissingGroupsEditor() extends Mock implements MissingGroupsEditor;
 
-class MockDiffEditor extends Mock implements DiffEditor;
+class MockDiffEditor() extends Mock implements DiffEditor;
 
-class MockCleanupEditor extends Mock implements CleanupEditor;
+class MockCleanupEditor() extends Mock implements CleanupEditor;
 
-class TestableReviewCommand extends ReviewCommand {
+class TestableReviewCommand(super._providerContainer) extends ReviewCommand {
   @override
   ArgResults? argResults;
-
-  new(super._providerContainer);
 }
 
 void main() {

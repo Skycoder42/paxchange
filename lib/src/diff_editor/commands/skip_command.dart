@@ -2,8 +2,8 @@ import 'package:dart_console/dart_console.dart';
 
 import 'prompt_command.dart';
 
-final class SkipCommand extends PromptCommand {
-  const new(Console console) : super(console, '');
+final class const SkipCommand(Console console) extends PromptCommand {
+  this : super(console, '');
 
   @override
   String get key => 's';

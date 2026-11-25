@@ -9,15 +9,13 @@ import 'package:paxchange/src/package_install.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults;
+class MockArgResults() extends Mock implements ArgResults;
 
-class MockPackageInstall extends Mock implements PackageInstall;
+class MockPackageInstall() extends Mock implements PackageInstall;
 
-class TestableInstallCommand extends InstallCommand {
+class TestableInstallCommand(super._providerContainer) extends InstallCommand {
   @override
   ArgResults? argResults;
-
-  new(super._providerContainer);
 }
 
 void main() {

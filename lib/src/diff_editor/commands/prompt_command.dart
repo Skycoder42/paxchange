@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:dart_console/dart_console.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-enum PromptResult {
+enum PromptResult({
+  required final bool stopProcessing,
+  required final bool didModify,
+}) {
   succeeded(stopProcessing: false, didModify: true),
   succeededReload(stopProcessing: true, didModify: true),
   failed(stopProcessing: true, didModify: true),
@@ -11,24 +14,16 @@ enum PromptResult {
   skipped(stopProcessing: false, didModify: false),
   quit(stopProcessing: true, didModify: false);
 
-  final bool stopProcessing;
-  final bool didModify;
-
-  new({required this.stopProcessing, required this.didModify});
-
   PromptResult withReload() => switch (this) {
     PromptResult.succeeded => PromptResult.succeededReload,
     _ => this,
   };
 }
 
-abstract base class PromptCommand {
-  @protected
-  final Console console;
-  final String packageName;
-
-  const new(this.console, this.packageName);
-
+abstract base class const PromptCommand(
+  @protected final Console console,
+  final String packageName,
+) {
   String get key;
   String get description;
 

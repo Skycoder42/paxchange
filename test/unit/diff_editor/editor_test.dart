@@ -16,18 +16,18 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockConsole extends Mock implements Console;
+class MockConsole() extends Mock implements Console;
 
-class MockPrompter extends Mock implements Prompter;
+class MockPrompter() extends Mock implements Prompter;
 
-class MockPackageFileAdapter extends Mock implements PackageFileAdapter;
+class MockPackageFileAdapter() extends Mock implements PackageFileAdapter;
 
-class MockPackageSync extends Mock implements PackageSync;
+class MockPackageSync() extends Mock implements PackageSync;
 
-class MockCommandEditor<T> extends Mock implements CommandEditor<T>;
+class MockCommandEditor<T>() extends Mock implements CommandEditor<T>;
 
-final class FakePromptCommand extends PromptCommand with Fake {
-  new() : super(MockConsole(), '');
+final class FakePromptCommand() extends PromptCommand with Fake {
+  this : super(MockConsole(), '');
 }
 
 void main() {

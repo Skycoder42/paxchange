@@ -29,19 +29,13 @@ DiffEditor diffEditor(Ref ref) => DiffEditor(
 );
 // coverage:ignore-end
 
-class DiffEditor extends CommandEditor<DiffEntry> {
-  final PackageFileAdapter _packageFileAdapter;
-  final DiffFileAdapter _diffFileAdapter;
-  final Pacman _pacman;
-
-  new(
-    super.console,
-    super.prompter,
-    this._packageFileAdapter,
-    this._diffFileAdapter,
-    this._pacman,
-  );
-
+class DiffEditor(
+  super.console,
+  super.prompter,
+  final PackageFileAdapter _packageFileAdapter,
+  final DiffFileAdapter _diffFileAdapter,
+  final Pacman _pacman,
+) extends CommandEditor<DiffEntry> {
   @override
   Stream<DiffEntry> loadTargets(
     String machineName,

@@ -6,7 +6,10 @@ import '../../pacman/pacman.dart';
 import 'prompt_command.dart';
 
 @visibleForTesting
-enum PrintTarget { local, remote }
+enum PrintTarget() {
+  local,
+  remote,
+}
 
 final class PrintCommand extends PromptCommand {
   final Pacman _pacman;

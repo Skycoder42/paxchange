@@ -8,9 +8,9 @@ import 'package:paxchange/src/diff_editor/commands/prompt_command.dart';
 import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:test/test.dart';
 
-class MockPacman extends Mock implements Pacman;
+class MockPacman() extends Mock implements Pacman;
 
-class MockConsole extends Mock implements Console;
+class MockConsole() extends Mock implements Console;
 
 void main() {
   group('$PrintCommand', () {

@@ -13,12 +13,10 @@ PackageInstall packageInstall(Ref ref) => PackageInstall(
 );
 // coverage:ignore-end
 
-class PackageInstall {
-  final PackageFileAdapter _packageFileAdapter;
-  final Pacman _pacman;
-
-  const new(this._packageFileAdapter, this._pacman);
-
+class const PackageInstall(
+  final PackageFileAdapter _packageFileAdapter,
+  final Pacman _pacman,
+) {
   Future<int> installPackages(
     String machineName, {
     bool noConfirm = false,

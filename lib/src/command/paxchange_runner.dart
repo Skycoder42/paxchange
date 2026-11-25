@@ -17,22 +17,20 @@ part 'paxchange_runner.g.dart';
 
 @immutable
 @CliOptions()
-final class GlobalOptions {
+final class const GlobalOptions({
   @CliOption(
     abbr: 'c',
     defaultsTo: '/etc/paxchange.json',
     valueHelp: 'path',
     help: 'Path to the configuration file to be used.',
   )
-  final String config;
+  required final String config,
+});
 
-  const new({required this.config});
-}
-
-class PaxchangeRunner extends CommandRunner<int> {
+class PaxchangeRunner() extends CommandRunner<int> {
   late final ProviderContainer _providerContainer;
 
-  new()
+  this
     : super(
         'paxchange',
         'Simple dart script to passively synchronize '

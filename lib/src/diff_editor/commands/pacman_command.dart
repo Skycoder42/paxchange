@@ -5,13 +5,12 @@ import '../../pacman/pacman.dart';
 import '../prompter.dart';
 import 'prompt_command.dart';
 
-abstract base class PacmanCommand extends PromptCommand {
-  @protected
-  final Pacman pacman;
-  final Prompter _prompter;
-
-  const new(super.console, this.pacman, this._prompter, super.packageName);
-
+abstract base class const PacmanCommand(
+  super.console,
+  @protected final Pacman pacman,
+  final Prompter _prompter,
+  super.packageName,
+) extends PromptCommand {
   @override
   @nonVirtual
   Future<PromptResult> call() async {
@@ -39,9 +38,12 @@ abstract base class PacmanCommand extends PromptCommand {
   Future<int> runPacman(String packageName);
 }
 
-final class InstallCommand extends PacmanCommand {
-  const new(super.console, super.pacman, super._prompter, super.packageName);
-
+final class const InstallCommand(
+  super.console,
+  super.pacman,
+  super._prompter,
+  super.packageName,
+) extends PacmanCommand {
   @override
   String get key => 'i';
 
@@ -58,17 +60,13 @@ final class InstallCommand extends PacmanCommand {
       super.pacman.installPackages([packageName]);
 }
 
-final class RemoveCommand extends PacmanCommand {
-  final bool recursive;
-
-  const new(
-    super.console,
-    super.pacman,
-    super._prompter,
-    super.packageName, {
-    this.recursive = false,
-  });
-
+final class const RemoveCommand(
+  super.console,
+  super.pacman,
+  super._prompter,
+  super.packageName, {
+  final bool recursive = false,
+}) extends PacmanCommand {
   @override
   String get key => recursive ? 'r' : 'u';
 
@@ -88,9 +86,12 @@ final class RemoveCommand extends PacmanCommand {
       super.pacman.removePackage(packageName, recursive: recursive);
 }
 
-final class MarkImplicitlyInstalledCommand extends PacmanCommand {
-  const new(super.console, super.pacman, super._prompter, super.packageName);
-
+final class const MarkImplicitlyInstalledCommand(
+  super.console,
+  super.pacman,
+  super._prompter,
+  super.packageName,
+) extends PacmanCommand {
   @override
   String get key => 'm';
 
@@ -107,9 +108,12 @@ final class MarkImplicitlyInstalledCommand extends PacmanCommand {
       .changePackageInstallReason(packageName, InstallReason.asDeps);
 }
 
-final class MarkExplicitlyInstalledCommand extends PacmanCommand {
-  const new(super.console, super.pacman, super._prompter, super.packageName);
-
+final class const MarkExplicitlyInstalledCommand(
+  super.console,
+  super.pacman,
+  super._prompter,
+  super.packageName,
+) extends PacmanCommand {
   @override
   String get key => 'm';
 

@@ -8,7 +8,7 @@ import 'package:paxchange/src/storage/package_file_adapter.dart';
 import 'package:paxchange/src/storage/package_file_hierarchy.dart';
 import 'package:test/test.dart';
 
-class MockPacman extends Mock implements Pacman;
+class MockPacman() extends Mock implements Pacman;
 
 void main() {
   group('$LoadPackageFailure', () {

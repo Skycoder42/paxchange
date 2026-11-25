@@ -11,11 +11,7 @@ part 'prompter.g.dart';
 Prompter prompter(Ref ref) => Prompter(ref.watch(consoleProvider));
 // coverage:ignore-end
 
-class Prompter {
-  final Console _console;
-
-  const new(this._console);
-
+class const Prompter(final Console _console) {
   void writeError(String message) {
     _console
       ..setForegroundColor(ConsoleColor.red)

@@ -14,11 +14,7 @@ DiffFileAdapter diffFileAdapter(Ref ref) =>
     DiffFileAdapter(ref.watch(configProvider).storageDirectory);
 // coverage:ignore-end
 
-class DiffFileAdapter {
-  final Directory _storageDirectory;
-
-  new(this._storageDirectory);
-
+class DiffFileAdapter(final Directory _storageDirectory) {
   Stream<DiffEntry> loadPackageDiff(String machineName) {
     final diffFile = _diffFile(machineName);
 

@@ -5,14 +5,10 @@ import '../../storage/package_file_hierarchy.dart';
 import '../commands/prompt_command.dart';
 import '../prompter.dart';
 
-abstract class CommandEditor<TTarget> {
-  @protected
-  final Console console;
-  @protected
-  final Prompter prompter;
-
-  new(this.console, this.prompter);
-
+abstract class CommandEditor<TTarget>(
+  @protected final Console console,
+  @protected final Prompter prompter,
+) {
   Stream<TTarget> loadTargets(
     String machineName,
     PackageFileHierarchy hierarchy,

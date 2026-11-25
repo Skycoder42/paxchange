@@ -10,17 +10,15 @@ import 'package:paxchange/src/package_sync.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:test/test.dart';
 
-class MockArgResults extends Mock implements ArgResults;
+class MockArgResults() extends Mock implements ArgResults;
 
-class MockPackageSync extends Mock implements PackageSync;
+class MockPackageSync() extends Mock implements PackageSync;
 
-class MockStdout extends Mock implements Stdout;
+class MockStdout() extends Mock implements Stdout;
 
-class TestableUpdateCommand extends UpdateCommand {
+class TestableUpdateCommand(super._providerContainer) extends UpdateCommand {
   @override
   ArgResults? argResults;
-
-  new(super._providerContainer);
 }
 
 void main() {

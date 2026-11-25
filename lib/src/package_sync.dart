@@ -20,19 +20,12 @@ PackageSync packageSync(Ref ref) => PackageSync(
 );
 // coverage:ignore-end
 
-class PackageSync {
-  final String _rootPackageName;
-  final PackageFileAdapter _packageFileAdapter;
-  final DiffFileAdapter _diffFileAdapter;
-  final Pacman _pacman;
-
-  new(
-    this._rootPackageName,
-    this._packageFileAdapter,
-    this._diffFileAdapter,
-    this._pacman,
-  );
-
+class PackageSync(
+  final String _rootPackageName,
+  final PackageFileAdapter _packageFileAdapter,
+  final DiffFileAdapter _diffFileAdapter,
+  final Pacman _pacman,
+) {
   Future<int> updatePackageDiff() async {
     // load package history
     final packageHistory = await _packageFileAdapter

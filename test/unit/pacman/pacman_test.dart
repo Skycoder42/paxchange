@@ -9,11 +9,11 @@ import 'package:paxchange/src/pacman/pacman.dart';
 import 'package:paxchange/src/util/process_wrapper.dart';
 import 'package:test/test.dart';
 
-class ProcessWrapperMock extends Mock implements ProcessWrapper;
+class ProcessWrapperMock() extends Mock implements ProcessWrapper;
 
-class ProcessMock extends Mock implements Process;
+class ProcessMock() extends Mock implements Process;
 
-class MockStderr extends Mock implements Stdout;
+class MockStderr() extends Mock implements Stdout;
 
 void main() {
   setUpAll(() {
