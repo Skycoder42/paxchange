@@ -2,10 +2,14 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "shell",
-			"command": "./tool/setup-git-hooks.sh",
-			"label": "Setup git hooks",
+			"type": "dart",
+			"command": "dart",
+			"args": [
+				"run",
+				"dart_test_tools:setup_hooks"
+			],
 			"problemMatcher": [],
+			"label": "Setup git hooks",
 			"runOptions": {
 				"runOn": "folderOpen"
 			}
