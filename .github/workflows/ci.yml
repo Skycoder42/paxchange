@@ -3,11 +3,7 @@ name: Continuous Integration and Deployment
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "**"
   pull_request:
-    branches:
-      - "**"
 
 jobs:
   ci:
@@ -69,3 +65,20 @@ jobs:
     uses: Skycoder42/dart_test_tools/.github/workflows/aur.yml@main
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
+  renovate:
+    name: Renovate
+    needs:
+      - ci
+      - integration_tests
+      - build
+      - release
+      - aur
+    if: ${{ !cancelled() }}
+    uses: Skycoder42/dart_test_tools/.github/workflows/renovate-finish.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    with:
+      needs: ${{ toJSON(needs) }}
